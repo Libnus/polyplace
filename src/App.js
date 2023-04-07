@@ -3,7 +3,7 @@ import Navbar from './components/Navbar';
 import { Routes,BrowserRouter, Route } from 'react-router-dom';
 import Rooms from './pages/Rooms';
 import History from './pages/History';
-import './components/Navbar.css';
+import './assets/styles/main.css';
 
 function App() {
     return (

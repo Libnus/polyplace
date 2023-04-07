@@ -1,5 +1,5 @@
 import React from 'react';
-import '../components/Navbar.css';
+import '../assets/styles/main.css';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 

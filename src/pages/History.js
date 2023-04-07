@@ -1,5 +1,5 @@
 import React from 'react';
-import '../components/Navbar.css';
+import '../assets/styles/main.css';
 
 const History = () => {
     return(
