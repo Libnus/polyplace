@@ -4,52 +4,88 @@ import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 
 const columns: GridColDef[] = [
-  { field: 'id', headerName: 'ID', width: 70 },
-  { field: 'firstName', headerName: 'First name', width: 130 },
-  { field: 'lastName', headerName: 'Last name', width: 130 },
+  { field: 'room', headerName: 'Room', width: 160, sortable: false},
+  { field: 'firstName', headerName: 'First name', width: 200, sortable: false },
+  { field: 'lastName', headerName: 'Last name', width: 200, sortable: false },
   {
-    field: 'age',
-    headerName: 'Age',
-    type: 'number',
-    width: 90,
+    field: 'timeLeft', headerName: 'Time Left', headerAlign: 'center', width: 160, align: 'center', center: true,  sortable: false
   },
   {
-    field: 'fullName',
-    headerName: 'Full name',
-    description: 'This column has a value getter and is not sortable.',
+    field: 'startTime',
+    headerName: 'Start Time',
+    width: 160,
+    sortable: false,
+    align: 'center',
+    headerAlign: 'center'
+  },
+  {
+    field: 'endTime',
+    headerName: 'End Time',
     sortable: false,
     width: 160,
-    valueGetter: (params: GridValueGetterParams) =>
-      `${params.row.firstName || ''} ${params.row.lastName || ''}`,
+    align: 'center',
+    headerAlign: 'center'
   },
 ];
 
 const rows = [
-  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-
+  {id: 1, room: '353A', firstName: 'Linus', lastName: 'Zwaka', timeLeft: '01:00', startTime: '12:00', endTime: '1:00'},
+  {id: 2, room: '353B', firstName: 'Brian', lastName: 'Henry', timeLeft: '00:59', startTime: '11:00', endTime: '1:30'},
 ];
+const sortedRows = rows.sort((a,b) => (60*Number(a.timeLeft.slice(0,2))+Number(a.timeLeft.slice(4,6))) - ((60*Number(b.timeLeft.slice(0,2))+Number(b.timeLeft.slice(4,6)))));
 
 const Rooms = () => {
     return(
         <div className="main">
-            <div className="table">
-                <Box sx={{ borderRadius: '0%', height: 400, width: '100%' }}>
-                    <DataGrid
-                        rows={rows}
-                        columns={columns}
-                        pageSize={5}
-                        rowsPerPageOptions={[5]}
-                        checkboxSelection
-                    />
-                </Box>
+            <div id="3floor" className="divFloor">
+                <h1 className="floor">3rd Floor</h1>
+                <div className="table">
+                  <Box sx={{
+                    backgroundColor: `#d4d4d4`,
+                    width: '100%',
+                    borderRadius:0,
+                  }}>
+                        <DataGrid
+                            rows={rows}
+                            columns={columns}
+                            autoHeight
+                            disableColumnMenu
+                            hideFooter
+                            sx={{
+                                boxShadow: 2,
+                                border: 0,
+                                borderColor: 'primary.light',
+                                '& .MuiDataGrid-cell:hover':{ color:'primary.main', },
+
+                            }}
+                        />
+                    </Box>
+                </div>
+            </div>
+            <div id="4floor" className="divFloor">
+                <h1 className="floor" style={{background: "blue"}}>4th Floor</h1>
+                <div className="table">
+                  <Box sx={{
+                    backgroundColor: `#d4d4d4`,
+                    width: '100%',
+                    borderRadius:0,
+                  }}>
+                        <DataGrid
+                            rows={rows}
+                            columns={columns}
+                            autoHeight
+                            disableColumnMenu
+                            hideFooter
+                            sx={{
+                                boxShadow: 2,
+                                border: 0,
+                                borderColor: 'primary.light',
+                                '& .MuiDataGrid-cell:hover':{ color:'primary.main', },
+
+                            }}
+                        />
+                    </Box>
+                </div>
             </div>
         </div>
     );
