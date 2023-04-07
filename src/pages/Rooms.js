@@ -34,11 +34,15 @@ const rows = [
 ];
 const sortedRows = rows.sort((a,b) => (60*Number(a.timeLeft.slice(0,2))+Number(a.timeLeft.slice(4,6))) - ((60*Number(b.timeLeft.slice(0,2))+Number(b.timeLeft.slice(4,6)))));
 
+// const stylizedDataGrid = styled(DataGrid)(({theme}) => ({
+//     '& .'
+// })
+
 const Rooms = () => {
     return(
         <div className="main">
             <div id="3floor" className="divFloor">
-                <h1 className="floor">3rd Floor</h1>
+              <h1 className="floor" style={{background: 'orange'}}>3rd Floor</h1>
                 <div className="table">
                   <Box sx={{
                     backgroundColor: `#d4d4d4`,
@@ -56,6 +60,16 @@ const Rooms = () => {
                                 border: 0,
                                 borderColor: 'primary.light',
                                 '& .MuiDataGrid-cell:hover':{ color:'primary.main', },
+                                '.time_plenty':{background:"green", '&:hover':{background:"lightgreen"},},
+                                '.time_fine':{background:"yellow", '&:hover':{background:"lightyellow"},},
+                                '.time_near':{background:"red", '&:hover':{background:"lightred"},},
+                                '.time_up':{background:"grey", '&:hover':{background:"lightgrey"},},
+                            }}
+                            getRowClassName={(params) => {
+                                return (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(4,6))) >= 60 ? "time_plenty" :
+                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(4,6))) < 60 ?  "time_fine"   :
+                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(4,6))) < 15 ?  "time_near"   :
+                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(4,6))) <= 0 ?  "time_up"     : "";
 
                             }}
                         />
