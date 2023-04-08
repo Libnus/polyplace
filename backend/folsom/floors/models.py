@@ -16,11 +16,8 @@ class Floor(models.Model):
     room_num    : Room Number
     reservation : A reservation associated with this room. Will be blank if room is empty
 '''
+
 class Room(models.Model):
     floor = models.ForeignKey(Floor, on_delete=models.CASCADE)
     room_num = models.CharField(max_length=5)
     reservation = models.ForeignKey(Reservation, blank=True, null=True, on_delete=models.CASCADE)
-
-    # check if room is empty
-    def is_empty(self):
-        return self.reservation is None

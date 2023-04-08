@@ -6,31 +6,24 @@ from floors.models import Room, Floor
 from reservations.models import Reservation
 from .serializers import FloorSerializer, RoomSerializer
 
-class FloorViewSet(viewsets.ModelViewSet):
+class FloorViewSet(viewsets.ViewSet):
     """
     A viewset for Floor model
     """
-
-    queryset = Floor.objects.all()
-    serializer_class = FloorSerializer
-
     def list(self, request):
-        return Response(FloorSerializer(self.queryset,many=True).data)
+        return Response(FloorSerializer(Floor.objects.all(),many=True).data)
 
     def retrieve(self,request,pk=None):
-        floor = self.queryset.filter(floor_num=pk)
-        return Response(self.serializer_class(floor,many=False).data)
+        floor = Floor.objects.get(floor_num=pk)
+        return Response(FloorSerializer(floor,many=False).data)
 
 
-class RoomViewSet(viewsets.ModelViewSet):
-    queryset = Room.objects.all()
-    serializer_class = RoomSerializer
-
+class RoomViewSet(viewsets.ViewSet):
     # get all rooms
     def list(self, request):
-        return Response(self.serializer_class(self.queryset,many=True).data)
+        return Response(RoomSerializer(Room.objects.all(),many=True).data)
 
     # retrieves a room with a particular floor number
     def retrieve(self,request,pk=None):
-        rooms = self.queryset.filter(floor=pk)
-        return Response(self.serializer_class(rooms,many=True).data)
+        rooms = Room.objects.filter(floor=pk)
+        return Response(RoomSerializer(rooms,many=True).data)
