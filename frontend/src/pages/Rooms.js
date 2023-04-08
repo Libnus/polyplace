@@ -35,6 +35,12 @@ const rows = [
 const sortedRows = rows.sort((a,b) => (60*Number(a.timeLeft.slice(0,2))+Number(a.timeLeft.slice(4,6))) - ((60*Number(b.timeLeft.slice(0,2))+Number(b.timeLeft.slice(4,6)))));
 
 const Rooms = () => {
+
+    let getRooms = async () => {
+        let response = await fetch('http://127.0.0.1:8000/api/rooms/')
+        let data = response.json()
+    }
+
     return(
         <div className="main">
             <div id="3floor" className="divFloor">
