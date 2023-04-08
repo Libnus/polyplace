@@ -35,6 +35,7 @@ def getFloor(request, fnum):
     rooms = Room.objects.filter(floor=fnum)
     return Response(RoomSerializer(rooms,many=True).data)
 
+@api_view(['GET'])
 def getFloors(request):
     floors = Floor.objects.all()
     return Response(FloorSerializer(floor,many=True).data)
