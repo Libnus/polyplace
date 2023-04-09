@@ -14,7 +14,7 @@ class FloorViewSet(viewsets.ViewSet):
         return Response(FloorSerializer(Floor.objects.all(),many=True).data)
 
     def retrieve(self,request,pk=None):
-        floor = Floor.objects.get(floor_num=pk)
+        floor = Floor.objects.get(id=pk)
         return Response(FloorSerializer(floor,many=False).data)
 
 
