@@ -13,14 +13,14 @@ class ReservationViewSet(viewsets.ViewSet):
 
     # get reservation associated with room
     def retrieve(self, request, pk=None):
-        reservation = Reservation.objects.filter(room=pk)
+        reservation = Reservation.objects.filter(id=pk)
         return Response(ReservationSerializer(reservation,many=True).data)
 
     # create method creates a reservation then adds the reservation to the room
     def create(self,request,*args,**kwargs):
         if not Room.objects.filter(room_num=request.data['room_num']).exists(): # check that the room exists
             return Response(status=status.HTTP_409_CONFLICT)
-        if Room.objects.filter(room_num=request.data['room_num']).reservation != None: # check if room has already been reserved
+        if Room.objects.get(room_num=request.data['room_num']).reservation != None: # check if room has already been reserved
             return Response(status=status.HTTP_409_CONFLICT)
         if Reservation.objects.filter(rin=request.data['rin']).exists():
             return Response(status=status.HTTP_409_CONFLICT)
