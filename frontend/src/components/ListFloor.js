@@ -43,27 +43,42 @@ const ListFloor = ({ floor }) => {
 
     const parseRoomsJson = async(rooms) => {
         for(var i=0; i < rooms.length; i++){
-            const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['reservation']}/`)
-            const reservations =  await response.json()
-            const reservation = reservations[0]
 
-            console.log("Reservations Data:",reservation)
+            // fetch the reservation if room has reservation
+            if(rooms[i]['reservation'] != null){
+                const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['reservation']}/`)
+                const reservations =  await response.json()
+                const reservation = reservations[0]
 
-            const endTime = new Date(reservation['end_time'])
-            const currentTime = new Date()
-            const timeLeft = msToTime((endTime.getTime() - currentTime.getTime()))
-            console.log("Time left", timeLeft)
+                console.log("Reservations Data:",reservation)
 
-            rooms[i]['start_time'] = new Date(reservation['start_time']).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
-            rooms[i]['end_time'] = new Date(reservation['end_time']).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
-            rooms[i]['time_left'] = timeLeft
-            rooms[i]['first_name'] = reservation["first_name"]
-            rooms[i]['last_name'] = reservation["last_name"]
+                // calculate time left
+                const endTime = new Date(reservation['end_time'])
+                const currentTime = new Date()
+                const timeLeft = msToTime((endTime.getTime() - currentTime.getTime()))
+                console.log("Time left", timeLeft)
+
+                // update fields for room json
+                rooms[i]['start_time'] = new Date(reservation['start_time']).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
+                rooms[i]['end_time'] = new Date(reservation['end_time']).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
+                rooms[i]['time_left'] = timeLeft
+                rooms[i]['first_name'] = reservation["first_name"]
+                rooms[i]['last_name'] = reservation["last_name"]
+
+            }
+            else{ // room is empty
+                rooms[i]['start_time'] = '----'
+                rooms[i]['end_time'] = '----'
+                rooms[i]['time_left'] = '----'
+                rooms[i]['first_name'] = '----'
+                rooms[i]['last_name'] = '----'
+            }
 
             // clean up the json
             delete rooms[i]['floor']
             delete rooms[i]['reservation']
         }
+
         // sort the data
         rows = rooms.sort((a,b) => (60*Number(a.time_left.slice(0,2))+Number(a.time_left.slice(4,6))) - ((60*Number(b.time_left.slice(0,2))+Number(b.time_left.slice(4,6)))));
 
@@ -80,7 +95,7 @@ const ListFloor = ({ floor }) => {
 
     return(
         <div className="divFloor">
-            <h1 className="floor">{floor['floor_num']}</h1>
+            <h1 className="floor">{floor['floor_num']} Floor</h1>
                 <div className="table">
                     <Box sx={{
                         backgroundColor: `#d4d4d4`,

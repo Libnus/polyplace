@@ -7,7 +7,7 @@ from reservations.models import Reservation
     num_rooms : Number of available rooms
 '''
 class Floor(models.Model):
-    floor_num = models.IntegerField(default=0)
+    floor_num = models.CharField(default="", max_length=5)
     num_rooms = models.IntegerField(default=0)
 
 # data associated with the room
