@@ -21,12 +21,10 @@ const Rooms = () => {
     }
 
     return(
-        <>
-            <div className="main">
-                {floors.map((floor,index) => (
-                    <ListFloor key={index} floor={floor} />))}
-            </div>
-        </>
+        <div className="main">
+            {floors.map((floor,index) => (
+                <ListFloor key={index} floor={floor} />))}
+        </div>
     );
 };
 

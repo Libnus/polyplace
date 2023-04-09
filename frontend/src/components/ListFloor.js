@@ -152,9 +152,10 @@ const ListFloor = ({ floor }) => {
 
 
     return(
-        <div className="divFloor">
-            <h1 className="floor">{floor['floor_num']} Floor</h1>
-                <div className="table">
+        <>
+        <div className='divFloor'>
+            <h1 className='floor' style={{background: floor['color']}}>{floor['floor_num']} Floor</h1>
+                <div className='table'>
                     <Box sx={{
                         backgroundColor: `#d4d4d4`,
                         width: '100%',
@@ -177,6 +178,7 @@ const ListFloor = ({ floor }) => {
                     </Box>
                 </div>
         </div>
+        </>
     )
 }
 

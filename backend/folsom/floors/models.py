@@ -9,6 +9,7 @@ from reservations.models import Reservation
 class Floor(models.Model):
     floor_num = models.CharField(default="", max_length=5)
     num_rooms = models.IntegerField(default=0)
+    color = models.CharField(default="#FF8C00", max_length=7)
 
 # data associated with the room
 '''
