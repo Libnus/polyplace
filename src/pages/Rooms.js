@@ -29,10 +29,12 @@ const columns: GridColDef[] = [
 ];
 
 const rows = [
-  {id: 1, room: '353A', firstName: 'Linus', lastName: 'Zwaka', timeLeft: '01:00', startTime: '12:00', endTime: '1:00'},
+  {id: 1, room: '353A', firstName: 'Linus', lastName: 'Zwaka', timeLeft: '00:60', startTime: '12:00', endTime: '1:00'},
   {id: 2, room: '353B', firstName: 'Brian', lastName: 'Henry', timeLeft: '00:59', startTime: '11:00', endTime: '1:30'},
+  {id: 3, room: '431',  firstName: 'Louis', lastName: 'Parrinello', timeLeft: '00:00', startTime: '11:00', endTime: '1:30'},
+  {id: 4, room: '451',  firstName: 'Louis', lastName: 'Parrinello', timeLeft: '00:05', startTime: '11:00', endTime: '1:30'},
 ];
-const sortedRows = rows.sort((a,b) => (60*Number(a.timeLeft.slice(0,2))+Number(a.timeLeft.slice(4,6))) - ((60*Number(b.timeLeft.slice(0,2))+Number(b.timeLeft.slice(4,6)))));
+const sortedRows = rows.sort((a,b) => (60*Number(a.timeLeft.slice(0,2))+Number(a.timeLeft.slice(-2))) - ((60*Number(b.timeLeft.slice(0,2))+Number(b.timeLeft.slice(-2)))));
 
 // const stylizedDataGrid = styled(DataGrid)(({theme}) => ({
 //     '& .'
@@ -60,16 +62,16 @@ const Rooms = () => {
                                 border: 0,
                                 borderColor: 'primary.light',
                                 '& .MuiDataGrid-cell:hover':{ color:'primary.main', },
-                                '.time_plenty':{background:"green", '&:hover':{background:"lightgreen"},},
-                                '.time_fine':{background:"yellow", '&:hover':{background:"lightyellow"},},
-                                '.time_near':{background:"red", '&:hover':{background:"lightred"},},
-                                '.time_up':{background:"grey", '&:hover':{background:"lightgrey"},},
+                                '.time_plenty':{background:"#7cc662", '&:hover':{background:"#8adb6e"},},
+                                '.time_fine':{background:"#FFd300", '&:hover':{background:"#ffda60"},},
+                                '.time_near':{background:"#ea3333", '&:hover':{background:"#f14d4d"},},
+                                '.time_up':{background:"grey", '&:hover':{background:"darkgrey"},},
                             }}
                             getRowClassName={(params) => {
-                                return (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(4,6))) >= 60 ? "time_plenty" :
-                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(4,6))) < 60 ?  "time_fine"   :
-                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(4,6))) < 15 ?  "time_near"   :
-                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(4,6))) <= 0 ?  "time_up"     : "";
+                               return  (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(-2))) <= 0 ?  "time_up"     :
+                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(-2))) <= 15 ?  "time_near"   :
+                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(-2))) < 60 ?  "time_fine"   :
+                                       (60*Number(params.row.timeLeft.slice(0,2))+Number(params.row.timeLeft.slice(-2))) >= 60 ? "time_plenty" : "";
 
                             }}
                         />
