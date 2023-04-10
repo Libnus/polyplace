@@ -10,7 +10,7 @@ const Footer = () => {
                     onMouseOver={({target})=>target.style.color="white"}
                     onMouseOut={({target})=>target.style.color="black"} /></a>
             </div>
-            © 2023 - Folsom Thing v2 $60.00
+            © 2023 - Folsom Thing
         </div>
     );
 }
