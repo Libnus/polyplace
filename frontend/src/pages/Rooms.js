@@ -3,7 +3,7 @@ import '../assets/styles/main.css';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import ListFloor from '../components/ListFloor';
-
+import RoomEdit from '../components/RoomEdit';
 
 const Rooms = () => {
 
@@ -22,8 +22,11 @@ const Rooms = () => {
 
     return(
         <div className="main">
-            {floors.map((floor,index) => (
-                <ListFloor key={index} floor={floor} />))}
+            <RoomEdit />
+            <div className="floorContainer">
+                {floors.map((floor,index) => (
+                    <ListFloor key={index} floor={floor} />))}
+            </div>
         </div>
     );
 };
