@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import '../assets/styles/main.css';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
+import { darken, lighten, styled} from '@mui/material/styles'
+
 import Datetime from 'react-datetime';
 
 const columns: GridColDef[] = [
@@ -13,7 +15,66 @@ const columns: GridColDef[] = [
     { field: 'end_time',headerName: 'End Time',sortable: false,width: 160,align: 'center',headerAlign: 'center'},
 ]
 
-function msToTime(s) {
+const getBackgroundColor = (color, mode) =>
+      mode === 'dark' ? darken(color, 0.7) : lighten(color, 0.7);
+
+const getHoverBackgroundColor = (color, mode) =>
+      mode === 'dark' ? darken(color,0.6) : lighten(color, 0.6)
+
+const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
+    '& .room-reserve-theme--TimeUp':{
+        backgroundColor: lighten(theme.palette.error.main,0.5),
+        '&:hover':{
+            backgroundColor: lighten(theme.palette.error.main,0.4),
+        },
+        '&.Mui-selected':{
+            backgroundColor: lighten(theme.palette.error.main,0.3),
+            '&:hover':{
+                backgroundColor: lighten(theme.palette.error.main,0.2),
+            }
+        },
+    },
+    '& .room-reserve-theme--Warning':{
+        backgroundColor: lighten(theme.palette.warning.main,0.5),
+        '&:hover':{
+            backgroundColor: lighten(theme.palette.warning.main,0.4),
+        },
+        '&.Mui-selected':{
+            backgroundColor: lighten(theme.palette.warning.main,0.3),
+            '&:hover':{
+                backgroundColor: lighten(theme.palette.warning.main,0.2),
+            }
+        },
+    },
+    '& .room-reserve-theme--TimeGood':{
+        backgroundColor: lighten(theme.palette.success.main,0.5),
+        '&:hover':{
+            backgroundColor: lighten(theme.palette.success.main,0.4),
+        },
+        '&.Mui-selected':{
+            backgroundColor: lighten(theme.palette.success.main,0.3),
+            '&:hover':{
+                backgroundColor: lighten(theme.palette.success.main,0.2),
+            }
+        },
+    },
+    '& .room-reserve-theme--Empty':{
+    },
+}));
+
+// return the status code of time left on a room
+const getStatus = (time) => {
+    console.log("time",time)
+    if(time.slice(0,2) === "--") return "Empty"
+    if(time.slice(0,2) !== "00") return "TimeGood"
+    if(time.slice(-2) === "00") return "TimeUp"
+    if(time.slice(-2) <= "15") return "Warning"
+    else return "Empty"
+}
+
+// =============================================== Mui styling ^^^^^
+
+const msToTime = (s) => {
 
   // Pad to 2 or 3 digits, default is 2
   function pad(n, z) {
@@ -49,8 +110,6 @@ const ListFloor = ({ floor }) => {
                 const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['reservation']}/`)
                 const reservations =  await response.json()
                 const reservation = reservations[0]
-
-                console.log("Reservations Data:",reservation)
 
                 // calculate time left
                 const endTime = new Date(reservation['end_time'])
@@ -88,21 +147,21 @@ const ListFloor = ({ floor }) => {
     let getRooms = async () => {
         const response = await fetch(`http://127.0.0.1:8000/floors_api/rooms/${floor['id']}/`)
         const data = await response.json()
-        console.log("DATA FOOMS:", data)
         parseRoomsJson(data)
     }
 
 
     return(
-        <div className="divFloor">
-            <h1 className="floor">{floor['floor_num']} Floor</h1>
-                <div className="table">
+        <>
+        <div className='divFloor'>
+            <h1 className='floor' style={{background: floor['color']}}>{floor['floor_num']} Floor</h1>
+                <div className='table'>
                     <Box sx={{
                         backgroundColor: `#d4d4d4`,
                         width: '100%',
                         borderRadius:0,
                         }}>
-                        <DataGrid
+                        <StyledDataGrid
                             rows={rooms}
                             columns={columns}
                             autoHeight
@@ -114,10 +173,12 @@ const ListFloor = ({ floor }) => {
                                 borderColor: 'primary.light',
                                 '& .MuiDataGrid-cell:hover':{ color:'primary.main', },
                             }}
+                            getRowClassName={(params) => 'room-reserve-theme--' + getStatus(params.row.time_left)}
                         />
                     </Box>
                 </div>
         </div>
+        </>
     )
 }
 
