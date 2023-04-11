@@ -4,6 +4,7 @@ import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import ListFloor from '../components/ListFloor';
 import RoomEdit from '../components/RoomEdit';
+import Reservation from '../components/Reservation';
 
 const Rooms = () => {
 
@@ -21,6 +22,7 @@ const Rooms = () => {
     }
 
     return(
+        <>
         <div className="main">
             <RoomEdit />
             <div className="floorContainer">
@@ -28,6 +30,7 @@ const Rooms = () => {
                     <ListFloor key={index} floor={floor} />))}
             </div>
         </div>
+        </>
     );
 };
 
