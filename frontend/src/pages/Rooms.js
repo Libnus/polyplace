@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/styles/main.css';
-import { useGridApiRef } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import ListFloor from '../components/ListFloor';
 import RoomEdit from '../components/RoomEdit';
 import Reservation from '../components/Reservation';
 
-const Rooms = ({getRoomSelected}) => {
+const Rooms = () => {
 
     let [floors, setFloors] = useState([]);
-    let selected = "";
+    let [selectedRoom, setSelectedRoom] = useState("");
 
     const getRoomSelected = (room_num) => {
-        selected = room_num;
+        setSelectedRoom(room_num);
     }
 
     useEffect(() => {
@@ -35,7 +34,7 @@ const Rooms = ({getRoomSelected}) => {
     return(
         <>
         <div className="main">
-            <RoomEdit addReservationCall={addReservationCall(selected)}/>
+            <RoomEdit selectedRoom={selectedRoom}/>
             <div className="floorContainer">
                 {floors.map((floor,index) => (
                     <ListFloor key={index} floor={floor} getRoomSelected={getRoomSelected}/>))}

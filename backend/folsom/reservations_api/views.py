@@ -19,11 +19,11 @@ class ReservationViewSet(viewsets.ViewSet):
     # create method creates a reservation then adds the reservation to the room
     def create(self,request,*args,**kwargs):
         if not Room.objects.filter(room_num=request.data['room_num']).exists(): # check that the room exists
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response({'message':"Conflict! Room doesn't exist!"},status=status.HTTP_409_CONFLICT)
         if Room.objects.get(room_num=request.data['room_num']).reservation != None: # check if room has already been reserved
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response({'message':"Conflict! Room taken"},status=status.HTTP_409_CONFLICT)
         if Reservation.objects.filter(rin=request.data['rin']).exists():
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response({'message':"Conflict! Student already reserved a room!"},status=status.HTTP_409_CONFLICT)
 
         else:
             data = request.data

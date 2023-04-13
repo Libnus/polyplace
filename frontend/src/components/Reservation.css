@@ -92,3 +92,54 @@
     margin-top: 5%;
 }
 
+.waiting{
+    background-color: #f04850;
+    border-radius: 5px;
+    width: 98%;
+    height: 40px;
+    font-size: 15pt;
+    border: 0;
+    margin: auto;
+    margin-bottom: 2%;
+    color:  white;
+    transition: ease-out 0.5s;
+}
+
+.ready{
+    background-color: #006d77;
+    border-radius: 5px;
+    width: 98%;
+    height: 40px;
+    font-size: 15pt;
+    border: 0;
+    margin: auto;
+    margin-bottom: 2%;
+    color:  white;
+    transition: ease-out 0.5s;
+}
+
+.waiting:hover{
+    transition: ease-in 0.3s;
+    box-shadow: inset 1000px 0 0 0 #d90429;
+}
+
+.ready:hover{
+    transition: ease-in 0.3s;
+    box-shadow: inset 1000px 0 0 0 #76c893;
+}
+
+.submitSuc{
+    margin-top: 0;
+    margin-left: 1%;
+    color: green;
+    font-style: italic;
+}
+
+.submitError{
+    margin-top: 0;
+    margin-left: 1%;
+    color: red;
+    font-style: italic;
+    font-weight: bold;
+}
+

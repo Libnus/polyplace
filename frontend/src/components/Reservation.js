@@ -82,11 +82,10 @@ const getRoomTime = () => {
     let current = new Date();
     let hour = current.getHours();
     current.setHours(hour+2)
-    return current.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});
-
+    return current;
 }
 
-const Student = ({ rin, email, showEdit }) => {
+const Student = ({room, rin, email, endTime, showEdit }) => {
     if(rin.length === 0){
         email="----@rpi.edu"
         rin = "----";
@@ -95,9 +94,9 @@ const Student = ({ rin, email, showEdit }) => {
     return(
         <div className="reservationStudent">
             <div className="reservationStudentLeft">
-                <div style={{paddingBottom: '5%', fontWeight:'bold'}}>Room</div>
-                <div style={{paddingBottom: '2'}}>{getDate()}</div>
-                <div style={{fontWeight: 'lighter'}}><i>Expires @{getRoomTime()}</i></div>
+                <div style={{paddingBottom: '5%', fontWeight:'bold'}}>Room {room}</div>
+                <div style={{paddingBottom: '2%'}}>{getDate()}</div>
+                <div style={{fontWeight: 'lighter'}}><i>Expires @{endTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})}</i></div>
             </div>
             <div className="reservationStudentRight">
                 <div style={{fontWeight: 'bold'}}>{email}</div>
@@ -108,23 +107,79 @@ const Student = ({ rin, email, showEdit }) => {
     );
 }
 
-const Reservation = ({ open, children ,onClose, room}) => {
-    if(!open)return null;
+const Submit = ({waiting, submitReservation, submitted, submitError}) => {
+
+    return (
+        <>
+        <button className={waiting ? "waiting" : "ready"} onClick={submitReservation()}>Submit</button>
+        {submitted ? <h3 className="submitSuc">Submitted</h3> : submitError && <h3 className="submitError">Error!!!</h3>}
+        </>
+    );
+}
+
+const Reservation = ({ room, open, children ,onClose}) => {
+    if(!open) return null;
+
+    // check that use has actually selected a room
+
     let students = [];
 
     let [barcode, setBarcode] = useState({first_name: '', last_name: '', email: '', rin: ''});
     let [isScan, setIsScan] = useState(true);
     let [edit, setEdit] = useState(false);
 
-    // useEffect(() =>{
+    let [submitted, setSubmitted] = useState(false);
+    let [submitError, setSubmitError] = useState({
+        submitError: false,
+        errorMessage: ""
+    });
 
-    // },[barcode, isScan]);
-    //
-    //
+
+    let endTime = getRoomTime(); // time the room reservation ends
 
     const getCallback = (childData) => {
         setBarcode({first_name: childData.first_name, last_name: childData.last_name, email: childData.email, rin: childData.rin});
         setIsScan(false);
+    }
+
+    const submitReservation = async () => {
+        // reset states
+        setSubmitted(false); 
+        setSubmitError({submitError: false, errorMessage: ""});
+
+        if(!isScan){
+            // parse data for json
+            let data = {
+                room_num: room,
+                first_name: barcode.first_name,
+                last_name: barcode.last_name,
+                rin: barcode.rin,
+                start_time: new Date(),
+                end_time: endTime
+            }
+
+            try{
+                // try upload
+                const response = await fetch("http://127.0.0.1:8000/reservations_api/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+                console.log("Response:", result);
+                if(response.status===409){
+                    setSubmitError({submitError: true, errorMessage: result.message});
+                    console.log("Error!!", result.message);
+                }
+                else setSubmitted(true);
+            }catch(error){
+                console.error("Error:", error);
+                setSubmitError({submitError: true, errorMessage: "Something tragic has happened :("});
+            }
+        }
+        return;
     }
 
     const showEdit = () => {
@@ -140,11 +195,13 @@ const Reservation = ({ open, children ,onClose, room}) => {
                     <div className='reservationTitle'>Reservation</div>
                     <hr className={isScan ? 'idScanFalse' : 'idScanTrue'}></hr>
                     <div className='reservationStudents'>
-                        <Student rin={barcode.rin} email={barcode.email} showEdit={showEdit} />
+                        <Student room={room} rin={barcode.rin} email={barcode.email} showEdit={showEdit} endTime={endTime} />
                     </div>
                     <hr className={isScan ? 'idScanFalse' : 'idScanTrue'}></hr>
                     {isScan ? <i style={{paddingLeft: "2%",paddingTop:"1%"}}>Waiting for scan...</i> : <i style={{paddingLeft:"2%", paddingTop:"1%"}}>ID scanned!</i>}
                 <Form barcode={barcode} isScan={isScan} edit={edit} />
+                <button className={isScan ? "waiting" : "ready"} onClick={() => submitReservation()}>Submit</button>
+                {submitted ? <h3 className="submitSuc">Submitted</h3> : submitError.submitError && <h3 className="submitError">Error!!! {submitError.errorMessage}</h3>}
             </div>
         </div>
         {children}
