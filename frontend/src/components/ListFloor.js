@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/styles/main.css';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridValueGetterParams, GridEventListener } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import { darken, lighten, styled} from '@mui/material/styles'
 
@@ -64,7 +64,6 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 
 // return the status code of time left on a room
 const getStatus = (time) => {
-    console.log("time",time)
     if(time.slice(0,2) === "--") return "Empty"
     if(time.slice(0,2) !== "00") return "TimeGood"
     if(time.slice(-2) === "00") return "TimeUp"
@@ -93,7 +92,7 @@ const msToTime = (s) => {
   return pad(hrs) + ':' + pad(mins);
 }
 
-const ListFloor = ({ floor }) => {
+const ListFloor = ({ floor, getRoomSelected }) => {
 
     let rows
     let [rooms, setRooms] = useState([])
@@ -115,7 +114,6 @@ const ListFloor = ({ floor }) => {
                 const endTime = new Date(reservation['end_time'])
                 const currentTime = new Date()
                 const timeLeft = msToTime((endTime.getTime() - currentTime.getTime()))
-                console.log("Time left", timeLeft)
 
                 // update fields for room json
                 rooms[i]['start_time'] = new Date(reservation['start_time']).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
@@ -150,6 +148,9 @@ const ListFloor = ({ floor }) => {
         parseRoomsJson(data)
     }
 
+    const handleRowClick: GridEventListener<'rowClick'> = (params) => {
+        getRoomSelected(params.row.room_num);
+    };
 
     return(
         <>
@@ -174,6 +175,7 @@ const ListFloor = ({ floor }) => {
                                 '& .MuiDataGrid-cell:hover':{ color:'primary.main', },
                             }}
                             getRowClassName={(params) => 'room-reserve-theme--' + getStatus(params.row.time_left)}
+                            onRowClick={handleRowClick}
                         />
                     </Box>
                 </div>

@@ -5,7 +5,12 @@ const parseScan = (scan) => {
     return scan.slice(rinStart+1,-3);
 }
 
-const Scan = ({scan, onScan, updateBarcode}) => {
+const getStudentInfo = (barcode) => {
+    let data = {first_name: "Linus", last_name: "Zwaka", email: "zwakal@rpi.edu", rin: barcode};
+    return data;
+}
+
+const Scan = ({scan, setBarcode}) => {
     console.log(scan);
     if(!scan) {
         return null;
@@ -21,7 +26,10 @@ const Scan = ({scan, onScan, updateBarcode}) => {
 
         if(code === 13 && scannedBarcode[0] === ';'){
             scannedBarcode = parseScan(scannedBarcode)
-            {onScan()} {updateBarcode(scannedBarcode)}
+            // TODO make db call to get student info
+            let studentData = getStudentInfo(scannedBarcode);
+            console.log("Student data", studentData);
+            {setBarcode(studentData)}
         }
     }
 }

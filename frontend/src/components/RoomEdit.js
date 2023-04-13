@@ -3,7 +3,7 @@ import { useState } from 'react';
 import '../assets/styles/main.css';
 import Reservation from'../components/Reservation'
 
-const RoomEdit = () => {
+const RoomEdit = (addReservationCall) => {
     let [isAddReserveOpen, setIsAddReserveOpen] = useState(false)
 
     return(
