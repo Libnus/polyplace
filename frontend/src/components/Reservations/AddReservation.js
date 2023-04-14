@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import Datetime from 'react-datetime';
 import './Reservation.css'
-import Scan from './Scan';
+import Scan from '../Scan/Scan';
 
 const RESERVATION_STYLES ={
     position: 'fixed',
@@ -46,13 +46,13 @@ const Form = ( props ) => {
                     <div className="infoBox">
                         <span className="infoText">First Name: </span>
                         { props.isScan ? (<input type="text" className="inputText" placeholder="Enter first name..."></input>)
-                          : (<input type="text" className="inputText" value={props.barcode.first_name}></input>)
+                          : (<input type="text" className="inputText" value={props.student.first_name}></input>)
                         }
                     </div>
                     <div className="infoBox">
                         <span className="infoText">Last Name: </span>
                         { props.isScan ? (<input type="text" className="inputText" placeholder="Enter last name..."></input>)
-                          : (<input type="text" className="inputText" value={props.barcode.last_name}></input>)
+                          : (<input type="text" className="inputText" value={props.student.last_name}></input>)
                         }
                     </div>
                 </div>
@@ -60,13 +60,13 @@ const Form = ( props ) => {
                     <div className="infoBox">
                         <span className="infoText">RIN#: </span>
                         { props.isScan ? (<input type="text" className="inputText" placeholder="Enter RIN..."></input>)
-                          : (<input type="text" className="inputText" value={props.barcode.rin}></input>)
+                          : (<input type="text" className="inputText" value={props.student.rin}></input>)
                         }
                     </div>
                     <div className="infoBox">
                         <span className="infoText">Email: </span>
                         { props.isScan ? (<input type="text" className="inputText" placeholder="Enter email..."></input>)
-                          : (<input type="text" className="inputText" value={props.barcode.email}></input>)
+                          : (<input type="text" className="inputText" value={props.student.email}></input>)
                         }
                     </div>
                 </div>
@@ -90,6 +90,8 @@ const Student = ({room, rin, email, endTime, showEdit }) => {
         email="----@rpi.edu"
         rin = "----";
     }
+
+    console.log(endTime);
 
     return(
         <div className="reservationStudent">
@@ -117,13 +119,13 @@ const Submit = ({waiting, submitReservation, submitted, submitError}) => {
     );
 }
 
-const Reservation = ({ room, open, children ,onClose}) => {
+const AddReservation = ({ room, open, children ,onClose}) => {
     if(!open) return null;
 
 
     let students = [];
 
-    let [barcode, setBarcode] = useState({first_name: '', last_name: '', email: '', rin: ''});
+    let [studentInfo, setStudentInfo] = useState({first_name: '', last_name: '', email: '', rin: ''});
     let [isScan, setIsScan] = useState(true);
     let [edit, setEdit] = useState(false);
 
@@ -137,7 +139,7 @@ const Reservation = ({ room, open, children ,onClose}) => {
     let endTime = getRoomTime(); // time the room reservation ends
 
     const getCallback = (childData) => {
-        setBarcode({first_name: childData.first_name, last_name: childData.last_name, email: childData.email, rin: childData.rin});
+        setStudentInfo({first_name: childData.first_name, last_name: childData.last_name, email: childData.email, rin: childData.rin});
         setIsScan(false);
     }
 
@@ -150,9 +152,9 @@ const Reservation = ({ room, open, children ,onClose}) => {
             // parse data for json
             let data = {
                 room_num: room,
-                first_name: barcode.first_name,
-                last_name: barcode.last_name,
-                rin: barcode.rin,
+                first_name: studentInfo.first_name,
+                last_name: studentInfo.last_name,
+                rin: studentInfo.rin,
                 start_time: new Date(),
                 end_time: endTime
             }
@@ -194,11 +196,11 @@ const Reservation = ({ room, open, children ,onClose}) => {
                     <div className='reservationTitle'>Reservation</div>
                     <hr className={isScan ? 'idScanFalse' : 'idScanTrue'}></hr>
                     <div className='reservationStudents'>
-                        <Student room={room} rin={barcode.rin} email={barcode.email} showEdit={showEdit} endTime={endTime} />
+                        <Student room={room} rin={studentInfo.rin} email={studentInfo.email} showEdit={showEdit} endTime={endTime} />
                     </div>
                     <hr className={isScan ? 'idScanFalse' : 'idScanTrue'}></hr>
                     {isScan ? <i style={{paddingLeft: "2%",paddingTop:"1%"}}>Waiting for scan...</i> : <i style={{paddingLeft:"2%", paddingTop:"1%"}}>ID scanned!</i>}
-                <Form barcode={barcode} isScan={isScan} edit={edit} />
+                <Form student={studentInfo} isScan={isScan} edit={edit} />
                 <button className={isScan ? "waiting" : "ready"} onClick={() => submitReservation()}>Submit</button>
                 {submitted ? <h3 className="submitSuc">Submitted</h3> : submitError.submitError && <h3 className="submitError">Error!!! {submitError.errorMessage}</h3>}
             </div>
@@ -208,4 +210,10 @@ const Reservation = ({ room, open, children ,onClose}) => {
     );
 }
 
-export default Reservation;
+export default AddReservation;
+
+export{
+    Form,
+    Student,
+}
+

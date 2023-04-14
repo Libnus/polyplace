@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/styles/main.css';
 import Box from '@mui/material/Box';
-import ListFloor from '../components/ListFloor';
-import RoomEdit from '../components/RoomEdit';
-import Reservation from '../components/Reservation';
+import ListFloor from '../components/Floors/ListFloor';
+import RoomEdit from '../components/Floors/RoomEdit';
 
 const Rooms = () => {
 
@@ -13,6 +12,8 @@ const Rooms = () => {
         first_name: "",
         last_name: "",
         end_time: "",
+        rin: "",
+        email: "",
     });
 
     const getRoomSelected = (room) => {
@@ -20,7 +21,9 @@ const Rooms = () => {
                          room_num: room.room_num,
                          first_name:room.first_name,
                          last_name:room.last_name,
-                         end_time:room.end_time});
+                         end_time:room.end_time,
+                         rin:room.rin,
+                         email:room.email});
     }
 
     useEffect(() => {
