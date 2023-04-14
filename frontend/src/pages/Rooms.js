@@ -8,10 +8,19 @@ import Reservation from '../components/Reservation';
 const Rooms = () => {
 
     let [floors, setFloors] = useState([]);
-    let [selectedRoom, setSelectedRoom] = useState("");
+    let [selectedRoom, setSelectedRoom] = useState({
+        room_num: "",
+        first_name: "",
+        last_name: "",
+        end_time: "",
+    });
 
-    const getRoomSelected = (room_num) => {
-        setSelectedRoom(room_num);
+    const getRoomSelected = (room) => {
+        setSelectedRoom({...selectedRoom,
+                         room_num: room.room_num,
+                         first_name:room.first_name,
+                         last_name:room.last_name,
+                         end_time:room.end_time});
     }
 
     useEffect(() => {
@@ -34,7 +43,7 @@ const Rooms = () => {
     return(
         <>
         <div className="main">
-            <RoomEdit selectedRoom={selectedRoom}/>
+            <RoomEdit selectedRoom={selectedRoom} isOccupied={true ? selectedRoom.first_name.length > 0 : false}/>
             <div className="floorContainer">
                 {floors.map((floor,index) => (
                     <ListFloor key={index} floor={floor} getRoomSelected={getRoomSelected}/>))}

@@ -120,7 +120,6 @@ const Submit = ({waiting, submitReservation, submitted, submitError}) => {
 const Reservation = ({ room, open, children ,onClose}) => {
     if(!open) return null;
 
-    // check that use has actually selected a room
 
     let students = [];
 

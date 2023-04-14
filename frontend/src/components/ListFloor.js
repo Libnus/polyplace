@@ -107,8 +107,8 @@ const ListFloor = ({ floor, getRoomSelected }) => {
             // fetch the reservation if room has reservation
             if(rooms[i]['reservation'] != null){
                 const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['reservation']}/`)
-                const reservations =  await response.json()
-                const reservation = reservations[0]
+                const reservations =  await response.json();
+                const reservation = reservations[0];
 
                 // calculate time left
                 const endTime = new Date(reservation['end_time'])
@@ -121,19 +121,21 @@ const ListFloor = ({ floor, getRoomSelected }) => {
                 rooms[i]['time_left'] = timeLeft
                 rooms[i]['first_name'] = reservation["first_name"]
                 rooms[i]['last_name'] = reservation["last_name"]
+                rooms[i]['rin'] = reservation["rin"];
 
             }
             else{ // room is empty
-                rooms[i]['start_time'] = '----'
-                rooms[i]['end_time'] = '----'
-                rooms[i]['time_left'] = '----'
-                rooms[i]['first_name'] = '----'
-                rooms[i]['last_name'] = '----'
+                rooms[i]['start_time'] = '----';
+                rooms[i]['end_time'] = '----';
+                rooms[i]['time_left'] = '----';
+                rooms[i]['first_name'] = '----';
+                rooms[i]['last_name'] = '----';
+                rooms[i]['rin'] = '----';
             }
 
             // clean up the json
-            delete rooms[i]['floor']
-            delete rooms[i]['reservation']
+            delete rooms[i]['floor'];
+            delete rooms[i]['reservation'];
         }
 
         // sort the data
@@ -149,7 +151,8 @@ const ListFloor = ({ floor, getRoomSelected }) => {
     }
 
     const handleRowClick: GridEventListener<'rowClick'> = (params) => {
-        getRoomSelected(params.row.room_num);
+        console.log(params.row);
+        getRoomSelected(params.row);
     };
 
     return(
