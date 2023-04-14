@@ -1,6 +1,6 @@
 html,body{
     margin: 0;
-    font-family: sans-serif;
+    font-family: 'Source Sans Pro', sans-serif;
     background-image: url('../imgs/d.jpg');
     background-attachment: fixed;
     background-size: 120% 100%;
@@ -25,7 +25,7 @@ html,body{
     border-radius: 0px;
     opacity: 0.9;
     padding-left: 2%;
-    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 6px -2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 1px -2px rgba(0, 0, 0, 0.3);
 }
 
 .footer{
@@ -52,7 +52,6 @@ html,body{
     width: 15%;
     background: #1d1b1c;
     overflow-x:hidden;
-    opacity: 0.8;
 }
 
 .sidenav a{
@@ -72,8 +71,9 @@ html,body{
     margin-top: 2%;
     width: 80%;
     background: #36393e;
-    background: rgba(54,57,62,0.7);
+    background: rgba(54,57,62,1.0);
     box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 6px -2px rgba(0, 0, 0, 0.3), 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px 3px 3px 0px rgba(0, 0, 0, 0.3);
+    min-height: 100vh;
 }
 
 .roomEditor{
@@ -103,35 +103,54 @@ html,body{
 .divFloor{
     margin-bottom: 40px;
     transition: ease-out 1.0s;
+
+    border-radius: 7px;
+
+    border: 1px solid black;
+    background-color: #EFEFD0;
 }
 
 .divFloor:hover{
-    box-shadow: 9px 10px 3px 0px rgba(200, 200, 200, 0.4);
+    box-shadow: 9px 10px 1px 0px rgba(100, 100, 100, 0.4);
     transition: box-shadow 0.3s ease-in-out;
 }
 
 
 .floor{
     padding-top: 15px;
-    border-top-right-radius: 15px;
-    border-top-left-radius: 15px;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px;
     padding-bottom: 15px;
     padding-left: 25px;
     color: white;
-    background: darkorange;
+    background-color: darkorange;
     margin-bottom: 0px;
-    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 6px -2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 1px -2px rgba(0, 0, 0, 0.3);
     transition: ease-out 1.0s;
     opacity: 0.8;
 }
 
 .floor:hover{
     opacity: 0.9;
-    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 6px -2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 2px -2px rgba(0, 0, 0, 0.3);
     transition: ease-in 0.3s;
 }
 
 .table{
+}
+
+.floorTest{
+    padding-top: 1px;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px;
+    padding-bottom: 1px;
+    padding-left: 25px;
+    color: white;
+    background-color: #FF6B35;
+    margin-bottom: 0px;
+    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 0px -2px rgba(0, 0, 0, 0.3);
+    transition: ease-out 1.0s;
+    opacity: 0.8;
 }
 
 .navelement{
