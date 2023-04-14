@@ -37,3 +37,10 @@ packages/react-devtools-extensions/.tempUserDataDir
 packages/react-devtools-inline/dist
 packages/react-devtools-shell/dist
 packages/react-devtools-timeline/dist
+
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+
+db.sqlite3
