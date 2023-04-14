@@ -98,7 +98,6 @@ const EditReservation = ({ room, open, onClose }) => {
 
     console.log(room);
 
-
     return (
         <>
             <Scan scan={isScan} setBarcode={getCallback} />
