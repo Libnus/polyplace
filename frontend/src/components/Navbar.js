@@ -16,6 +16,11 @@ class Navbar extends Component{
                     path: '/history',
                     cName: 'nav-text'
                 },
+                {
+                    title: 'Login',
+                    path: '/login',
+                    cName: 'nav-text'
+                }
             ]
         };
     }

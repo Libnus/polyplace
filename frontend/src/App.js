@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import { Routes,BrowserRouter, Route } from 'react-router-dom';
 import Rooms from './pages/Rooms';
 import History from './pages/History';
+import Login from './pages/Login';
 import './assets/styles/main.css';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
                     <Routes>
                         <Route path='/rooms' element={<Rooms />} />
                         <Route path='/history' element={<History />} />
+                        <Route path='/login' element={<Login />} />
                     </Routes>
                 </BrowserRouter>
             </div>
