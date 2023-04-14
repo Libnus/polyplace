@@ -1,6 +1,6 @@
 import React from 'react';
 import { BsGithub } from 'react-icons/bs';
-import '../assets/styles/main.css';
+import '../../assets/styles/main.css';
 
 const Footer = () => {
     return (

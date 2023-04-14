@@ -1,6 +1,6 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import Navbar from './components/Main/Navbar';
+import Footer from './components/Main/Footer';
 import { Routes,BrowserRouter, Route } from 'react-router-dom';
 import Rooms from './pages/Rooms';
 import History from './pages/History';

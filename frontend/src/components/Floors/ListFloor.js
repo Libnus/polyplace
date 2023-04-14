@@ -1,18 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import '../assets/styles/main.css';
-import { DataGrid, GridColDef, GridValueGetterParams, GridEventListener } from '@mui/x-data-grid';
+import '../../assets/styles/main.css';
+import { DataGrid, GridColDef, GridRenderCellParams, GridEventListener } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import { darken, lighten, styled} from '@mui/material/styles'
 
 import Datetime from 'react-datetime';
 
+const getTime = (value) => {
+    if(value.length !== 0)
+        return value.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'});
+    else return "----"
+}
+
+const getField = (value) => {
+    if(value.length !== 0) return value;
+    else return "----";
+}
+
 const columns: GridColDef[] = [
     { field: 'room_num', headerName: 'Room', width: 160, sortable: false},
-    { field: 'first_name', headerName: 'First name', width: 200, sortable: false },
-    { field: 'last_name', headerName: 'Last name', width: 200, sortable: false },
-    { field: 'time_left', headerName: 'Time Left', headerAlign: 'center', width: 160, align: 'center', center: true,  sortable: false},
-    { field: 'start_time', headerName: 'Start Time',width: 160,sortable: false,align: 'center',headerAlign: 'center'},
-    { field: 'end_time',headerName: 'End Time',sortable: false,width: 160,align: 'center',headerAlign: 'center'},
+    { field: 'first_name', headerName: 'First name', width: 200, sortable: false, valueGetter: ({value}) => getField(value)},
+    { field: 'last_name', headerName: 'Last name', width: 200, sortable: false, valueGetter: ({value}) => getField(value)},
+    { field: 'time_left', headerName: 'Time Left', headerAlign: 'center', width: 160, align: 'center', center: true, sortable: false, valueGetter: ({value}) => getField(value)},
+    { field: 'start_time', headerName: 'Start Time',width: 160,align: 'center',headerAlign: 'center',sortable: false, valueGetter: ({value}) => getTime(value)},
+    { field: 'end_time',headerName: 'End Time',width: 160,align: 'center',headerAlign: 'center',sortable: false, valueGetter: ({value}) => getTime(value)},
 ]
 
 const getBackgroundColor = (color, mode) =>
@@ -64,7 +75,7 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 
 // return the status code of time left on a room
 const getStatus = (time) => {
-    if(time.slice(0,2) === "--") return "Empty"
+    if(time.slice(0,2) === "") return "Empty"
     if(time.slice(0,2) !== "00") return "TimeGood"
     if(time.slice(-2) === "00") return "TimeUp"
     if(time.slice(-2) <= "15") return "Warning"
@@ -72,6 +83,14 @@ const getStatus = (time) => {
 }
 
 // =============================================== Mui styling ^^^^^
+
+const getStartTime = (params) => {
+    return params.row.start_time.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
+}
+
+const getEndTime = (params) => {
+    return params.row.end_time.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
+}
 
 const msToTime = (s) => {
 
@@ -111,26 +130,28 @@ const ListFloor = ({ floor, getRoomSelected }) => {
                 const reservation = reservations[0];
 
                 // calculate time left
-                const endTime = new Date(reservation['end_time'])
-                const currentTime = new Date()
-                const timeLeft = msToTime((endTime.getTime() - currentTime.getTime()))
+                const endTime = new Date(reservation['end_time']);
+                const currentTime = new Date();
+                const timeLeft = msToTime((endTime.getTime() - currentTime.getTime()));
 
                 // update fields for room json
-                rooms[i]['start_time'] = new Date(reservation['start_time']).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
-                rooms[i]['end_time'] = new Date(reservation['end_time']).toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
-                rooms[i]['time_left'] = timeLeft
-                rooms[i]['first_name'] = reservation["first_name"]
-                rooms[i]['last_name'] = reservation["last_name"]
+                rooms[i]['start_time'] = new Date(reservation['start_time']);
+                rooms[i]['end_time'] = new Date(reservation['end_time']);
+                rooms[i]['time_left'] = timeLeft;
+                rooms[i]['first_name'] = reservation["first_name"];
+                rooms[i]['last_name'] = reservation["last_name"];
                 rooms[i]['rin'] = reservation["rin"];
+                rooms[i]['email'] = reservation["email"];
 
             }
             else{ // room is empty
-                rooms[i]['start_time'] = '----';
-                rooms[i]['end_time'] = '----';
-                rooms[i]['time_left'] = '----';
-                rooms[i]['first_name'] = '----';
-                rooms[i]['last_name'] = '----';
-                rooms[i]['rin'] = '----';
+                rooms[i]['start_time'] = '';
+                rooms[i]['end_time'] = '';
+                rooms[i]['time_left'] = '';
+                rooms[i]['first_name'] = '';
+                rooms[i]['last_name'] = '';
+                rooms[i]['rin'] = '';
+                rooms[i]['email'] = '';
             }
 
             // clean up the json
@@ -151,7 +172,7 @@ const ListFloor = ({ floor, getRoomSelected }) => {
     }
 
     const handleRowClick: GridEventListener<'rowClick'> = (params) => {
-        console.log(params.row);
+        console.log("rooms returned",params.row);
         getRoomSelected(params.row);
     };
 

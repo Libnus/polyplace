@@ -1,7 +1,8 @@
 import React from 'react';
 import { useState } from 'react';
-import '../assets/styles/main.css';
-import Reservation from'../components/Reservation'
+import '../../assets/styles/main.css';
+import AddReservation from'../Reservations/AddReservation'
+import EditReservation from '../Reservations/EditReservation'
 
 // handle error messages for roomEdit
 const ErrorAdd = ({notSelected, roomTaken}) => {
@@ -62,8 +63,8 @@ const RoomEdit = ({selectedRoom, isOccupied}) => {
             <button onClick={() => addReservation()}>Add Reservation</button>
             <button onClick={() => editReservation()}>Edit Reservation</button>
             <ErrorAdd notSelected={errorAdd.notSelected} roomTaken={errorAdd.roomTaken} />
-            <Reservation room={selectedRoom.room_num} open={isAddReserveOpen} onClose={() => setIsAddReserveOpen(false)}/>
-            <EditReservation room={selectedRoom} open={isEditReserveOpen} onClose={() => setIsEditReserveOpen(flase)} />
+            <AddReservation room={selectedRoom.room_num} open={isAddReserveOpen} onClose={() => setIsAddReserveOpen(false)}/>
+            <EditReservation room={selectedRoom} open={isEditReserveOpen} onClose={() => setIsEditReserveOpen(false)} />
         </div>
     );
 }
