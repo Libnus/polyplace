@@ -51,3 +51,24 @@
   opacity: 1.0;
   box-shadow: 5px 5px 0px 0px rgba(10, 10, 10, 0.5);
 }
+
+.overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0.6);
+  z-index: 1000;
+}
+
+}
+
+.calendar{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  background-color: #4E505B;
+  border-radius: 5px;
+  width: 50%;
+}

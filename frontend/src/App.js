@@ -5,6 +5,7 @@ import { Routes,BrowserRouter, Route } from 'react-router-dom';
 import Rooms from './pages/Rooms';
 import History from './pages/History';
 import Test from './pages/Test';
+import Calendar from './pages/Calendar';
 import './assets/styles/main.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                         <Route path='/rooms' element={<Rooms />} />
                         <Route path='/history' element={<History />} />
                         <Route path='/test' element={<Test />} />
+                        <Route path='/calendar' element={<Calendar />} />
                     </Routes>
                 </BrowserRouter>
             </div>
