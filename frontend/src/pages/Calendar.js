@@ -5,9 +5,8 @@ import { ResizableBox } from 'react-resizable';
 import './Test.css';
 import '../assets/styles/main.css';
 
-const Calendar = () => {
-
-    const sensitivity = 15;
+const CalendarEvent = () => {
+        const sensitivity = 15;
 
     const refBox = useRef(null);
     const refTop = useRef(null);
@@ -65,8 +64,11 @@ const Calendar = () => {
                 if(height > maxHeight){
                     height = maxHeight;
                 }
-                if(height < 50){
+                else if(height < 50){
                     height = 50;
+                }
+                else{
+                    dyHeight += dy*25;
                 }
 
                 resizeableElement.style.height = `${height}px`;
@@ -75,7 +77,9 @@ const Calendar = () => {
         };
 
         const onMouseUpTopResize = (event) => {
-            console.log("top height", height);
+            minHeight -= dyHeight;
+            console.log("new min height", minHeight);
+            dyHeight = 0;
             document.removeEventListener("mousemove", onMouseMoveTopResize);
             document.removeEventListener("mouseup", onMouseUpTopResize);
         };
@@ -140,6 +144,30 @@ const Calendar = () => {
     }, []);
 
     return (
+        <div className="monday eventCard" ref={refBox}>
+            <div className="resizeTop" ref={refTop}></div>
+                <div class="labels">
+                    Room 353-A
+                </div>
+                <div class="location">
+                    Folsom, 3rd Floor
+                </div>
+                <div class="reserveName">
+                    Henry, Brian & Zwaka, Linus
+                </div>
+                <div class="time">
+                    2:00-4:00 P.M.
+                </div>
+            <div className="resizeBottom" ref={refBottom}></div>
+        </div>
+    );
+
+}
+
+const Calendar = () => {
+
+
+    return (
         <>
         <div className="overlay"/>
         <div className="calendar">
@@ -162,29 +190,14 @@ const Calendar = () => {
 
                 <div className="day">
                     <div className="dayLabel">Monday</div>
-                    <div className="monday eventCard" ref={refBox}>
-                        <div className="resizeTop" ref={refTop}></div>
-                        <div>yes</div>
-                        <div className="resizeBottom" ref={refBottom}></div>
-                    </div>
-
-                    <div className="monday eventCard" ref={refBox1} style={{marginTop:"219px"}}>
-                        <div className="resizeTop" ref={refTop1}>hey1</div>
-                    </div>
-
-                    <div className="monday eventCard" ref={refBox1} style={{marginTop:"19px"}}>
-                        <div className="resizeTop" ref={refTop1}>hey</div>
-                    </div>
-
+                    <CalendarEvent />
                     <div className="hour"></div>
                     <div className="hour"></div>
                     <div className="hour"></div>
-                    <div className="hour">
-                    </div>
                     <div className="hour"></div>
                     <div className="hour"></div>
-                    <div className="hour">
-                    </div>
+                    <div className="hour"></div>
+                    <div className="hour"></div>
                     <div className="hour"></div>
                     <div className="hour"></div>
                     <div className="hour"></div>
