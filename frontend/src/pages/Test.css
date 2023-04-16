@@ -215,10 +215,11 @@ button.bookRoom:hover{
 }
 
 .eventCard{
+    user-select: none;
     color: black;
     position: absolute;
     z-index: 2000;
-    margin-top: 19px;
+    margin-top: 119px;
     height: 5%;
     width: 100%;
     box-sizing: border-box;
@@ -248,33 +249,15 @@ button.bookRoom:hover{
   padding-bottom: 1%;
 }
 
-.box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  background: #ccc;
-  border: 1px solid black;
-  text-align: center;
-  padding: 10px;
-  box-sizing: border-box;
-  margin-bottom: 10px;
-  overflow: hidden;
-  position: relative;
-  margin: 20px;
+.resizeTop{
+  cursor: row-resize;
+  height: 4%;
+  width: 100%;
 }
 
-.react-resizable {
-  position: relative;
-}
-.react-resizable-handle {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background-repeat: no-repeat;
-  background-origin: content-box;
-  box-sizing: border-box;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iNnB4Ij48ZyBvcGFjaXR5PSIwLjMwMiI+PHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDQgNC4yIEwgNC4yIDQuMiBMIDQuMiAwIEwgNiAwIEwgNiA2IEwgNiA2IFoiIGZpbGw9IiMwMDAwMDAiLz48L2c+PC9zdmc+');
-  background-position: bottom right;
-  padding: 0 3px 3px 0;
+.resizeBottom{
+  cursor: row-resize;
+  height: 4%;
+  bottom: 0;
+  width: 100%;
 }
