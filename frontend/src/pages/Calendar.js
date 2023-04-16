@@ -1,10 +1,14 @@
 import React from 'react';
 import { useEffect, useRef } from 'react';
+import { Resizable } from 'react-resizable';
+import { ResizableBox } from 'react-resizable';
 import './Test.css';
 import '../assets/styles/main.css';
 
 const Calendar = () => {
 
+    const refBox = useRef(null);
+    const refTop = useRef(null);
 
     return (
         <>
@@ -29,30 +33,16 @@ const Calendar = () => {
 
                 <div className="day">
                     <div className="dayLabel">Monday</div>
+                    <div className="eventCard">
+                    </div>
+                    <div className="hour"></div>
+                    <div className="hour"></div>
+                    <div className="hour"></div>
                     <div className="hour">
-                        <div className="eventCard">hi</div>
                     </div>
                     <div className="hour"></div>
                     <div className="hour"></div>
                     <div className="hour">
-                    </div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour">
-                        <div className="eventCard" style={{height: '200%'}}>
-                            <div className="labels">
-                                Room 353-A
-                            </div>
-                            <div className="location">
-                                Folsom, 3rd Floor
-                            </div>
-                            <div className="reserveName">
-                                Henry, Brian & Zwaka, Linus
-                            </div>
-                            <div className="time">
-                                2:00-4:00 P.M.
-                            </div>
-                        </div>
                     </div>
                     <div className="hour"></div>
                     <div className="hour"></div>
