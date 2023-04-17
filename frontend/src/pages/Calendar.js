@@ -1,21 +1,16 @@
 import React from 'react';
 import { useEffect, useRef } from 'react';
-import { Resizable } from 'react-resizable';
-import { ResizableBox } from 'react-resizable';
 import './Test.css';
 import '../assets/styles/main.css';
 
-const CalendarEvent = () => {
-        const sensitivity = 15;
+const CalendarEvent = ( { day, position } ) => {
+    const sensitivity = 15;
 
     const refBox = useRef(null);
     const refTop = useRef(null);
-    const refBox1 = useRef(null);
-    const refTop1 = useRef(null);
     const refBottom = useRef(null);
 
-    let day = "monday";
-
+    // convert from px to int for height calculations
     const convertMargin = (num) => {
         return Math.floor((num)/50)*50;
     }
@@ -32,25 +27,29 @@ const CalendarEvent = () => {
         // maximum and minimum height div can have
         let maxHeight = height + marginTop;
         let minHeight = convertMargin(650 - (marginTop)) //TODO change 619 to maxSize of day as scaling could change
-        console.log(maxHeight);
 
-        // also need to check maxheight and consider other divs as well so they don't collide
-        const events = document.getElementsByClassName(day);
+        const getMaxMinHeights = () => {
+            // also need to check maxheight and consider other divs as well so they don't collide
+            const events = document.getElementsByClassName(day);
+            maxHeight = height + marginTop;
+            minHeight = convertMargin(650 - (marginTop)) //TODO change 619 to maxSize of day as scaling could change
 
-        // loop over elements from this day and if we find a height less than max then
-        // update max to reflect the new maximum height this element can have
-        for(let i = 0; i < events.length; i++){
-            if(events[i] !== resizeableElement){
-                const eventStyle = getComputedStyle(events[i]);
-                const eventTop = convertMargin(parseInt(eventStyle.marginTop));
+            // loop over elements from this day and if we find a height less than max then
+            // update max to reflect the new maximum height this element can have
+            for(let i = 0; i < events.length; i++){
+                if(events[i] !== resizeableElement){
+                    const eventStyle = getComputedStyle(events[i]);
+                    const eventTop = convertMargin(parseInt(eventStyle.marginTop));
+                    console.log("eventTop", eventTop);
 
-                if(eventTop < marginTop) maxHeight -= eventTop+parseInt(eventStyle.height);
-                if(eventTop > marginTop) minHeight = eventTop-marginTop;
+                    if(eventTop < marginTop) maxHeight = (marginTop - (eventTop+parseInt(eventStyle.height)))+height;
+                    if(eventTop > marginTop) minHeight = eventTop-marginTop;
+                }
             }
-        }
 
-        console.log("maxHeight", maxHeight);
-        console.log("minheight",minHeight);
+            console.log("maxHeight", maxHeight);
+            console.log("minheight",minHeight);
+        };
 
         let y = 0;
 
@@ -59,6 +58,7 @@ const CalendarEvent = () => {
             if(event.clientY % sensitivity === 0){
 
                 let dy = (event.clientY) - y;
+                const originalHeight = height;
                 height = height-dy*25;
 
                 if(height > maxHeight){
@@ -71,20 +71,25 @@ const CalendarEvent = () => {
                     dyHeight += dy*25;
                 }
 
+                // update height and marginTop
+                marginTop -= (height-originalHeight);
+                resizeableElement.style.marginTop = `${marginTop}px`;
+
                 resizeableElement.style.height = `${height}px`;
             }
             y = event.clientY;
         };
 
         const onMouseUpTopResize = (event) => {
-            minHeight -= dyHeight;
             console.log("new min height", minHeight);
             dyHeight = 0;
+            console.log("marginTop",marginTop);
             document.removeEventListener("mousemove", onMouseMoveTopResize);
             document.removeEventListener("mouseup", onMouseUpTopResize);
         };
 
         const onMouseDownTopResize = (event) => {
+            getMaxMinHeights();
             y = event.clientY;
             const styles = window.getComputedStyle(resizeableElement);
             resizeableElement.style.bottom = styles.bottom;
@@ -124,6 +129,7 @@ const CalendarEvent = () => {
         };
 
         const onMouseDownBottomResize = (event) =>{
+            getMaxMinHeights();
             y = event.clientY;
             const styles = window.getComputedStyle(resizeableElement);
             resizeableElement.style.top = styles.top;
@@ -144,7 +150,7 @@ const CalendarEvent = () => {
     }, []);
 
     return (
-        <div className="monday eventCard" ref={refBox}>
+        <div className="monday eventCard" ref={refBox} style={{marginTop:position}}>
             <div className="resizeTop" ref={refTop}></div>
                 <div class="labels">
                     Room 353-A
@@ -190,7 +196,8 @@ const Calendar = () => {
 
                 <div className="day">
                     <div className="dayLabel">Monday</div>
-                    <CalendarEvent />
+                    <CalendarEvent day="monday" position="169px"/>
+                    <CalendarEvent day="monday" position="19px"/>
                     <div className="hour"></div>
                     <div className="hour"></div>
                     <div className="hour"></div>

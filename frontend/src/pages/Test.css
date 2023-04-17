@@ -144,6 +144,7 @@ button.bookRoom:hover{
 
 .overlay{
   position: fixed;
+  user-select: none;
   top: 0;
   left: 0;
   bottom: 0;
@@ -155,6 +156,7 @@ button.bookRoom:hover{
 .calendar{
   position: fixed;
   top: 50%;
+  user-select: none;
   left: 50%;
   background-color: rgba(52,55,60,1.0);
   color: white;
@@ -189,6 +191,7 @@ button.bookRoom:hover{
 
 .day{
     height: 100%;
+    user-select: none;
     width: 20%;
     display: flex;
     flex-direction: column;
@@ -198,11 +201,13 @@ button.bookRoom:hover{
 .dayLabel{
     text-align: center;
     font-weight: bold;
+    user-select: none;
     font-size: 15px;
 }
 
 .hour{
     box-sizing: border-box;
+    user-select: none;
     height: 5%;
     border-right: 1px solid white;
     border-top: 1px solid white;
