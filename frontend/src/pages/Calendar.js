@@ -13,7 +13,7 @@ const CalendarEvent = ( { day, position } ) => {
 
     // convert from px to int for height calculations
     const convertMargin = (num) => {
-        return Math.floor((num)/50)*50;
+        return Math.floor((num)/25)*25;
     }
 
     useEffect(() => {
@@ -35,7 +35,7 @@ const CalendarEvent = ( { day, position } ) => {
             marginTop = convertMargin(parseInt(styles.marginTop));
             console.log("marginTop", marginTop);
             maxHeight = height + marginTop;
-            minHeight = convertMargin(650 - (marginTop)) //TODO change 619 to maxSize of day as scaling could change
+            minHeight = convertMargin(650 - (marginTop)) //TODO change 650 to maxSize of day as scaling could change
 
             // loop over elements from this day and if we find a height less than max then
             // update max to reflect the new maximum height this element can have
@@ -43,6 +43,7 @@ const CalendarEvent = ( { day, position } ) => {
                 if(events[i] !== resizeableElement){
                     const eventStyle = getComputedStyle(events[i]);
                     const eventTop = convertMargin(parseInt(eventStyle.marginTop));
+                    console.log("eventTop", eventTop);
 
                     if(eventTop < marginTop) maxHeight = (marginTop - (eventTop+parseInt(eventStyle.height)))+height;
                     if(eventTop > marginTop) minHeight = eventTop-marginTop;
@@ -56,10 +57,11 @@ const CalendarEvent = ( { day, position } ) => {
         // get the max and min div margins for draggable events
         // check other divs for collisions
         const getDragMaxMin = () => {
-            const marginTopPx = parseInt(styles.marginTop);
+            const marginTop = parseInt(styles.marginTop);
+            console.log("marginTop getDragMaxmin",marginTop)
 
-            maxHeight = 19; // 19px is the max margin
-            minHeight = 650; // 650px is the min margin
+            maxHeight = 0; // 0 is the max margin
+            minHeight = 650 - height; // 619 is the min margin
 
             const events = document.getElementsByClassName(day);
 
@@ -67,11 +69,11 @@ const CalendarEvent = ( { day, position } ) => {
                 if(events[i] !== resizeableElement){
                     const eventStyle = getComputedStyle(events[i]);
                     const eventHeight = parseInt(eventStyle.height); // height + 19 offset for day label
-                    const eventTopPx = parseInt(eventStyle.marginTop);
+                    const eventTop = convertMargin(parseInt(eventStyle.marginTop));
 
-                    if(eventTopPx < marginTopPx) maxHeight = (eventTopPx+eventHeight);
-                    if(eventTopPx > marginTopPx) minHeight = eventTopPx-height;
-                    console.log("eventToppx", eventTopPx);
+                    if(eventTop < marginTop) maxHeight = (eventTop+eventHeight);
+                    if(eventTop > marginTop) minHeight = eventTop-height;
+                    console.log("eventToppx", eventTop);
                 }
             }
 
@@ -101,7 +103,7 @@ const CalendarEvent = ( { day, position } ) => {
 
                 // update height and marginTop
                 marginTop -= (height-originalHeight);
-                resizeableElement.style.marginTop = `${marginTop}px`;
+                resizeableElement.style.marginTop = `${marginTop+19}px`;
 
                 resizeableElement.style.height = `${height}px`;
             }
@@ -163,23 +165,21 @@ const CalendarEvent = ( { day, position } ) => {
 
         // GRAB EVENT
         const onMouseMoveMiddleResize = (event) => {
-            let change = parseInt(resizeableElement.style.marginTop);
-
             if(event.clientY % sensitivity === 0){
                 let dy = (event.clientY) - y;
-                change = change+dy*25;
+                marginTop = marginTop+dy*25;
 
-                if(change < maxHeight){
-                    change = maxHeight;
+                if(marginTop < maxHeight){
+                    marginTop = maxHeight;
                 }
-                else if(change > minHeight){
-                    change = minHeight;
+                else if(marginTop > minHeight){
+                    marginTop = minHeight;
                 }
-                resizeableElement.style.marginTop = `${change}px`;
+                resizeableElement.style.marginTop = `${marginTop+19}px`;
 
             }
             y = event.clientY;
-            console.log("change", change);
+            console.log("change", marginTop);
         };
 
         const onMouseUpMiddleResize = (event) => {
@@ -212,7 +212,7 @@ const CalendarEvent = ( { day, position } ) => {
     }, []);
 
     return (
-        <div className="monday eventCard" ref={refBox} style={{marginTop:position}}>
+        <div className={day + " eventCard"} ref={refBox} style={{marginTop:position}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
                 <div class="labels">
@@ -279,6 +279,9 @@ const Calendar = () => {
 
                 <div className="day">
                     <div className="dayLabel">Tuesday</div>
+                    <CalendarEvent day="tuesday" position="169px"/>
+                    <CalendarEvent day="tuesday" position="19px"/>
+                    <CalendarEvent day="tuesday" position="69px"/>
                     <div className="hour"></div>
                     <div className="hour"></div>
                     <div className="hour"></div>
