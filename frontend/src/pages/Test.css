@@ -259,12 +259,25 @@ button.bookRoom:hover{
   cursor: row-resize;
   height: 4%;
   width: 100%;
+  z-index: 1001;
 }
 
 .resizeBottom{
   position: absolute;
   cursor: row-resize;
-  height: 2%;
+  height: 4%;
   bottom: 0;
+  z-index: 1001;
   width: 100%;
+}
+
+.resizeMiddle{
+  cursor: grab;
+  position: absolute;
+  z-index: 1000;
+  height: 100%;
+  margin-top: 2%;
+  maring-bottom: 2%;
+  width: 100%;
+  top: 50%;
 }

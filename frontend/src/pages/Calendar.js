@@ -9,6 +9,7 @@ const CalendarEvent = ( { day, position } ) => {
     const refBox = useRef(null);
     const refTop = useRef(null);
     const refBottom = useRef(null);
+    const refMiddle = useRef(null);
 
     // convert from px to int for height calculations
     const convertMargin = (num) => {
@@ -31,6 +32,8 @@ const CalendarEvent = ( { day, position } ) => {
         const getMaxMinHeights = () => {
             // also need to check maxheight and consider other divs as well so they don't collide
             const events = document.getElementsByClassName(day);
+            marginTop = convertMargin(parseInt(styles.marginTop));
+            console.log("marginTop", marginTop);
             maxHeight = height + marginTop;
             minHeight = convertMargin(650 - (marginTop)) //TODO change 619 to maxSize of day as scaling could change
 
@@ -40,7 +43,6 @@ const CalendarEvent = ( { day, position } ) => {
                 if(events[i] !== resizeableElement){
                     const eventStyle = getComputedStyle(events[i]);
                     const eventTop = convertMargin(parseInt(eventStyle.marginTop));
-                    console.log("eventTop", eventTop);
 
                     if(eventTop < marginTop) maxHeight = (marginTop - (eventTop+parseInt(eventStyle.height)))+height;
                     if(eventTop > marginTop) minHeight = eventTop-marginTop;
@@ -50,6 +52,32 @@ const CalendarEvent = ( { day, position } ) => {
             console.log("maxHeight", maxHeight);
             console.log("minheight",minHeight);
         };
+
+        // get the max and min div margins for draggable events
+        // check other divs for collisions
+        const getDragMaxMin = () => {
+            const marginTopPx = parseInt(styles.marginTop);
+
+            maxHeight = 19; // 19px is the max margin
+            minHeight = 650; // 650px is the min margin
+
+            const events = document.getElementsByClassName(day);
+
+            for(let i = 0; i < events.length; i++){
+                if(events[i] !== resizeableElement){
+                    const eventStyle = getComputedStyle(events[i]);
+                    const eventHeight = parseInt(eventStyle.height); // height + 19 offset for day label
+                    const eventTopPx = parseInt(eventStyle.marginTop);
+
+                    if(eventTopPx < marginTopPx) maxHeight = (eventTopPx+eventHeight);
+                    if(eventTopPx > marginTopPx) minHeight = eventTopPx-height;
+                    console.log("eventToppx", eventTopPx);
+                }
+            }
+
+            console.log("maxGrab",maxHeight);
+            console.log("minGrab",minHeight);
+        }
 
         let y = 0;
 
@@ -81,9 +109,6 @@ const CalendarEvent = ( { day, position } ) => {
         };
 
         const onMouseUpTopResize = (event) => {
-            console.log("new min height", minHeight);
-            dyHeight = 0;
-            console.log("marginTop",marginTop);
             document.removeEventListener("mousemove", onMouseMoveTopResize);
             document.removeEventListener("mouseup", onMouseUpTopResize);
         };
@@ -121,8 +146,6 @@ const CalendarEvent = ( { day, position } ) => {
         };
 
         const onMouseUpBottomResize = (event) => {
-            maxHeight += dyHeight;
-            dyHeight = 0;
             console.log("new maxHeight", maxHeight);
             document.removeEventListener("mousemove", onMouseMoveBottomResize)
             document.removeEventListener("mouseup", onMouseUpBottomResize);
@@ -136,22 +159,62 @@ const CalendarEvent = ( { day, position } ) => {
             resizeableElement.style.bottom = null;
             document.addEventListener("mousemove", onMouseMoveBottomResize);
             document.addEventListener("mouseup", onMouseUpBottomResize);
-        }
+        };
+
+        // GRAB EVENT
+        const onMouseMoveMiddleResize = (event) => {
+            let change = parseInt(resizeableElement.style.marginTop);
+
+            if(event.clientY % sensitivity === 0){
+                let dy = (event.clientY) - y;
+                change = change+dy*25;
+
+                if(change < maxHeight){
+                    change = maxHeight;
+                }
+                else if(change > minHeight){
+                    change = minHeight;
+                }
+                resizeableElement.style.marginTop = `${change}px`;
+
+            }
+            y = event.clientY;
+            console.log("change", change);
+        };
+
+        const onMouseUpMiddleResize = (event) => {
+            document.removeEventListener("mousemove", onMouseMoveMiddleResize);
+            document.removeEventListener("mouseup", onMouseUpMiddleResize);
+        };
+
+        const onMouseDownMiddleResize = (event) => {
+            getDragMaxMin();
+            y = event.clientY;
+            const styles = window.getComputedStyle(resizeableElement);
+            resizeableElement.style.top = null;
+            resizeableElement.style.bottom = null;
+            document.addEventListener("mousemove", onMouseMoveMiddleResize);
+            document.addEventListener("mouseup", onMouseUpMiddleResize)
+        };
 
         const resizerTop = refTop.current;
         resizerTop.addEventListener("mousedown", onMouseDownTopResize);
         const resizerBottom = refBottom.current;
         resizerBottom.addEventListener("mousedown", onMouseDownBottomResize);
+        const resizerMiddle = refMiddle.current;
+        resizerMiddle.addEventListener("mousedown", onMouseDownMiddleResize);
 
         return () => {
             resizerTop.removeEventListener("mousedown", onMouseDownTopResize);
             resizerBottom.removeEventListener("mousedown", onMouseDownBottomResize);
+            resizerMiddle.removeEventListener("mousedown", onMouseDownMiddleResize);
         }
     }, []);
 
     return (
         <div className="monday eventCard" ref={refBox} style={{marginTop:position}}>
             <div className="resizeTop" ref={refTop}></div>
+            <div className="resizeMiddle" ref={refMiddle}></div>
                 <div class="labels">
                     Room 353-A
                 </div>
