@@ -191,8 +191,8 @@ const CalendarEvent = ( { day, position } ) => {
             getDragMaxMin();
             y = event.clientY;
             const styles = window.getComputedStyle(resizeableElement);
-            resizeableElement.style.top = null;
-            resizeableElement.style.bottom = null;
+            // resizeableElement.style.top = null;
+            // resizeableElement.style.bottom = null;
             document.addEventListener("mousemove", onMouseMoveMiddleResize);
             document.addEventListener("mouseup", onMouseUpMiddleResize)
         };
@@ -202,19 +202,18 @@ const CalendarEvent = ( { day, position } ) => {
         const resizerBottom = refBottom.current;
         resizerBottom.addEventListener("mousedown", onMouseDownBottomResize);
         const resizerMiddle = refMiddle.current;
-        resizerMiddle.addEventListener("mousedown", onMouseDownMiddleResize);
+        //resizerMiddle.addEventListener("mousedown", onMouseDownMiddleResize);
 
         return () => {
             resizerTop.removeEventListener("mousedown", onMouseDownTopResize);
             resizerBottom.removeEventListener("mousedown", onMouseDownBottomResize);
-            resizerMiddle.removeEventListener("mousedown", onMouseDownMiddleResize);
+            //resizerMiddle.removeEventListener("mousedown", onMouseDownMiddleResize);
         }
     }, []);
 
     return (
         <div className="monday eventCard" ref={refBox} style={{marginTop:position}}>
             <div className="resizeTop" ref={refTop}></div>
-            <div className="resizeMiddle" ref={refMiddle}></div>
                 <div class="labels">
                     Room 353-A
                 </div>

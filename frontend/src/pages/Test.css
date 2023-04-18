@@ -225,7 +225,7 @@ button.bookRoom:hover{
     position: absolute;
     z-index: 2000;
     margin-top: 119px;
-    height: 5%;
+    height: 10%;
     width: 100%;
     box-sizing: border-box;
     border-left: 6px solid lightgreen;
@@ -280,4 +280,5 @@ button.bookRoom:hover{
   maring-bottom: 2%;
   width: 100%;
   top: 50%;
+  background-color: black;
 }
