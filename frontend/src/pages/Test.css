@@ -225,14 +225,14 @@ button.bookRoom:hover{
     position: absolute;
     z-index: 2000;
     margin-top: 119px;
-    height: 10%;
+    height: 5%;
     width: 100%;
     box-sizing: border-box;
     border-left: 6px solid lightgreen;
-    border-radius: 7px;
-    #border-top-right-radius: 15px;
+    //border-radius: 7px;
+    border-top-right-radius: 15px;
     white-space: nowrap;
-    box-shadow: 2px 2px 0.5px 0px rgba(0, 0, 0, 1.0), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3);
+    //box-shadow: 2px 2px 0.5px 0px rgba(0, 0, 0, 1.0), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3);
     transition: ease-out 0.2s;
     padding: 2%;
     overflow-y: scroll;
@@ -296,6 +296,4 @@ button.bookRoom:hover{
   maring-bottom: 2%;
   width: 100%;
   top: 50%;
-  background-color: black;
 }
-
