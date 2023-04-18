@@ -230,13 +230,28 @@ button.bookRoom:hover{
     box-sizing: border-box;
     border-left: 6px solid lightgreen;
     border-radius: 7px;
-    background-color: #FFFDD0;
+    #border-top-right-radius: 15px;
     white-space: nowrap;
     box-shadow: 2px 2px 0.5px 0px rgba(0, 0, 0, 1.0), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3);
     transition: ease-out 0.2s;
     padding: 2%;
     overflow-y: scroll;
     overflow-x: hidden;
+
+    --color-background-0: #FFFDD0;
+    --color-border-0: #90EE90;
+
+    --color-background-1: #F7C59F;
+    --color-border-1: #FF6B35;
+
+    --color-background-2: #1A659E;
+    --color-border-2: #004E89;
+
+    --color-background-3: #EFEFD0;
+    --color-border-3: #456972;
+
+    --color-background-4: #D667A5;
+    --color-border-4: #6D5B79;
 }
 
 .labels{
@@ -282,3 +297,4 @@ button.bookRoom:hover{
   width: 100%;
   top: 50%;
 }
+

@@ -1,9 +1,9 @@
 import React from 'react';
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Test.css';
 import '../assets/styles/main.css';
 
-const CalendarEvent = ( { day, position } ) => {
+const CalendarEvent = ( { day, position, colors } ) => {
     const sensitivity = 15;
 
     const refBox = useRef(null);
@@ -20,21 +20,23 @@ const CalendarEvent = ( { day, position } ) => {
 
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
-        let height = parseInt(styles.height, 10);
+        let height = parseInt(styles.height);
         let dyHeight = 0; // keep track of change in height for this mousedown event
 
         let marginTop = convertMargin(parseInt(styles.marginTop));
 
         // maximum and minimum height div can have
-        let maxHeight = height + marginTop;
-        let minHeight = convertMargin(650 - (marginTop)) //TODO change 619 to maxSize of day as scaling could change
+        let maxHeight = 0;
+        let minHeight = convertMargin(650 - (marginTop)); //TODO change 619 to maxSize of day as scaling could change
 
         const getMaxMinHeights = () => {
             // also need to check maxheight and consider other divs as well so they don't collide
             const events = document.getElementsByClassName(day);
             marginTop = convertMargin(parseInt(styles.marginTop));
+            console.log(events);
             console.log("marginTop", marginTop);
-            maxHeight = height + marginTop;
+
+            maxHeight = 0;
             minHeight = convertMargin(650 - (marginTop)) //TODO change 650 to maxSize of day as scaling could change
 
             // loop over elements from this day and if we find a height less than max then
@@ -46,7 +48,8 @@ const CalendarEvent = ( { day, position } ) => {
                     console.log("eventTop", eventTop);
 
                     if(eventTop < marginTop) maxHeight = (marginTop - (eventTop+parseInt(eventStyle.height)))+height;
-                    if(eventTop > marginTop) minHeight = eventTop-marginTop;
+                    if(eventTop <= minHeight && eventTop > marginTop) minHeight = eventTop-marginTop;
+                    console.log("maxHeight = inloop", maxHeight);
                 }
             }
 
@@ -57,13 +60,14 @@ const CalendarEvent = ( { day, position } ) => {
         // get the max and min div margins for draggable events
         // check other divs for collisions
         const getDragMaxMin = () => {
-            const marginTop = parseInt(styles.marginTop);
+            //const marginTop = parseInt(styles.marginTop);
             console.log("marginTop getDragMaxmin",marginTop)
 
             maxHeight = 0; // 0 is the max margin
-            minHeight = 650 - height; // 619 is the min margin
+            minHeight = 650 - height; // 650 is the min margin
 
             const events = document.getElementsByClassName(day);
+            console.log(events);
 
             for(let i = 0; i < events.length; i++){
                 if(events[i] !== resizeableElement){
@@ -71,9 +75,11 @@ const CalendarEvent = ( { day, position } ) => {
                     const eventHeight = parseInt(eventStyle.height); // height + 19 offset for day label
                     const eventTop = convertMargin(parseInt(eventStyle.marginTop));
 
-                    if(eventTop < marginTop) maxHeight = (eventTop+eventHeight);
-                    if(eventTop > marginTop) minHeight = eventTop-height;
+                    if(eventTop >= maxHeight && eventTop < marginTop) maxHeight = (eventTop+eventHeight);
+                    if((eventTop-height) <= minHeight && eventTop > marginTop) minHeight = eventTop-height;
                     console.log("eventToppx", eventTop);
+                    console.log("loop_minGrab",minHeight);
+
                 }
             }
 
@@ -94,11 +100,8 @@ const CalendarEvent = ( { day, position } ) => {
                 if(height > maxHeight){
                     height = maxHeight;
                 }
-                else if(height < 50){
+                if(height < 50){
                     height = 50;
-                }
-                else{
-                    dyHeight += dy*25;
                 }
 
                 // update height and marginTop
@@ -134,11 +137,8 @@ const CalendarEvent = ( { day, position } ) => {
                 if(height > minHeight){
                     height = minHeight;
                 }
-                else if(height < 50){
+                if(height < 50){
                     height = 50;
-                }
-                else{
-                    dyHeight += dy*25;
                 }
 
                 resizeableElement.style.height = `${height}px`;
@@ -212,19 +212,19 @@ const CalendarEvent = ( { day, position } ) => {
     }, []);
 
     return (
-        <div className={day + " eventCard"} ref={refBox} style={{marginTop:position}}>
+        <div className={day + " eventCard"} ref={refBox} style={{marginTop:position, backgroundColor: colors.background, borderColor: colors.border}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
-                <div class="labels">
+                <div className="labels">
                     Room 353-A
                 </div>
-                <div class="location">
+                <div className="location">
                     Folsom, 3rd Floor
                 </div>
-                <div class="reserveName">
+                <div className="reserveName">
                     Henry, Brian & Zwaka, Linus
                 </div>
-                <div class="time">
+                <div className="time">
                     2:00-4:00 P.M.
                 </div>
             <div className="resizeBottom" ref={refBottom}></div>
@@ -235,6 +235,80 @@ const CalendarEvent = ( { day, position } ) => {
 
 const Calendar = () => {
 
+    const events = [
+        [
+        {day: "monday", position: "169px"},
+        {day: "monday", position: "219px"},
+        {day: "monday", position: "269px"},
+        {day: "monday", position: "19px"},
+        {day: "monday", position: "119px"}
+        ],
+    ];
+
+    const getColor = (index,eventsIndex) => {
+        const color = index % eventsIndex;
+        return {
+            background: "var(--color-background-" + color + ")",
+            border: "var(--color-border-" + color + ")",
+        };
+    }
+
+    const parseEvents = (events) => {
+        let newCalendarEvents = [];
+
+        for(let i = 0; i < events.length; i++){
+            for(let j = 0; j < events[i].length;j++){
+                const colors = getColor(j,events[i].length);
+                console.log(colors);
+                newCalendarEvents.push((<CalendarEvent 
+                    day={events[i][j].day} 
+                    position={events[i][j].position} 
+                    key={newCalendarEvents.length}
+                    colors={colors}
+                    />));
+            }
+        }
+
+        return newCalendarEvents;
+    }
+
+    const [calendarEvents, setCalendarEvents] = useState(parseEvents(events));
+
+
+
+    // useEffect(() => {
+    //     // add loaded events in calendar
+    //     for(let i = 0; i < events.length; i++){
+    //         console.log(events[i],events.length,events[i].length);
+    //         for(let j = 0; j < events[i].length;j++){
+    //             console.log(j);
+    //             setCalendarEvents(calendarEvents.concat(<CalendarEvent 
+    //                 day={events[i][j].day} 
+    //                 position={events[i][j].position} 
+    //                 key={calendarEvents.length}
+    //                 styles={{
+    //                     backgroundColor: getColor(j).background,
+    //                     borderColor: getColor(j).border,
+    //                 }}
+    //                 />));
+    //         }
+    //     }
+    // });
+
+    // set their colors
+    const setColors = () => {
+        for(let i = 0; i < calendarEvents.length;i++){
+            calendarEvents[i].style.backgroundColor = getColor(i).background;
+            calendarEvents[i].style.borderColor = getColor(i).border;
+        }
+    }
+
+
+
+    const addCalendarEvent = (day, position) => {
+        setCalendarEvents(calendarEvents.concat(<CalendarEvent day={day} position={position} key={calendarEvents.length}/>));
+        setColors();
+    };
 
     return (
         <>
@@ -258,11 +332,10 @@ const Calendar = () => {
                 </div>
 
                 <div className="day">
+                    {calendarEvents}
                     <div className="dayLabel">Monday</div>
-                    <CalendarEvent day="monday" position="169px"/>
-                    <CalendarEvent day="monday" position="19px"/>
                     <div className="hour"></div>
-                    <div className="hour"></div>
+                    <div className="hour" onClick={() => addCalendarEvent("monday", "69px")}></div>
                     <div className="hour"></div>
                     <div className="hour"></div>
                     <div className="hour"></div>
@@ -279,9 +352,6 @@ const Calendar = () => {
 
                 <div className="day">
                     <div className="dayLabel">Tuesday</div>
-                    <CalendarEvent day="tuesday" position="169px"/>
-                    <CalendarEvent day="tuesday" position="19px"/>
-                    <CalendarEvent day="tuesday" position="69px"/>
                     <div className="hour"></div>
                     <div className="hour"></div>
                     <div className="hour"></div>
