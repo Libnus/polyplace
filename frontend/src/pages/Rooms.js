@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/styles/main.css';
 import Box from '@mui/material/Box';
-import ListFloor from '../components/Floors/ListFloor';
-import RoomEdit from '../components/Floors/RoomEdit';
+import ListFloor from '../components/Buildings/Floors/ListFloor';
+import RoomEdit from '../components/Buildings/Floors/RoomEdit';
 
 const Rooms = () => {
 

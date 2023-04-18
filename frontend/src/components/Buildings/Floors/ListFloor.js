@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../../assets/styles/main.css';
+import '../../../assets/styles/main.css';
+
 import { DataGrid, GridColDef, GridRenderCellParams, GridEventListener } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import { darken, lighten, styled} from '@mui/material/styles'

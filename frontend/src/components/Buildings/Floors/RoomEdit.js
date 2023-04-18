@@ -1,8 +1,8 @@
 import React from 'react';
 import { useState } from 'react';
-import '../../assets/styles/main.css';
-import AddReservation from'../Reservations/AddReservation'
-import EditReservation from '../Reservations/EditReservation'
+import '../../../assets/styles/main.css';
+import AddReservation from'../../Reservations/AddReservation'
+import EditReservation from '../../Reservations/EditReservation'
 
 // handle error messages for roomEdit
 const ErrorAdd = ({notSelected, roomTaken}) => {

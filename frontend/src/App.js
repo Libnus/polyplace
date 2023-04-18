@@ -6,6 +6,7 @@ import Rooms from './pages/Rooms';
 import History from './pages/History';
 import Test from './pages/Test';
 import Calendar from './pages/Calendar';
+import Buildings from './pages/Buildings';
 import './assets/styles/main.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
                         <Route path='/history' element={<History />} />
                         <Route path='/test' element={<Test />} />
                         <Route path='/calendar' element={<Calendar />} />
+                        <Route path='/buildings' element={<Buildings buildings={["Amos Eaten"]} />} />
                     </Routes>
                 </BrowserRouter>
             </div>
