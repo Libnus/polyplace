@@ -67,11 +67,7 @@ html,body{
 .sidenav a:hover{
     color:white;
 }
-.divider{
-    height: 0px;
-    transition: height ease 30.0s;
-    overflow: hidden;
-}
+
 .main{
     margin-top: 2%;
     width: 80%;
