@@ -23,7 +23,7 @@ function App() {
                         <Route path='/history' element={<History />} />
                         <Route path='/test' element={<Test />} />
                         <Route path='/calendar' element={<Calendar />} />
-                        <Route path='/buildings' element={<Buildings buildings={["Amos Eaten"]} />} />
+                        <Route path='/buildings' element={<Buildings buildings={["Amos Eaten","Folsom Library", "Colonie","DCC"]} />} />
                     </Routes>
                 </BrowserRouter>
             </div>
