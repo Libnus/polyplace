@@ -37,8 +37,7 @@ const Rooms = () => {
     let getFloors = async () => {
         const response = await fetch('http://127.0.0.1:8000/floors_api/floors/')
         const floors = await response.json()
-
-        console.log('DATA:', floors)
+        
         setFloors(floors)
 
     }

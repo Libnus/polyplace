@@ -92,7 +92,7 @@ button.bookRoom:hover{
     overflow: scroll;
 }
 
-.room.closed{
+.room.reserved{
 	border-top: 6px solid red;
 	background-color: #ffc7a2;
 }

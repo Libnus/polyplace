@@ -8,7 +8,7 @@ class Reservation(models.Model):
     last_name = models.CharField(max_length=20)
     rin = models.CharField(max_length=9,default="")
     email = models.CharField(max_length=20,default="----@rpi.edu")
-    start_time = models.DateTimeField(auto_now_add=True,blank=True)
+    start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
     def time_left(self):
