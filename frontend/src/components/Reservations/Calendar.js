@@ -255,6 +255,48 @@ const getPosition = (start_time,end_time) => {
     return [marginTop, height];
 }
 
+const Day = ( {day, events, index} ) => {
+    function capitalize(s){
+        return s[0].toUpperCase + s.slice(1);
+    }
+
+    const getColor = (index,eventsIndex) => {
+        const color = index % eventsIndex;
+        return {
+            background: "var(--color-background-" + color + ")",
+            border: "var(--color-border-" + color + ")",
+        };
+    }
+
+    return(
+        <div className="day">
+            {events.map((event,index) => (
+                <CalendarEvent
+                    day={day}
+                    time={[event.start_time,event.end_time]}
+                    position={getPosition(event.start_time, event.end_time)}
+                    key={index}
+                    colors={getColor(index,5)} 
+                />
+            ))}
+            <div className="dayLabel">{capitalize(day)}</div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+            <div className="hour"></div>
+        </div>
+    );
+}
+
 const Calendar = ( {room} ) => {
 
     let [calendarEvents, setCalendarEvents] = useState([]);
@@ -268,33 +310,8 @@ const Calendar = ( {room} ) => {
     });
 
     useEffect(() => {
-
         getReservations();
     },[]);
-
-    const getColor = (index,eventsIndex) => {
-        const color = index % eventsIndex;
-        return {
-            background: "var(--color-background-" + color + ")",
-            border: "var(--color-border-" + color + ")",
-        };
-    }
-
-    const newCalendarEvent = (day,event,index) => {
-                let newCalendarEvents = [];
-
-                const colors = getColor(index,5); 
-
-                console.log("data_i", event);
-
-
-                return <CalendarEvent
-                            day={day}
-                            position={getPosition(event.start_time, event.end_time)}
-                            key={index}
-                            colors={colors}
-                            />;
-    };
 
     const parseReservationsJson = (data) => {
         const options = {weekday: 'long'};
@@ -367,20 +384,11 @@ const Calendar = ( {room} ) => {
     //     }
     // });
 
-    // set their colors
-    const setColors = () => {
-        for(let i = 0; i < calendarEvents.length;i++){
-            calendarEvents[i].style.backgroundColor = getColor(i).background;
-            calendarEvents[i].style.borderColor = getColor(i).border;
-        }
-    }
 
-
-
-    const addCalendarEvent = (day, position) => {
-        setCalendarEvents(calendarEvents.concat(<CalendarEvent day={day} position={position} key={calendarEvents.length}/>));
-        setColors();
-    };
+    // const addCalendarEvent = (day, position) => {
+    //     setCalendarEvents(calendarEvents.concat(<CalendarEvent day={day} position={position} key={calendarEvents.length}/>));
+    //     setColors();
+    // };
 
 // {events.friday.map((event,index) => (
 //                         <CalendarEvent
@@ -412,113 +420,9 @@ const Calendar = ( {room} ) => {
                     <div className="calendarTime">8 PM</div>
                 </div>
 
-                <div className="day">
-                    {events.monday.map((event,index) => (
-                        <CalendarEvent
-                            day={event.day}
-                            time={[event.start_time,event.end_time]}
-                            position={getPosition(event.start_time, event.end_time)}
-                            key={index}
-                            colors={getColor(index,5)} 
-                        />
-                    ))}
-                    <div className="dayLabel">Monday</div>
-                    <div className="hour"></div>
-                    <div className="hour" onClick={() => addCalendarEvent("monday", "69px")}></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                </div>
-
-
-                <div className="day">
-                    <div className="dayLabel">Tuesday</div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                </div>
-
-
-                <div className="day">
-                    <div className="dayLabel">Wednesday</div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                </div>
-
-                <div className="day">
-                    <div className="dayLabel">Thursday</div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                    <div className="hour"></div>
-                </div>
-
-                <div className="day">
-                    {events.friday.map((event,index) => (
-                        <CalendarEvent
-                            day={event.day}
-                            time={[event.start_time,event.end_time]}
-                            position={getPosition(event.start_time, event.end_time)}
-                            key={index}
-                            colors={getColor(index,5)} 
-                        />
-                    ))}
-                    <div className="dayLabel">Friday</div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-                    <div className="hour-last"></div>
-
-
-                </div>
-
+                {Object.entries(events).map((day, dayIndex) => (
+                    <Day day={day} events={events[day]} key={dayIndex} />
+                ))}
             </div>
         </div>
         <div className="main"/>
