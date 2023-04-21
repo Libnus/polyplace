@@ -5,6 +5,7 @@ import './Buildings.css';
 
 const Building = ( {building} ) => {
 
+const BuildingContainer = ( {building} ) => {
     let navigate = useNavigate();
     const handleRouteClick = () => {
         console.log("clicked");
@@ -13,6 +14,8 @@ const Building = ( {building} ) => {
 
     return (
         <div className="buildingContainer" onClick={() => handleRouteClick()}>
+            <div className="buildingImage" ></div>
+            <div className="buildingImage" style={{backgroundImage: `url(/${building.replace(/\s/g,'')}.png)`}}></div>
             <div className="buildingImage" ></div>
             <div className="buildingLabel">
                 <div className="label">{building}</div>

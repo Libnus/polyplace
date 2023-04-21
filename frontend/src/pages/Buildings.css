@@ -28,7 +28,7 @@
 
 .buildingImage {
     height: 100%;
-    background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/BiotechCenterRPI.jpg/2880px-BiotechCenterRPI.jpg);
+    #background-image: url('../assets/imgs/buildings/AmosEaton.png');
     background-attachment: center;
     background-size: 100% 90%;
     transition: ease-in 0.3s;
