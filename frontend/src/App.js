@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Main/Navbar';
 import Footer from './components/Main/Footer';
 import { Routes, BrowserRouter, Route, Link } from 'react-router-dom';
@@ -11,9 +12,18 @@ import Building from './pages/Building';
 import './assets/styles/main.css';
 
 function App() {
-    const buildings = ["Amos Eaton","Folsom Library", "Colonie","DCC"];
 
+    let [buildings,setBuildings] = useState([]);
 
+    useEffect(() => {
+        getBuildings();
+    },[])
+
+    const getBuildings = async () => {
+        const response = await fetch('http://127.0.0.1:8000/floors_api/buildings/');
+        const data = await response.json();
+        setBuildings(data);
+    };
 
     return (
         <div className="page-container">
@@ -22,7 +32,7 @@ function App() {
             </div>
             <div className="content-container">
                 <BrowserRouter>
-                    {buildings.map(building => (<Link to={'/buildings/' + building.replace(/\s/g, '')} />))}
+                    {buildings.map(building => (<Link to={'/buildings/' + building.id} />))}
                     <Navbar />
                     <Routes>
                         <Route path='/rooms' element={<Rooms />} />

@@ -5,18 +5,18 @@ import Test from './Test';
 import '../assets/styles/main.css';
 import './Buildings.css';
 
-const BuildingContainer = ( {building} ) => {
+const BuildingContainer = ( {buildingName, buildingId} ) => {
     let navigate = useNavigate();
     const handleRouteClick = () => {
         console.log("clicked");
-        navigate(`/buildings/${building.replace(/\s/g, '')}`);
+        navigate(`/buildings/${buildingId}`);
     }
 
     return (
         <div className="buildingContainer" onClick={() => handleRouteClick()}>
-            <div className="buildingImage" style={{backgroundImage: `url(/${building.replace(/\s/g,'')}.png)`}}></div>
+            <div className="buildingImage" style={{backgroundImage: `url(/${buildingName.replace(/\s/g,'')}.png)`}}></div>
             <div className="buildingLabel">
-                <div className="label">{building}</div>
+                <div className="label">{buildingName}</div>
             </div>
         </div>
     );
@@ -31,7 +31,7 @@ const Buildings = ( {buildings} ) => {
         <div className="main">
             <div className="buildingsContainer">
                 {buildings.map((building,index) => (
-                    <BuildingContainer key={index} building={building} />
+                    <BuildingContainer key={index} buildingName={building.building_name} buildingId={building.id} />
                 ))}
             </div>
         </div>

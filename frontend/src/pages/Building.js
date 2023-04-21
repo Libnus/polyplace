@@ -2,9 +2,13 @@ import React from 'react';
 import { useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 
-const Room = (index, room, floor) => {
+import Calendar from '../components/Reservations/Calendar'
+
+const Room = ({index, room, floor}) => {
+	let [isCalendarOpen, setCalendarOpen] = useState(false);
+
 	const handleClick = () => {
-		console.log("cc");
+		setCalendarOpen(true);
 	};
 
 	console.log(room);
@@ -14,7 +18,8 @@ const Room = (index, room, floor) => {
 	let statusMessage = "";
 	if(room.room_status.status === "free"){
 		statusClass = "room";
-		statusMessage = "free until " + room.room_status.time;
+		if(room.room_status.time.length !== 0) statusMessage = "free until " + room.room_status.time;
+		else statusMessage = "free room"
 	}
 	else if(room.room_status.status === "not_bookable"){
 		statusClass = "room warning";
@@ -34,6 +39,8 @@ const Room = (index, room, floor) => {
 	}
 	
 	return (
+		<>
+		{isCalendarOpen && <Calendar room={room} />}
 		<div className={statusClass} onClick={handleClick}>
 			<div className="labels">
 				Room {room.room_num}
@@ -48,10 +55,11 @@ const Room = (index, room, floor) => {
 				{statusMessage}
 			</div>
 		</div>
+		</>
 	);
 }
 
-const Floor = (index, floor) => {
+const Floor = ({index, floor}) => {
 
 	let [rooms, setRooms] = useState([]);
 
@@ -60,7 +68,7 @@ const Floor = (index, floor) => {
 	}, []);
 
 	let getRooms = async () => {
-        const response = await fetch(`http://127.0.0.1:8000/floors_api/rooms/${floor['id']}/`);
+        const response = await fetch(`http://127.0.0.1:8000/floors_api/rooms/${floor.id}/`);
         const data = await response.json();
         setRooms(data);
     }
@@ -70,7 +78,7 @@ const Floor = (index, floor) => {
 			<div className="floorTest">
 				<h1>{floor.floor_num} Floor</h1>
 			</div>
-			<div className="foormsContent">
+			<div className="roomsContent">
 				<div className="roomAvailable">
 					<button className="bookRoom">8/10</button>
 					<button className="myBook" style={{width: '15%'}}>My reservations</button>
@@ -90,12 +98,14 @@ const Building = () => {
 
 	const building = useParams().building;
 
+	console.log("building", building);
+
 	useEffect(() => {
         getFloors();
     },[]);
 
 	let getFloors = async () => {
-		const response = await fetch(`http://127.0.0.1:8000/floors_api/floors/${building.id}/`);
+		const response = await fetch(`http://127.0.0.1:8000/floors_api/floors/${building}/`);
         const floors = await response.json();
 
         console.log('DATA:', floors);
