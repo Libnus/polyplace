@@ -5,7 +5,7 @@ import '../../assets/styles/main.css';
 
 import Datetime from 'react-datetime';
 
-const CalendarEvent = ( { day, position, colors } ) => {
+const CalendarEvent = ( { day, time, position, colors } ) => {
     const sensitivity = 15;
 
     const refBox = useRef(null);
@@ -237,7 +237,7 @@ const CalendarEvent = ( { day, position, colors } ) => {
                     Henry, Brian & Zwaka, Linus
                 </div>
                 <div className="time">
-                    2:00-4:00 P.M.
+                    {time[0].toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}-{time[1].toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}
                 </div>
             <div className="resizeBottom" ref={refBottom}></div>
         </div>
@@ -264,60 +264,48 @@ const Calendar = ( {room} ) => {
         tuesday: [],
         wednesday: [],
         thursday: [],
-        friday: []
+        friday: [],
     });
 
     useEffect(() => {
+
         getReservations();
     },[]);
 
-    const newCalendarEvent = (day,event,index) => {
-        let newCalendarEvents = [];
-
-        // for(let i = 0; i < events.length; i++){
-        //     for(let j = 0; j < events[i].length;j++){
-        //         const colors = getColor(j,events[i].length);
-        //         console.log(colors);
-        //         newCalendarEvents.push((<CalendarEvent
-        //             day={events[i][j].day}
-        //             position={events[i][j].position}
-        //             key={newCalendarEvents.length}
-        //             colors={colors}
-        //             />));
-        //     }
-        // }
-
-        const colors = getColor(index,5); 
-
-        console.log("data_i", event);
-
-
-        return <CalendarEvent
-                    day={day}
-                    position={getPosition(event.start_time, event.end_time)}
-                    key={index}
-                    colors={colors}
-                    />;
-
-        // for(let day in events){
-        //     for(let index = 0; index < day.length; index++){
-        //         const colors = getColor(index,day.length);
-
-        //         newCalendarEvents.push((<CalendarEvent
-        //             day={day}
-        //             position={getPosition(day[index].start_time, day[index].end_time)}
-        //             key={newCalendarEvents.length}
-        //             colors={colors}
-        //             />));
-        //     }
-        // }
-
-        // setCalendarEvents(newCalendarEvents);
-        // //return newCalendarEvents;
+    const getColor = (index,eventsIndex) => {
+        const color = index % eventsIndex;
+        return {
+            background: "var(--color-background-" + color + ")",
+            border: "var(--color-border-" + color + ")",
+        };
     }
+
+    const newCalendarEvent = (day,event,index) => {
+                let newCalendarEvents = [];
+
+                const colors = getColor(index,5); 
+
+                console.log("data_i", event);
+
+
+                return <CalendarEvent
+                            day={day}
+                            position={getPosition(event.start_time, event.end_time)}
+                            key={index}
+                            colors={colors}
+                            />;
+    };
 
     const parseReservationsJson = (data) => {
         const options = {weekday: 'long'};
+
+        let newEvents = {
+            monday: [],
+            tuesday: [],
+            wednesday: [],
+            thursday: [],
+            friday: [],
+        };
 
         for(let i = 0; i < data.length; i++){
             data[i].start_time = new Date(data[i].start_time);
@@ -327,19 +315,27 @@ const Calendar = ( {room} ) => {
             const day = data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()
             
             data[i].day = day;
-            console.log(data[i])
 
-            setEvents(events[day].push(data[i]));
+            //newEvents[day].push(newCalendarEvent(day,data[i],i));
+            newEvents[day].push(data[i]);
+            console.log("newevents", newEvents);
         }
 
-        console.log("events",events.friday);
+        setEvents({...events, 
+            monday: newEvents.monday,
+            tuesday: newEvents.tuesday,
+            wednesday: newEvents.wednesday,
+            thursday: newEvents.thursday,
+            friday: newEvents.friday
+        })
+        console.log("events", events);
     }
 
     const getReservations = async () => {
         const response = await fetch(`http://127.0.0.1:8000/reservations_api/${room.id}/`);
         const data = await response.json();
         console.log("events data", data);
-        parseReservationsJson(data);
+        parseReservationsJson(data)
     };
 
     // const events = [
@@ -351,14 +347,6 @@ const Calendar = ( {room} ) => {
     //     {day: "monday", position: "119px"}
     //     ],
     // ];
-
-    const getColor = (index,eventsIndex) => {
-        const color = index % eventsIndex;
-        return {
-            background: "var(--color-background-" + color + ")",
-            border: "var(--color-border-" + color + ")",
-        };
-    }
 
     // useEffect(() => {
     //     // add loaded events in calendar
@@ -394,6 +382,15 @@ const Calendar = ( {room} ) => {
         setColors();
     };
 
+// {events.friday.map((event,index) => (
+//                         <CalendarEvent
+//                             day={event.day}
+//                             position={getPosition(event.start_time, event.end_time)}
+//                             key={index}
+//                             color={getColor(index,5)} 
+//                         />
+//                     ))}
+
     return (
         <>
         <div className="overlay"/>
@@ -416,12 +413,13 @@ const Calendar = ( {room} ) => {
                 </div>
 
                 <div className="day">
-                    {events.friday.map((event,index) => (
+                    {events.monday.map((event,index) => (
                         <CalendarEvent
                             day={event.day}
+                            time={[event.start_time,event.end_time]}
                             position={getPosition(event.start_time, event.end_time)}
                             key={index}
-                            color={getColor(index,5)} 
+                            colors={getColor(index,5)} 
                         />
                     ))}
                     <div className="dayLabel">Monday</div>
@@ -494,6 +492,15 @@ const Calendar = ( {room} ) => {
                 </div>
 
                 <div className="day">
+                    {events.friday.map((event,index) => (
+                        <CalendarEvent
+                            day={event.day}
+                            time={[event.start_time,event.end_time]}
+                            position={getPosition(event.start_time, event.end_time)}
+                            key={index}
+                            colors={getColor(index,5)} 
+                        />
+                    ))}
                     <div className="dayLabel">Friday</div>
                     <div className="hour-last"></div>
                     <div className="hour-last"></div>
