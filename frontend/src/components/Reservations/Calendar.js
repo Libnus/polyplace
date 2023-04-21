@@ -245,19 +245,19 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 }
 
-// takes a reservation time and returns the position (margin and height) for rendering
-const getPosition = (start_time,end_time) => {
-    const marginTop = 19 + (start_time.getHours()-8)*50;
-    const height = Math.round(((end_time-start_time)/3.6e+6)*50);
-
-    console.log(height);
-
-    return [marginTop, height];
-}
-
 const Day = ( {day, events, index} ) => {
-    function capitalize(s){
-        return s[0].toUpperCase + s.slice(1);
+    const capitalize = (s) => {
+        return s[0].toUpperCase() + s.slice(1);
+    }
+
+    // takes a reservation time and returns the position (margin and height) for rendering
+    const getPosition = (start_time,end_time) => {
+        const marginTop = 19 + (start_time.getHours()-8)*50;
+        const height = Math.round(((end_time-start_time)/3.6e+6)*50);
+
+        console.log(height);
+
+        return [marginTop, height];
     }
 
     const getColor = (index,eventsIndex) => {
@@ -399,6 +399,8 @@ const Calendar = ( {room} ) => {
 //                         />
 //                     ))}
 
+    console.log("object", Object.entries(events));
+
     return (
         <>
         <div className="overlay"/>
@@ -420,8 +422,8 @@ const Calendar = ( {room} ) => {
                     <div className="calendarTime">8 PM</div>
                 </div>
 
-                {Object.entries(events).map((day, dayIndex) => (
-                    <Day day={day} events={events[day]} key={dayIndex} />
+                {Object.entries(events).map(([dayKey,value]) => (
+                    <Day day={dayKey} events={value} key={dayKey} />
                 ))}
             </div>
         </div>
