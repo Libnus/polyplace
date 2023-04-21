@@ -5,16 +5,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.response import Response
-from floors.models import Room, Floor, Building
+from floors.models import Room, Floor
 from reservations.models import Reservation
-from .serializers import BuildingSerializer, FloorSerializer, RoomSerializer
-
-class BuildingViewSet(viewsets.ViewSet):
-    """
-    A viewset for Building model
-    """
-    def list(self, request):
-        return Response(BuildingSerializer(Building.objects.all(),many=True).data)
+from .serializers import FloorSerializer, RoomSerializer
 
 class FloorViewSet(viewsets.ViewSet):
     """
@@ -24,8 +17,8 @@ class FloorViewSet(viewsets.ViewSet):
         return Response(FloorSerializer(Floor.objects.all(),many=True).data)
 
     def retrieve(self,request,pk=None):
-        floor = Floor.objects.filter(building=pk)
-        return Response(FloorSerializer(floor,many=True).data)
+        floor = Floor.objects.get(id=pk)
+        return Response(FloorSerializer(floor,many=False).data)
 
 
 
