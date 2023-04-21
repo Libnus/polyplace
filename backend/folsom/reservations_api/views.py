@@ -13,10 +13,10 @@ class ReservationViewSet(viewsets.ViewSet):
     def list(self, request):
         return Response(ReservationSerializer(Reservation.objects.all(),many=True).data)
 
-    # get reservation associated with room
+    # get reservations associated with room
     def retrieve(self, request, pk=None):
-        reservation = Reservation.objects.filter(id=pk)
-        return Response(ReservationSerializer(reservation,many=True).data)
+        reservations = Room.objects.get(id=pk).reservations.all();
+        return Response(ReservationSerializer(reservations,many=True).data)
 
     # create method creates a reservation then adds the reservation to the room
     def create(self,request,*args,**kwargs):
