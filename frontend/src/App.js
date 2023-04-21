@@ -20,7 +20,6 @@ function App() {
                         <Route path='/history' element={<History />} />
                         <Route path='/test' element={<Test />} />
                         <Route path='/calendar' element={<Calendar />} />
-                        <Route path='/buildings' element={<Buildings buildings={["Amos Eaten","Folsom Library", "Colonie","DCC"]} />} />
                         <Route path='/buildings' element={<Buildings buildings={buildings}/>} />
                         <Route path='/buildings/:building' element={<Building/>} />
                     </Routes>
