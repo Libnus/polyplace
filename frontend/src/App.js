@@ -20,8 +20,12 @@ function App() {
                         <Route path='/history' element={<History />} />
                         <Route path='/test' element={<Test />} />
                         <Route path='/calendar' element={<Calendar />} />
+<<<<<<< HEAD
                         <Route path='/buildings' element={<Buildings buildings={buildings}/>} />
                         <Route path='/buildings/:building' element={<Building/>} />
+=======
+                        <Route path='/buildings' element={<Buildings buildings={["Amos Eaten","Folsom Library", "Colonie","DCC"]} />} />
+>>>>>>> 6a713d5 (buildings stylesheet)
                     </Routes>
                 </BrowserRouter>
             </div>
