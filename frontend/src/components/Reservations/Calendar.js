@@ -245,19 +245,55 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 }
 
-const Day = ( {day, events, index} ) => {
+const Hour = ({ hour, createEvent }) => {
+    const handleClick = () => {
+        console.log("creating event");
+        createEvent(hour);
+    };
+
+    return (
+        <div className="hour" onClick={() => handleClick()}></div>
+    );
+}
+
+const Day = ( {day, events, index, addCreatedEvent} ) => {
     const capitalize = (s) => {
         return s[0].toUpperCase() + s.slice(1);
     }
 
     // takes a reservation time and returns the position (margin and height) for rendering
-    const getPosition = (start_time,end_time) => {
-        const marginTop = 19 + (start_time.getHours()-8)*50;
-        const height = Math.round(((end_time-start_time)/3.6e+6)*50);
+    const getPosition = (startTime,endTime) => {
+        const marginTop = 19 + (startTime.getHours()-8)*50;
+        const height = Math.round(((endTime-startTime)/3.6e+6)*50);
 
         console.log(height);
 
         return [marginTop, height];
+    }
+
+    const handleCreate = (hour) => {
+        let startTime = new Date();
+        startTime.setHours(hour);
+        startTime.setMinutes(0);
+        startTime.setSeconds(0);
+    
+        let endTime = new Date();
+        endTime.setHours(hour+1);
+        endTime.setMinutes(0);
+        endTime.setSeconds(0);
+
+        const newEvent = {
+            day: day,
+            first_name: "Linus",
+            last_name: "Zwaka",
+            email: "zwakal@rpi.edu", // temp email
+            rin: "662017350",
+            start_time: startTime,
+            end_time: endTime,
+        }
+        
+        addCreatedEvent(day,newEvent);
+
     }
 
     const getColor = (index,eventsIndex) => {
@@ -280,19 +316,19 @@ const Day = ( {day, events, index} ) => {
                 />
             ))}
             <div className="dayLabel">{capitalize(day)}</div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
+            <Hour hour={8} createEvent={handleCreate} />
+            <Hour hour={9} createEvent={handleCreate}/>
+            <Hour hour={10} createEvent={handleCreate}/>
+            <Hour hour={11} createEvent={handleCreate}/>
+            <Hour hour={12} createEvent={handleCreate}/>
+            <Hour hour={13} createEvent={handleCreate}/>
+            <Hour hour={14} createEvent={handleCreate}/>
+            <Hour hour={15} createEvent={handleCreate}/>
+            <Hour hour={16} createEvent={handleCreate}/>
+            <Hour hour={17} createEvent={handleCreate}/>
+            <Hour hour={18} createEvent={handleCreate}/>
+            <Hour hour={19} createEvent={handleCreate}/>
+            <Hour hour={20} createEvent={handleCreate}/>
         </div>
     );
 }
@@ -301,6 +337,8 @@ const Calendar = ( {room} ) => {
 
     let [calendarEvents, setCalendarEvents] = useState([]);
 
+    let [eventCreated, setEventCreated] = useState(false);
+
     let [events,setEvents] = useState({
         monday: [],
         tuesday: [],
@@ -308,6 +346,18 @@ const Calendar = ( {room} ) => {
         thursday: [],
         friday: [],
     });
+
+    const addCreatedEvent = (day, newEvent) => {
+        if(!eventCreated){
+            let newEvents = events[day];
+            newEvents.push(newEvent);
+            setEvents({...events, [day]: newEvents});
+
+            console.log("newly created", events);
+
+            setEventCreated(true);
+        }
+    }
 
     useEffect(() => {
         getReservations();
@@ -355,51 +405,7 @@ const Calendar = ( {room} ) => {
         parseReservationsJson(data)
     };
 
-    // const events = [
-    //     [
-    //     {day: "monday", position: "169px"},
-    //     {day: "monday", position: "219px"},
-    //     {day: "monday", position: "269px"},
-    //     {day: "monday", position: "19px"},
-    //     {day: "monday", position: "119px"}
-    //     ],
-    // ];
-
-    // useEffect(() => {
-    //     // add loaded events in calendar
-    //     for(let i = 0; i < events.length; i++){
-    //         console.log(events[i],events.length,events[i].length);
-    //         for(let j = 0; j < events[i].length;j++){
-    //             console.log(j);
-    //             setCalendarEvents(calendarEvents.concat(<CalendarEvent
-    //                 day={events[i][j].day}
-    //                 position={events[i][j].position}
-    //                 key={calendarEvents.length}
-    //                 styles={{
-    //                     backgroundColor: getColor(j).background,
-    //                     borderColor: getColor(j).border,
-    //                 }}
-    //                 />));
-    //         }
-    //     }
-    // });
-
-
-    // const addCalendarEvent = (day, position) => {
-    //     setCalendarEvents(calendarEvents.concat(<CalendarEvent day={day} position={position} key={calendarEvents.length}/>));
-    //     setColors();
-    // };
-
-// {events.friday.map((event,index) => (
-//                         <CalendarEvent
-//                             day={event.day}
-//                             position={getPosition(event.start_time, event.end_time)}
-//                             key={index}
-//                             color={getColor(index,5)} 
-//                         />
-//                     ))}
-
-    console.log("object", Object.entries(events));
+    console.log("events render", events);
 
     return (
         <>
@@ -423,7 +429,7 @@ const Calendar = ( {room} ) => {
                 </div>
 
                 {Object.entries(events).map(([dayKey,value]) => (
-                    <Day day={dayKey} events={value} key={dayKey} />
+                    <Day day={dayKey} events={value} key={dayKey} addCreatedEvent={addCreatedEvent}/>
                 ))}
             </div>
         </div>
