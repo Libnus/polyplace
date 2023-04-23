@@ -15,7 +15,6 @@ def check_reservation_time(reservations, new_reservation_time):
 
 	print(new_reservation_time_start, new_reservation_time_end)
 
-
 	for reservation in reservations.all():
 		reservation_object = Reservation.objects.get(id=reservation.id)
 
