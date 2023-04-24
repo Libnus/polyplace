@@ -1,7 +1,9 @@
 echo "Welcome to PolyPlace!\n\n"
 echo "starting the install..."
 
-BASE_DIR=$(dirname $0)
+BASE_DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+cd $BASE_DIR
 
 # NPM =========================
 cd ../frontend
@@ -18,10 +20,14 @@ pip install django-filter  # Filtering support
 
 pip3 install django-cors-headers
 
+pip3 install drjango_cron
+
 # Django set up
 python3 manage.py makemigrations floor
 python3 manage.py makemigrations reservations
 python3 manage.py migrate
+
+pip3 install python-decouple
 
 # CREATE CRONS
 crontab -l > poly_crons
@@ -34,12 +40,13 @@ mkdir backend/history
 
 # CREATE LOGS
 # TODO : make logs in custom directory set by user
-mkdir $BASE_DIR/logs
-touch $BASE_DIR/logs/frontend.log
-touch $BASE_DIR/logs/backend.log
+mkdir logs/
+touch logs/frontend.log
+touch logs/backend.log
 
 # GENERATE SECRET KEY
-echo "SECRET_KEY=" > backend/folsom/.env
+touch backend/folsom/.env
+echo -n "SECRET_KEY=" > backend/folsom/.env
 python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' >> backend/folsom/.env
 
 echo "Install complete! Run run.sh to start server :)"

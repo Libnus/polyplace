@@ -28,7 +28,7 @@ function App() {
     return (
         <div className="page-container">
             <div className="header">
-                <h1 style={{left: "20%", color: "white"}}>Folsom Thing</h1>
+                <h1 style={{left: "20%", color: "white"}}>RPI</h1>
             </div>
             <div className="content-container">
                 <BrowserRouter>

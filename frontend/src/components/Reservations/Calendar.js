@@ -324,7 +324,6 @@ const Day = ( {day, events, index, addCreatedEvent} ) => {
             border: "var(--color-border-" + color + ")",
         };
     }
-
     return(
         <div className="day">
             {events.map((event,index) => (

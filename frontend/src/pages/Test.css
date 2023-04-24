@@ -186,6 +186,7 @@ button.bookRoom:hover{
 
 .calendarTime{
     height: 5%;
+    white-space: nowrap;
     text-align:right;
 }
 
