@@ -1,9 +1,25 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
+import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import './Test.css';
 import '../../assets/styles/main.css';
 
 import Datetime from 'react-datetime';
+
+// =========== HELPERS
+
+// find the start of the week given a week offset
+// example: if 0 is inputted, the date returned would be the start of this week. 1 inputted would give the start date of next week
+const getWeekStart = (weekOffset) => {
+    const weekStart = new Date();
+    const dateOffset = weekStart.getDate() - (weekStart.getDay()-1); // -1 because python starts the week on monday ;)
+
+    weekStart.setDate(dateOffset+(weekOffset*7));
+
+    return weekStart;
+}
+
+// ============================================
 
 const CalendarEvent = ( { day, time, position, colors } ) => {
     const sensitivity = 15;
@@ -187,7 +203,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 else if(marginTop > minHeight){
                     marginTop = minHeight;
                 }
-                resizeableElement.style.marginTop = `${marginTop+19}px`;
+                resizeableElement.style.marginTop = `${marginTop+20}px`;
 
             }
             y = event.clientY;
@@ -245,19 +261,60 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 }
 
-const Day = ( {day, events, index} ) => {
+const Hour = ({ hour, createEvent, last }) => {
+    const handleClick = () => {
+        console.log("creating event");
+        createEvent(hour);
+    };
+
+    return (
+        <div className={ last ? "hourLast" : "hour" } onClick={() => handleClick()}></div>
+    );
+}
+
+const Day = ( {day, events, index, addCreatedEvent} ) => {
     const capitalize = (s) => {
         return s[0].toUpperCase() + s.slice(1);
     }
 
-    // takes a reservation time and returns the position (margin and height) for rendering
-    const getPosition = (start_time,end_time) => {
-        const marginTop = 19 + (start_time.getHours()-8)*50;
-        const height = Math.round(((end_time-start_time)/3.6e+6)*50);
+    let last = false;
+    if(day === "friday"){
+        last = true;
+    }
 
-        console.log(height);
+    // takes a reservation time and returns the position (margin and height) for rendering
+    const getPosition = (startTime,endTime) => {
+        const marginTop = 20 + (startTime.getHours()-8)*50;
+        const height = Math.round(((endTime-startTime)/3.6e+6)*50);
+
+        console.log(marginTop);
 
         return [marginTop, height];
+    }
+
+    const handleCreate = (hour) => {
+        let startTime = new Date();
+        startTime.setHours(hour);
+        startTime.setMinutes(0);
+        startTime.setSeconds(0);
+    
+        let endTime = new Date();
+        endTime.setHours(hour+1);
+        endTime.setMinutes(0);
+        endTime.setSeconds(0);
+
+        const newEvent = {
+            day: day,
+            first_name: "Linus",
+            last_name: "Zwaka",
+            email: "zwakal@rpi.edu", // temp email
+            rin: "662017350",
+            start_time: startTime,
+            end_time: endTime,
+        }
+        
+        addCreatedEvent(day,newEvent);
+
     }
 
     const getColor = (index,eventsIndex) => {
@@ -279,27 +336,26 @@ const Day = ( {day, events, index} ) => {
                 />
             ))}
             <div className="dayLabel">{capitalize(day)}</div>
-            <Hour la>
-            <div className="hour" onClick></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className"hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
+            <Hour hour={8} last={last} createEvent={handleCreate} />
+            <Hour hour={9} last={last} createEvent={handleCreate}/>
+            <Hour hour={10} last={last} createEvent={handleCreate}/>
+            <Hour hour={11} last={last} createEvent={handleCreate}/>
+            <Hour hour={12} last={last} createEvent={handleCreate}/>
+            <Hour hour={13} last={last} createEvent={handleCreate}/>
+            <Hour hour={14} last={last} createEvent={handleCreate}/>
+            <Hour hour={15} last={last} createEvent={handleCreate}/>
+            <Hour hour={16} last={last} createEvent={handleCreate}/>
+            <Hour hour={17} last={last} createEvent={handleCreate}/>
+            <Hour hour={18} last={last} createEvent={handleCreate}/>
+            <Hour hour={19} last={last} createEvent={handleCreate}/>
+            <Hour hour={20} last={last} createEvent={handleCreate}/>
         </div>
     );
 }
 
-const Calendar = ( {room} ) => {
 
-    let [calendarEvents, setCalendarEvents] = useState([]);
+const Calendar = ( {room, week} ) => {
+    let [eventCreated, setEventCreated] = useState(false);
 
     let [events,setEvents] = useState({
         monday: [],
@@ -313,6 +369,11 @@ const Calendar = ( {room} ) => {
         getReservations();
     },[]);
 
+    const weekStart = getWeekStart(week);
+    console.log("Week start", weekStart, week);
+
+    // parse reservations json returned from db
+    // dates are turned into date objects and sorted into appropriate days
     const parseReservationsJson = (data) => {
         const options = {weekday: 'long'};
 
@@ -330,7 +391,7 @@ const Calendar = ( {room} ) => {
 
             //events[data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()] = "yes";
             const day = data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()
-            
+
             data[i].day = day;
 
             //newEvents[day].push(newCalendarEvent(day,data[i],i));
@@ -338,98 +399,98 @@ const Calendar = ( {room} ) => {
             console.log("newevents", newEvents);
         }
 
-        setEvents({...events, 
-            monday: newEvents.monday,
-            tuesday: newEvents.tuesday,
-            wednesday: newEvents.wednesday,
-            thursday: newEvents.thursday,
-            friday: newEvents.friday
-        })
-        console.log("events", events);
+        setEvents(newEvents);
     }
 
     const getReservations = async () => {
-        const response = await fetch(`http://127.0.0.1:8000/reservations_api/${room.id}/`);
+        const weekString = weekStart.getMonth()+1 + "-" + weekStart.getDate() + "-" + weekStart.getFullYear();
+        console.log("weekString",weekString);
+        const response = await fetch(`http://127.0.0.1:8000/reservations_api/${room.id}/get_week/?date=${weekString}/`);
         const data = await response.json();
-        console.log("events data", data);
-        parseReservationsJson(data)
-    };
-
-    // const events = [
-    //     [
-    //     {day: "monday", position: "169px"},
-    //     {day: "monday", position: "219px"},
-    //     {day: "monday", position: "269px"},
-    //     {day: "monday", position: "19px"},
-    //     {day: "monday", position: "119px"}
-    //     ],
-    // ];
-
-    // useEffect(() => {
-    //     // add loaded events in calendar
-    //     for(let i = 0; i < events.length; i++){
-    //         console.log(events[i],events.length,events[i].length);
-    //         for(let j = 0; j < events[i].length;j++){
-    //             console.log(j);
-    //             setCalendarEvents(calendarEvents.concat(<CalendarEvent
-    //                 day={events[i][j].day}
-    //                 position={events[i][j].position}
-    //                 key={calendarEvents.length}
-    //                 styles={{
-    //                     backgroundColor: getColor(j).background,
-    //                     borderColor: getColor(j).border,
-    //                 }}
-    //                 />));
-    //         }
-    //     }
-    // });
+        console.log(data);
+        parseReservationsJson(data);
+    }
 
 
-    // const addCalendarEvent = (day, position) => {
-    //     setCalendarEvents(calendarEvents.concat(<CalendarEvent day={day} position={position} key={calendarEvents.length}/>));
-    //     setColors();
-    // };
+    const addCreatedEvent = (day, newEvent) => {
+        if(!eventCreated){
+            let newEvents = events[day];
+            newEvents.push(newEvent);
+            setEvents({...events, [day]: newEvents});
 
-// {events.friday.map((event,index) => (
-//                         <CalendarEvent
-//                             day={event.day}
-//                             position={getPosition(event.start_time, event.end_time)}
-//                             key={index}
-//                             color={getColor(index,5)} 
-//                         />
-//                     ))}
+            console.log("newly created", events);
 
-    console.log("object", Object.entries(events));
+            setEventCreated(true);
+        }
+    }
+
+    return (
+        <div className="calendarContainer">
+            <div className="calendarTimes">
+                <div className="calendarTime">8 AM</div>
+                <div className="calendarTime">9 AM</div>
+                <div className="calendarTime">10 AM</div>
+                <div className="calendarTime">11 AM</div>
+                <div className="calendarTime">12 PM</div>
+                <div className="calendarTime">1 PM</div>
+                <div className="calendarTime">2 PM</div>
+                <div className="calendarTime">3 PM</div>
+                <div className="calendarTime">4 PM</div>
+                <div className="calendarTime">5 PM</div>
+                <div className="calendarTime">6 PM</div>
+                <div className="calendarTime">7 PM</div>
+                <div className="calendarTime">8 PM</div>
+            </div>
+
+            {Object.entries(events).map(([dayKey,value]) => (
+                <Day day={dayKey} events={value} key={dayKey} addCreatedEvent={addCreatedEvent}/>
+            ))}
+        </div>
+    );
+}
+
+
+const CalendarView = ( {room} ) => {
+
+    let [calendarEvents, setCalendarEvents] = useState([]);
+    let [calendarIndex, setCalendarIndex] = useState(0);
+
+
+    // store the calendars
+    // just the next two weeks for now
+    const weekCalendars = [
+        <Calendar key={0} week={0} room={room} />,
+        <Calendar key={1} week={1} room={room} />
+    ];
+
+
+    const setCalendarLeftArrow = () => {
+        if(calendarIndex > 0){
+            console.log(calendarIndex-1);
+            setCalendarIndex(calendarIndex-1);
+        }
+    }
+
+    const setCalendarRightArrow = () => {
+        if(calendarIndex < weekCalendars.length-1){
+            console.log(calendarIndex+1);
+            setCalendarIndex(calendarIndex+1);
+        }
+    }
 
     return (
         <>
         <div className="overlay"/>
         <div className="calendar">
-            <div className="calendarContainer">
-                <div className="calendarTimes">
-                    <div className="calendarTime">8 AM</div>
-                    <div className="calendarTime">9 AM</div>
-                    <div className="calendarTime">10 AM</div>
-                    <div className="calendarTime">11 AM</div>
-                    <div className="calendarTime">12 PM</div>
-                    <div className="calendarTime">1 PM</div>
-                    <div className="calendarTime">2 PM</div>
-                    <div className="calendarTime">3 PM</div>
-                    <div className="calendarTime">4 PM</div>
-                    <div className="calendarTime">5 PM</div>
-                    <div className="calendarTime">6 PM</div>
-                    <div className="calendarTime">7 PM</div>
-                    <div className="calendarTime">8 PM</div>
-                </div>
-
-                {Object.entries(events).map(([dayKey,value]) => (
-                    <Day day={dayKey} events={value} key={dayKey} />
-                ))}
+            <div className="calendarBar">
+                <div className="calendarButton" onClick={() => setCalendarLeftArrow()}><HiChevronDoubleLeft size={50} /></div>
+                <div className="calendarButton" onClick={() => setCalendarRightArrow()}><HiChevronDoubleRight size={50} /></div>
             </div>
+            {weekCalendars[calendarIndex]}
         </div>
         <div className="main"/>
         </>
     );
 };
 
-export default Calendar;
+export default CalendarView;

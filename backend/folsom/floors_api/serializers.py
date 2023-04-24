@@ -44,13 +44,17 @@ class RoomSerializer(serializers.ModelSerializer):
         # loop over the reservations and find the event closest to the current time
         current_time = datetime.now()
         events = []
-        for reservation in Room.objects.get(id=room.id).reservations.all():
-            reservation_object = Reservation.objects.get(id=reservation.id)
+        for reservation in Reservation.objects.filter(room=room.id):
+            if reservation.end_time > current_time:
+                events.append((reservation.start_time,reservation.end_time))
 
-            print("hi")
+        # for reservation in Room.objects.get(id=room.id).reservations.all():
+        #     reservation_object = Reservation.objects.get(id=reservation.id)
 
-            if reservation_object.end_time > current_time: # if the event has not passed
-                events.append((reservation_object.start_time,reservation_object.end_time))
+        #     print("hi")
+
+        #     if reservation_object.end_time > current_time: # if the event has not passed
+        #         events.append((reservation_object.start_time,reservation_object.end_time))
 
         if(len(events) == 0):
             state['status'] = "free"

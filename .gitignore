@@ -45,5 +45,9 @@ packages/react-devtools-timeline/dist
 *.pot
 *.pyc
 __pycache__/
+*.sqlite3
 local_settings.py
 
+## general
+logs/
+history/

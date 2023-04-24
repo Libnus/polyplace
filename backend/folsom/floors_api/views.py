@@ -4,7 +4,6 @@ from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework import status
-from rest_framework.response import Response
 from floors.models import Building, Room, Floor
 from reservations.models import Reservation
 from .serializers import BuildingSerializer, FloorSerializer, RoomSerializer
@@ -36,4 +35,3 @@ class RoomViewSet(viewsets.ViewSet):
     def retrieve(self,request,pk=None):
         rooms = Room.objects.filter(floor=pk)
         return Response(RoomSerializer(rooms,many=True).data)
-
