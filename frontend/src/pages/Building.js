@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import Calendar from '../components/Reservations/Calendar'
 
-const Room = ({index, room, floor}) => {
+const Room = ({index, room, floor, building}) => {
 	let [isCalendarOpen, setCalendarOpen] = useState(false);
 
 	const handleClick = () => {
@@ -46,10 +46,10 @@ const Room = ({index, room, floor}) => {
 				Room {room.room_num}
 			</div>
 			<div className="location">
-				Folsom, {floor} Floor
+				Amos Eaton, {floor} Floor
 			</div>
 			<div className="reserveName">
-				<u>Thomas' CS1 Office Hours</u>
+				<u>CS1 Office Hours</u>
 			</div>
 			<div class="time">
 				{statusMessage}
@@ -59,7 +59,7 @@ const Room = ({index, room, floor}) => {
 	);
 }
 
-const Floor = ({index, floor}) => {
+const Floor = ({index, floor, building}) => {
 
 	let [rooms, setRooms] = useState([]);
 
@@ -85,7 +85,7 @@ const Floor = ({index, floor}) => {
 				</div>
 				<div className="roomsContainer">
 					{rooms.map((room,index) => (
-						<Room key={index} room={room} floor={floor.floor_num} />))}
+						<Room key={index} room={room} floor={floor.floor_num} building={building} />))}
 				</div>
 			</div>
 		</div>
@@ -96,7 +96,7 @@ const Building = () => {
 
 	let [floors, setFloors] = useState([]);
 
-	const building = useParams().building;
+	let building = useParams().building;
 
 	console.log("building", building);
 
@@ -118,7 +118,7 @@ const Building = () => {
 				<div className="title">Reservations</div>
 				<div className="floorContainer">
 					{floors.map((floor,index) => (
-						<Floor key={index} floor={floor} />))}
+						<Floor key={index} floor={floor} building={building}/>))}
 				</div>
 		</div>
 		</>

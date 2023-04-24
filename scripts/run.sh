@@ -17,10 +17,10 @@ done
 killall node
 
 # start backend
-cd backend/folsom
+cd ../backend/folsom
 python3 manage.py runserver > ../../logs/backend.log &
 
 # start frontend
-cd ../frontend/
+cd ../../frontend/
 npm start > ../logs/frontend.log &
 
