@@ -122,7 +122,6 @@ const Submit = ({waiting, submitReservation, submitted, submitError}) => {
 const AddReservation = ({ room, open, children ,onClose}) => {
     if(!open) return null;
 
-
     let students = [];
 
     let [studentInfo, setStudentInfo] = useState({first_name: '', last_name: '', email: '', rin: ''});

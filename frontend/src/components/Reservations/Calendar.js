@@ -267,7 +267,6 @@ const Day = ( {day, events, index} ) => {
             border: "var(--color-border-" + color + ")",
         };
     }
-
     return(
         <div className="day">
             {events.map((event,index) => (
@@ -280,12 +279,13 @@ const Day = ( {day, events, index} ) => {
                 />
             ))}
             <div className="dayLabel">{capitalize(day)}</div>
+            <Hour la>
+            <div className="hour" onClick></div>
             <div className="hour"></div>
             <div className="hour"></div>
             <div className="hour"></div>
             <div className="hour"></div>
-            <div className="hour"></div>
-            <div className="hour"></div>
+            <div className"hour"></div>
             <div className="hour"></div>
             <div className="hour"></div>
             <div className="hour"></div>
