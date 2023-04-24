@@ -47,3 +47,6 @@ packages/react-devtools-timeline/dist
 __pycache__/
 local_settings.py
 
+## general
+logs/
+history/
