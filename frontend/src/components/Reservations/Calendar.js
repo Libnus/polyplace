@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
+import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import './Test.css';
 import '../../assets/styles/main.css';
 
@@ -202,7 +203,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 else if(marginTop > minHeight){
                     marginTop = minHeight;
                 }
-                resizeableElement.style.marginTop = `${marginTop+19}px`;
+                resizeableElement.style.marginTop = `${marginTop+20}px`;
 
             }
             y = event.clientY;
@@ -260,20 +261,25 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 }
 
-const Hour = ({ hour, createEvent }) => {
+const Hour = ({ hour, createEvent, last }) => {
     const handleClick = () => {
         console.log("creating event");
         createEvent(hour);
     };
 
     return (
-        <div className="hour" onClick={() => handleClick()}></div>
+        <div className={ last ? "hourLast" : "hour" } onClick={() => handleClick()}></div>
     );
 }
 
 const Day = ( {day, events, index, addCreatedEvent} ) => {
     const capitalize = (s) => {
         return s[0].toUpperCase() + s.slice(1);
+    }
+
+    let last = false;
+    if(day === "friday"){
+        last = true;
     }
 
     // takes a reservation time and returns the position (margin and height) for rendering
@@ -331,19 +337,19 @@ const Day = ( {day, events, index, addCreatedEvent} ) => {
                 />
             ))}
             <div className="dayLabel">{capitalize(day)}</div>
-            <Hour hour={8} createEvent={handleCreate} />
-            <Hour hour={9} createEvent={handleCreate}/>
-            <Hour hour={10} createEvent={handleCreate}/>
-            <Hour hour={11} createEvent={handleCreate}/>
-            <Hour hour={12} createEvent={handleCreate}/>
-            <Hour hour={13} createEvent={handleCreate}/>
-            <Hour hour={14} createEvent={handleCreate}/>
-            <Hour hour={15} createEvent={handleCreate}/>
-            <Hour hour={16} createEvent={handleCreate}/>
-            <Hour hour={17} createEvent={handleCreate}/>
-            <Hour hour={18} createEvent={handleCreate}/>
-            <Hour hour={19} createEvent={handleCreate}/>
-            <Hour hour={20} createEvent={handleCreate}/>
+            <Hour hour={8} last={last} createEvent={handleCreate} />
+            <Hour hour={9} last={last} createEvent={handleCreate}/>
+            <Hour hour={10} last={last} createEvent={handleCreate}/>
+            <Hour hour={11} last={last} createEvent={handleCreate}/>
+            <Hour hour={12} last={last} createEvent={handleCreate}/>
+            <Hour hour={13} last={last} createEvent={handleCreate}/>
+            <Hour hour={14} last={last} createEvent={handleCreate}/>
+            <Hour hour={15} last={last} createEvent={handleCreate}/>
+            <Hour hour={16} last={last} createEvent={handleCreate}/>
+            <Hour hour={17} last={last} createEvent={handleCreate}/>
+            <Hour hour={18} last={last} createEvent={handleCreate}/>
+            <Hour hour={19} last={last} createEvent={handleCreate}/>
+            <Hour hour={20} last={last} createEvent={handleCreate}/>
         </div>
     );
 }
@@ -477,8 +483,10 @@ const CalendarView = ( {room} ) => {
         <>
         <div className="overlay"/>
         <div className="calendar">
-            <button onClick={() => setCalendarLeftArrow()}>left arrow</button>
-            <button onClick={() => setCalendarRightArrow()}>right arrow</button>
+            <div className="calendarBar">
+                <div className="calendarButton" onClick={() => setCalendarLeftArrow()}><HiChevronDoubleLeft size={50} /></div>
+                <div className="calendarButton" onClick={() => setCalendarRightArrow()}><HiChevronDoubleRight size={50} /></div>
+            </div>
             {weekCalendars[calendarIndex]}
         </div>
         <div className="main"/>
