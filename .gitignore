@@ -1,3 +1,5 @@
+### REACT ###
+
 .DS_STORE
 node_modules
 scripts/flow/*/.flowconfig
@@ -37,3 +39,15 @@ packages/react-devtools-extensions/.tempUserDataDir
 packages/react-devtools-inline/dist
 packages/react-devtools-shell/dist
 packages/react-devtools-timeline/dist
+
+### Django ###
+>>>>>>> b85a65d0a8144f9879b6cd35417249412588fe62
+*.pot
+*.pyc
+__pycache__/
+*.sqlite3
+local_settings.py
+
+## general
+logs/
+history/

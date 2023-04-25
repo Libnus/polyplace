@@ -2,9 +2,18 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
-from floors.models import Room, Floor
+from rest_framework.decorators import action
+from rest_framework import status
+from floors.models import Building, Room, Floor
 from reservations.models import Reservation
-from .serializers import FloorSerializer, RoomSerializer
+from .serializers import BuildingSerializer, FloorSerializer, RoomSerializer
+
+class BuildingViewSet(viewsets.ViewSet):
+    """
+    A viewset for Building model
+    """
+    def list(self,request):
+        return Response(BuildingSerializer(Building.objects.all(),many=True).data)
 
 class FloorViewSet(viewsets.ViewSet):
     """
@@ -14,9 +23,8 @@ class FloorViewSet(viewsets.ViewSet):
         return Response(FloorSerializer(Floor.objects.all(),many=True).data)
 
     def retrieve(self,request,pk=None):
-        floor = Floor.objects.get(id=pk)
-        return Response(FloorSerializer(floor,many=False).data)
-
+        floor = Floor.objects.filter(building=pk)
+        return Response(FloorSerializer(floor,many=True).data)
 
 class RoomViewSet(viewsets.ViewSet):
     # get all rooms
