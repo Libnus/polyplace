@@ -27,6 +27,8 @@ const RoomEdit = ({selectedRoom, isOccupied}) => {
         notSelected: false,
         roomTaken: false
     });
+
+    // TODO use errorEdit for error checking
     let [errorEdit, setErrorEdit] = useState({
         notSelected: false,
         roomNotTaken: false

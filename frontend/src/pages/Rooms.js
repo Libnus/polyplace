@@ -30,9 +30,6 @@ const Rooms = () => {
         getFloors();
     },[]);
 
-    const addReservationCall = () => {
-        return 0;
-    }
 
     let getFloors = async () => {
         const response = await fetch('http://127.0.0.1:8000/floors_api/floors/')

@@ -1,7 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Routes,BrowserRouter, Route, Link } from 'react-router-dom';
-import Test from './Test';
 import '../assets/styles/main.css';
 import './Buildings.css';
 

@@ -4,7 +4,6 @@ import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import './Test.css';
 import '../../assets/styles/main.css';
 
-import Datetime from 'react-datetime';
 
 // =========== HELPERS
 
@@ -39,7 +38,6 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
         let height = parseInt(styles.height);
-        let dyHeight = 0; // keep track of change in height for this mousedown event
 
         let marginTop = convertMargin(parseInt(styles.marginTop));
 
@@ -218,7 +216,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         const onMouseDownMiddleResize = (event) => {
             getDragMaxMin();
             y = event.clientY;
-            const styles = window.getComputedStyle(resizeableElement);
+
             resizeableElement.style.top = null;
             resizeableElement.style.bottom = null;
             document.addEventListener("mousemove", onMouseMoveMiddleResize);
@@ -366,50 +364,53 @@ const Calendar = ( {room, week} ) => {
     });
 
     useEffect(() => {
-        getReservations();
-    },[]);
+        const weekStart = getWeekStart(week);
+        console.log("Week start", weekStart, week);
 
-    const weekStart = getWeekStart(week);
-    console.log("Week start", weekStart, week);
+        // parse reservations json returned from db
+        // dates are turned into date objects and sorted into appropriate days
+        const parseReservationsJson = (data) => {
+            const options = {weekday: 'long'};
 
-    // parse reservations json returned from db
-    // dates are turned into date objects and sorted into appropriate days
-    const parseReservationsJson = (data) => {
-        const options = {weekday: 'long'};
+            let newEvents = {
+                monday: [],
+                tuesday: [],
+                wednesday: [],
+                thursday: [],
+                friday: [],
+            };
 
-        let newEvents = {
-            monday: [],
-            tuesday: [],
-            wednesday: [],
-            thursday: [],
-            friday: [],
+            for(let i = 0; i < data.length; i++){
+                data[i].start_time = new Date(data[i].start_time);
+                data[i].end_time = new Date(data[i].end_time);
+
+                //events[data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()] = "yes";
+                const day = data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()
+
+                data[i].day = day;
+
+                //newEvents[day].push(newCalendarEvent(day,data[i],i));
+                newEvents[day].push(data[i]);
+                console.log("newevents", newEvents);
+            }
+
+            setEvents(newEvents);
         };
 
-        for(let i = 0; i < data.length; i++){
-            data[i].start_time = new Date(data[i].start_time);
-            data[i].end_time = new Date(data[i].end_time);
+        const getReservations = async () => {
+            const weekString = weekStart.getMonth()+1 + "-" + weekStart.getDate() + "-" + weekStart.getFullYear();
+            console.log("weekString",weekString);
 
-            //events[data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()] = "yes";
-            const day = data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()
+            const response = await fetch(`http://127.0.0.1:8000/reservations_api/${room.id}/get_week/?date=${weekString}/`);
+            const data = await response.json();
+            console.log(data);
+            parseReservationsJson(data);
+        };
 
-            data[i].day = day;
+        getReservations();
 
-            //newEvents[day].push(newCalendarEvent(day,data[i],i));
-            newEvents[day].push(data[i]);
-            console.log("newevents", newEvents);
-        }
+    },[]);
 
-        setEvents(newEvents);
-    }
-
-    const getReservations = async () => {
-        const weekString = weekStart.getMonth()+1 + "-" + weekStart.getDate() + "-" + weekStart.getFullYear();
-        console.log("weekString",weekString);
-        const response = await fetch(`http://127.0.0.1:8000/reservations_api/${room.id}/get_week/?date=${weekString}/`);
-        const data = await response.json();
-        console.log(data);
-        parseReservationsJson(data);
-    }
 
 
     const addCreatedEvent = (day, newEvent) => {
@@ -452,7 +453,6 @@ const Calendar = ( {room, week} ) => {
 
 const CalendarView = ( {room} ) => {
 
-    let [calendarEvents, setCalendarEvents] = useState([]);
     let [calendarIndex, setCalendarIndex] = useState(0);
 
 

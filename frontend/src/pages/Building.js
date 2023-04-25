@@ -64,14 +64,15 @@ const Floor = ({index, floor, building}) => {
 	let [rooms, setRooms] = useState([]);
 
 	useEffect(() => {
+		let getRooms = async () => {
+			const response = await fetch(`http://127.0.0.1:8000/floors_api/rooms/${floor.id}/`);
+			const data = await response.json();
+			setRooms(data);
+		}
+
 		getRooms();
 	}, []);
 
-	let getRooms = async () => {
-        const response = await fetch(`http://127.0.0.1:8000/floors_api/rooms/${floor.id}/`);
-        const data = await response.json();
-        setRooms(data);
-    }
 
     return (
     	<div className="divFloor">
@@ -101,16 +102,18 @@ const Building = () => {
 	console.log("building", building);
 
 	useEffect(() => {
+
+		const getFloors = async () => {
+			const response = await fetch(`http://127.0.0.1:8000/floors_api/floors/${building}/`);
+			const floors = await response.json();
+
+			console.log('DATA:', floors);
+			setFloors(floors);
+		}
+
         getFloors();
     },[]);
 
-	let getFloors = async () => {
-		const response = await fetch(`http://127.0.0.1:8000/floors_api/floors/${building}/`);
-        const floors = await response.json();
-
-        console.log('DATA:', floors);
-        setFloors(floors);
-	}
 
 	return(
 		<>

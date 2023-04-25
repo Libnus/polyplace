@@ -6,7 +6,6 @@ import { Routes, BrowserRouter, Route, Link } from 'react-router-dom';
 import Rooms from './pages/Rooms';
 import History from './pages/History';
 import Test from './pages/Test';
-import Calendar from './pages/Calendar';
 import Buildings from './pages/Buildings';
 import Building from './pages/Building';
 import './assets/styles/main.css';
@@ -38,7 +37,6 @@ function App() {
                         <Route path='/rooms' element={<Rooms />} />
                         <Route path='/history' element={<History />} />
                         <Route path='/test' element={<Test />} />
-                        <Route path='/calendar' element={<Calendar />} />
                         <Route path='/buildings' element={<Buildings buildings={buildings}/>} />
                         <Route path='/buildings/:building' element={<Building/>} />
                     </Routes>

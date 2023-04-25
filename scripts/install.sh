@@ -1,4 +1,4 @@
-echo "Welcome to PolyPlace!\n\n"
+echo "Welcome to PolyPlace!"
 echo "starting the install..."
 
 BASE_DIR="$( cd "$( dirname "$0" )" && pwd )"

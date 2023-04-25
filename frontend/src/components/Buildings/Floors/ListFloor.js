@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import '../../../assets/styles/main.css';
 
-import { DataGrid, GridColDef, GridRenderCellParams, GridEventListener } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridEventListener } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import { darken, lighten, styled} from '@mui/material/styles'
 
-import Datetime from 'react-datetime';
 
 const getTime = (value) => {
     if(value.length !== 0)
@@ -27,11 +26,11 @@ const columns: GridColDef[] = [
     { field: 'end_time',headerName: 'End Time',width: 160,align: 'center',headerAlign: 'center',sortable: false, valueGetter: ({value}) => getTime(value)},
 ]
 
-const getBackgroundColor = (color, mode) =>
-      mode === 'dark' ? darken(color, 0.7) : lighten(color, 0.7);
+// const getBackgroundColor = (color, mode) =>
+//       mode === 'dark' ? darken(color, 0.7) : lighten(color, 0.7);
 
-const getHoverBackgroundColor = (color, mode) =>
-      mode === 'dark' ? darken(color,0.6) : lighten(color, 0.6)
+// const getHoverBackgroundColor = (color, mode) =>
+//       mode === 'dark' ? darken(color,0.6) : lighten(color, 0.6)
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .room-reserve-theme--TimeUp':{
@@ -85,14 +84,6 @@ const getStatus = (time) => {
 
 // =============================================== Mui styling ^^^^^
 
-const getStartTime = (params) => {
-    return params.row.start_time.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
-}
-
-const getEndTime = (params) => {
-    return params.row.end_time.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
-}
-
 const msToTime = (s) => {
 
   // Pad to 2 or 3 digits, default is 2
@@ -114,63 +105,64 @@ const msToTime = (s) => {
 
 const ListFloor = ({ floor, getRoomSelected }) => {
 
-    let rows
+    //let rows;
     let [rooms, setRooms] = useState([])
 
     useEffect(() => {
-        getRooms()
-    }, [])
 
-    const parseRoomsJson = async(rooms) => {
-        for(var i=0; i < rooms.length; i++){
+        let parseRoomsJson = async(rooms) => {
+            for(var i=0; i < rooms.length; i++){
 
-            // fetch the reservation if room has reservation
-            if(rooms[i]['reservation'] != null){
-                const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['reservation']}/`)
-                const reservations =  await response.json();
-                const reservation = reservations[0];
+                // fetch the reservation if room has reservation
+                if(rooms[i]['reservation'] != null){
+                    const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['reservation']}/`)
+                    const reservations =  await response.json();
+                    const reservation = reservations[0];
 
-                // calculate time left
-                const endTime = new Date(reservation['end_time']);
-                const currentTime = new Date();
-                const timeLeft = msToTime((endTime.getTime() - currentTime.getTime()));
+                    // calculate time left
+                    const endTime = new Date(reservation['end_time']);
+                    const currentTime = new Date();
+                    const timeLeft = msToTime((endTime.getTime() - currentTime.getTime()));
 
-                // update fields for room json
-                rooms[i]['start_time'] = new Date(reservation['start_time']);
-                rooms[i]['end_time'] = new Date(reservation['end_time']);
-                rooms[i]['time_left'] = timeLeft;
-                rooms[i]['first_name'] = reservation["first_name"];
-                rooms[i]['last_name'] = reservation["last_name"];
-                rooms[i]['rin'] = reservation["rin"];
-                rooms[i]['email'] = reservation["email"];
+                    // update fields for room json
+                    rooms[i]['start_time'] = new Date(reservation['start_time']);
+                    rooms[i]['end_time'] = new Date(reservation['end_time']);
+                    rooms[i]['time_left'] = timeLeft;
+                    rooms[i]['first_name'] = reservation["first_name"];
+                    rooms[i]['last_name'] = reservation["last_name"];
+                    rooms[i]['rin'] = reservation["rin"];
+                    rooms[i]['email'] = reservation["email"];
 
+                }
+                else{ // room is empty
+                    rooms[i]['start_time'] = '';
+                    rooms[i]['end_time'] = '';
+                    rooms[i]['time_left'] = '';
+                    rooms[i]['first_name'] = '';
+                    rooms[i]['last_name'] = '';
+                    rooms[i]['rin'] = '';
+                    rooms[i]['email'] = '';
+                }
+
+                // clean up the json
+                delete rooms[i]['floor'];
+                delete rooms[i]['reservation'];
             }
-            else{ // room is empty
-                rooms[i]['start_time'] = '';
-                rooms[i]['end_time'] = '';
-                rooms[i]['time_left'] = '';
-                rooms[i]['first_name'] = '';
-                rooms[i]['last_name'] = '';
-                rooms[i]['rin'] = '';
-                rooms[i]['email'] = '';
-            }
 
-            // clean up the json
-            delete rooms[i]['floor'];
-            delete rooms[i]['reservation'];
+            // sort the data
+            //rows = rooms.sort((a,b) => (60*Number(a.time_left.slice(0,2))+Number(a.time_left.slice(4,6))) - ((60*Number(b.time_left.slice(0,2))+Number(b.time_left.slice(4,6)))));
+
+            setRooms(rooms);
         }
 
-        // sort the data
-        rows = rooms.sort((a,b) => (60*Number(a.time_left.slice(0,2))+Number(a.time_left.slice(4,6))) - ((60*Number(b.time_left.slice(0,2))+Number(b.time_left.slice(4,6)))));
+        let getRooms = async () => {
+            const response = await fetch(`http://127.0.0.1:8000/floors_api/rooms/${floor['id']}/`);
+            const data = await response.json();
+            parseRoomsJson(data);
+        };
 
-        setRooms(rooms)
-    }
-
-    let getRooms = async () => {
-        const response = await fetch(`http://127.0.0.1:8000/floors_api/rooms/${floor['id']}/`)
-        const data = await response.json()
-        parseRoomsJson(data)
-    }
+        getRooms();
+    }, [])
 
     const handleRowClick: GridEventListener<'rowClick'> = (params) => {
         console.log("rooms returned",params.row);

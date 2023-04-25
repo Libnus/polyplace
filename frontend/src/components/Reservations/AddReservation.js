@@ -1,6 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
-import Datetime from 'react-datetime';
+import { useState } from 'react';
 import './Reservation.css'
 import Scan from '../Scan/Scan';
 
@@ -25,11 +24,6 @@ const OVERLAY_STYLES ={
     right: 0,
     backgroundColor: 'rgba(0,0,0,0.6)',
     zIndex: 1000
-}
-
-const addHours = (date, hours) => {
-    date.setHours(date.getHours() + hours)
-    return date.toLocaleString(navigator.language,{hour:'2-digit', minute:'2-digit'})
 }
 
 const getDate = () => {
@@ -109,20 +103,18 @@ const Student = ({room, rin, email, endTime, showEdit }) => {
     );
 }
 
-const Submit = ({waiting, submitReservation, submitted, submitError}) => {
+// const Submit = ({waiting, submitReservation, submitted, submitError}) => {
 
-    return (
-        <>
-        <button className={waiting ? "waiting" : "ready"} onClick={submitReservation()}>Submit</button>
-        {submitted ? <h3 className="submitSuc">Submitted</h3> : submitError && <h3 className="submitError">Error!!!</h3>}
-        </>
-    );
-}
+//     return (
+//         <>
+//         <button className={waiting ? "waiting" : "ready"} onClick={submitReservation()}>Submit</button>
+//         {submitted ? <h3 className="submitSuc">Submitted</h3> : submitError && <h3 className="submitError">Error!!!</h3>}
+//         </>
+//     );
+// }
 
 const AddReservation = ({ room, open, children ,onClose}) => {
     if(!open) return null;
-
-    let students = [];
 
     let [studentInfo, setStudentInfo] = useState({first_name: '', last_name: '', email: '', rin: ''});
     let [isScan, setIsScan] = useState(true);
@@ -133,6 +125,7 @@ const AddReservation = ({ room, open, children ,onClose}) => {
         submitError: false,
         errorMessage: ""
     });
+
 
 
     let endTime = getRoomTime(); // time the room reservation ends
@@ -146,6 +139,9 @@ const AddReservation = ({ room, open, children ,onClose}) => {
         // reset states
         setSubmitted(false); 
         setSubmitError({submitError: false, errorMessage: ""});
+
+        let error = false;
+        let message = "";
 
         if(!isScan){
             // parse data for json
@@ -170,15 +166,19 @@ const AddReservation = ({ room, open, children ,onClose}) => {
                 const result = await response.json();
                 console.log("Response:", result);
                 if(response.status===409){
-                    setSubmitError({submitError: true, errorMessage: result.message});
+                    error = true;
+                    message = result.message;
                     console.log("Error!!", result.message);
                 }
                 else setSubmitted(true);
             }catch(error){
+                error = true;
+                message = "something tragic has happened :(";
                 console.error("Error:", error);
-                setSubmitError({submitError: true, errorMessage: "Something tragic has happened :("});
             }
         }
+
+        setSubmitError({submitError: error, errorMessage: message});
         return;
     }
 

@@ -24,7 +24,7 @@ def get_next_free_time(last_event, events):
         events.remove(current_event)
 
         if(len(events) == 0): return last_event
-        current_event =  min(events, key=lambda time:time[0])
+        current_event = min(events, key=lambda time:time[0])
 
     return last_event
 
