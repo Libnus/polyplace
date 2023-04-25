@@ -18,7 +18,7 @@ class FloorSerializer(serializers.ModelSerializer):
 def get_next_free_time(last_event, events):
     if(len(events) == 0): return last_event
 
-    current_event =  min(events, key=lambda time:time[0])
+    current_event = min(events, key=lambda time:time[0])
     while last_event < current_event[0]+timedelta(minutes=30):
         last_event = current_event[1]
         events.remove(current_event)

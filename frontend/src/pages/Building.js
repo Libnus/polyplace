@@ -112,7 +112,7 @@ const Building = () => {
 		}
 
         getFloors();
-    },[]);
+    },[building]);
 
 
 	return(

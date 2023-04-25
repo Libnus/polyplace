@@ -162,7 +162,7 @@ const ListFloor = ({ floor, getRoomSelected }) => {
         };
 
         getRooms();
-    }, [])
+    }, [floor])
 
     const handleRowClick: GridEventListener<'rowClick'> = (params) => {
         console.log("rooms returned",params.row);

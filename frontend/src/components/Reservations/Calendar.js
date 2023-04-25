@@ -235,7 +235,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             resizerBottom.removeEventListener("mousedown", onMouseDownBottomResize);
             resizerMiddle.removeEventListener("mousedown", onMouseDownMiddleResize);
         }
-    }, []);
+    }, [day]);
 
     return (
         <div className={day + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], backgroundColor: colors.background, borderColor: colors.border}}>
@@ -409,7 +409,7 @@ const Calendar = ( {room, week} ) => {
 
         getReservations();
 
-    },[]);
+    },[room.id, week]);
 
 
 
