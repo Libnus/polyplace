@@ -20,9 +20,10 @@ pip install django-filter  # Filtering support
 
 pip3 install django-cors-headers
 
-pip3 install drjango_cron
+pip3 install django_cron
 
 # Django set up
+cd backend/folsom
 python3 manage.py makemigrations floor
 python3 manage.py makemigrations reservations
 python3 manage.py migrate
@@ -34,6 +35,8 @@ crontab -l > poly_crons
 echo "*/5 * * * * source python3 $BASE_DIR manage.py runcrons"
 crontab poly_crons
 rm poly_crons
+
+cd ../../
 
 # CREATE HISTORY
 mkdir backend/history

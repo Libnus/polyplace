@@ -29,9 +29,6 @@ const OVERLAY_STYLES ={
 }
 
 const EditReservation = ({ room, open, onClose }) => {
-    if(!open) return null;
-
-    console.log("room",room)
 
     let [studentInfo, setStudentInfo] = useState({first_name: room.first_name, last_name: room.last_name, email: room.email, rin: room.rin});
     let [isScan, setIsScan] = useState(false);
@@ -42,6 +39,10 @@ const EditReservation = ({ room, open, onClose }) => {
         submitError: false,
         errorMessage: ""
     });
+
+    if(!open) return null;
+
+    console.log("room",room)
 
     let endTime = new Date(room.end_time); // time the room reservation ends
     console.log("time",room.end_time);

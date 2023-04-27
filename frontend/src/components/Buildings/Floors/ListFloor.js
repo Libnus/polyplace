@@ -114,10 +114,14 @@ const ListFloor = ({ floor, getRoomSelected }) => {
             for(var i=0; i < rooms.length; i++){
 
                 // fetch the reservation if room has reservation
-                if(rooms[i]['reservation'] != null){
-                    const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['reservation']}/`)
-                    const reservations =  await response.json();
-                    const reservation = reservations[0];
+                const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['id']}/`)
+                const reservations =  await response.json();
+                //const reservation = reservations[0];
+
+
+                if(reservations.length > 0){
+                    console.log("here")
+                    const reservation = reservations[0]
 
                     // calculate time left
                     const endTime = new Date(reservation['end_time']);
@@ -133,6 +137,11 @@ const ListFloor = ({ floor, getRoomSelected }) => {
                     rooms[i]['rin'] = reservation["rin"];
                     rooms[i]['email'] = reservation["email"];
 
+                    // }
+
+                    // clean up the json
+                    delete rooms[i]['floor'];
+                    //delete rooms[i]['reservation'];
                 }
                 else{ // room is empty
                     rooms[i]['start_time'] = '';
@@ -143,10 +152,6 @@ const ListFloor = ({ floor, getRoomSelected }) => {
                     rooms[i]['rin'] = '';
                     rooms[i]['email'] = '';
                 }
-
-                // clean up the json
-                delete rooms[i]['floor'];
-                delete rooms[i]['reservation'];
             }
 
             // sort the data
