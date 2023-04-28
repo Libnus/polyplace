@@ -5,7 +5,12 @@ const Navbar = () => {
 
     let [sidebarData, setSidebarData] = useState([
         {
-            title: 'Rooms',
+            title: "Reservations",
+            path: '/buildings',
+            cName: 'nav-text'
+        },
+        {
+            title: 'Staff',
             path: '/rooms',
             cName: 'nav-text'
         },
