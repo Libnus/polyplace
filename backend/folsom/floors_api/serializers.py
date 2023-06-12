@@ -50,7 +50,7 @@ class RoomSerializer(serializers.ModelSerializer):
         for reservation in Reservation.objects.filter(room=room.id):
             print(reservation.end_time)
             if reservation.end_time > current_time:
-                events.append((reservation.start_time,reservation.end_time))
+                events.append((reservation.start_time,reservation.end_time, reservation.event_name))
         # for reservation in Room.objects.get(id=room.id).reservations.all():
         #     reservation_object = Reservation.objects.get(id=reservation.id)
 
@@ -62,6 +62,7 @@ class RoomSerializer(serializers.ModelSerializer):
         if(len(events) == 0):
             state['status'] = "free"
             state['time'] = ""
+            state['event'] = ""
             return state
 
         min_event = min(events, key=lambda time:time[0])
@@ -86,6 +87,8 @@ class RoomSerializer(serializers.ModelSerializer):
         else:
             state['status'] = "free"
             state['time'] = min_event[0].astimezone(timezone(timedelta(hours=-4))).strftime(time_format)
+
+        state['event'] = min_event[2]
 
         return state
 

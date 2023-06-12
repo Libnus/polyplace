@@ -49,7 +49,7 @@ const Room = ({index, room, floor, building}) => {
 				Amos Eaton, {floor} Floor
 			</div>
 			<div className="reserveName">
-				<u>CS1 Office Hours</u>
+				<u>{room.room_status.event}</u>
 			</div>
 			<div class="time">
 				{statusMessage}
@@ -76,7 +76,7 @@ const Floor = ({index, floor, building}) => {
 
     return (
     	<div className="divFloor">
-			<div className="floorTest">
+			<div className="floorTest" style={{backgroundColor: floor.color}}>
 				<h1>{floor.floor_num} Floor</h1>
 			</div>
 			<div className="roomsContent">

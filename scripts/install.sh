@@ -8,7 +8,7 @@ cd $BASE_DIR
 # NPM =========================
 cd ../frontend
 npm install
-cd ..
+cd ../backend/folsom
 
 # DJANGO =======================
 pip3 install Django
@@ -30,6 +30,8 @@ python3 manage.py migrate
 
 pip3 install python-decouple
 
+cd ../../
+
 # CREATE CRONS
 crontab -l > poly_crons
 echo "*/5 * * * * source python3 $BASE_DIR manage.py runcrons"
@@ -49,7 +51,9 @@ touch logs/backend.log
 
 # GENERATE SECRET KEY
 touch backend/folsom/.env
-echo -n "SECRET_KEY=" > backend/folsom/.env
-python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' >> backend/folsom/.env
+echo  "SECRET_KEY='" > backend/folsom/.env 
+echo python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' >> backend/folsom/.env
+
+echo "'" >> backend/folsom/.env
 
 echo "Install complete! Run run.sh to start server :)"
