@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('start_date', models.DateTimeField()),
                 ('end_date', models.DateTimeField()),
-                ('reservations', models.ManyToManyField(blank=True, to='reservations.Reservation')),
+                ('reservations', models.ManyToManyField(blank=True, to='reservations.reservation')),
             ],
         ),
     ]

@@ -114,7 +114,6 @@ const Student = ({room, rin, email, endTime, showEdit }) => {
 // }
 
 const AddReservation = ({ room, open, children ,onClose}) => {
-    if(!open) return null;
 
     let [studentInfo, setStudentInfo] = useState({first_name: '', last_name: '', email: '', rin: ''});
     let [isScan, setIsScan] = useState(true);
@@ -126,7 +125,8 @@ const AddReservation = ({ room, open, children ,onClose}) => {
         errorMessage: ""
     });
 
-
+    if(!open) return null;
+    console.log("ROOM", room);
 
     let endTime = getRoomTime(); // time the room reservation ends
 
@@ -146,13 +146,15 @@ const AddReservation = ({ room, open, children ,onClose}) => {
         if(!isScan){
             // parse data for json
             let data = {
-                room_num: room,
+                room: room,
                 first_name: studentInfo.first_name,
                 last_name: studentInfo.last_name,
                 rin: studentInfo.rin,
                 start_time: new Date(),
                 end_time: endTime
             }
+            console.log("date",data.start_time)
+            console.log("date",data.end_time)
 
             try{
                 // try upload

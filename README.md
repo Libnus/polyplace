@@ -1,3 +1,5 @@
+A simple room reservation system for RPI
+
 # Install
 
 Python and Node are required for the install script to run properly.
