@@ -50,10 +50,10 @@ touch logs/frontend.log
 touch logs/backend.log
 
 # GENERATE SECRET KEY
-touch backend/folsom/.env
-echo  "SECRET_KEY='" > backend/folsom/.env 
-echo python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' >> backend/folsom/.env
+rm .env
+printf "SECRET_KEY='" >> .env 
+printf "%s" "$(python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')" >> .env
 
-echo "'" >> backend/folsom/.env
+printf "'" >> .env
 
 echo "Install complete! Run run.sh to start server :)"
