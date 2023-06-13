@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
-import './Test.css';
+import './Building.css';
 import '../../assets/styles/main.css';
 
 
