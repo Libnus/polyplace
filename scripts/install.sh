@@ -8,7 +8,7 @@ cd $BASE_DIR
 # NPM =========================
 cd ../frontend
 npm install
-cd ..
+cd ../backend/folsom
 
 # DJANGO =======================
 pip3 install Django
@@ -20,20 +20,25 @@ pip install django-filter  # Filtering support
 
 pip3 install django-cors-headers
 
-pip3 install drjango_cron
+pip3 install django_cron
 
 # Django set up
+cd backend/folsom
 python3 manage.py makemigrations floor
 python3 manage.py makemigrations reservations
 python3 manage.py migrate
 
 pip3 install python-decouple
 
+cd ../../
+
 # CREATE CRONS
 crontab -l > poly_crons
 echo "*/5 * * * * source python3 $BASE_DIR manage.py runcrons"
 crontab poly_crons
 rm poly_crons
+
+cd ../../
 
 # CREATE HISTORY
 mkdir backend/history
@@ -45,10 +50,18 @@ touch logs/frontend.log
 touch logs/backend.log
 
 # GENERATE SECRET KEY
+<<<<<<< HEAD
 rm .env
 printf "SECRET_KEY='" >> .env 
 printf "%s" "$(python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')" >> .env
 
 printf "'" >> .env
+=======
+touch backend/folsom/.env
+echo  "SECRET_KEY='" > backend/folsom/.env 
+echo python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' >> backend/folsom/.env
+
+echo "'" >> backend/folsom/.env
+>>>>>>> cf97ec3389f07789c4432429267029ee0d20383e
 
 echo "Install complete! Run run.sh to start server :)"

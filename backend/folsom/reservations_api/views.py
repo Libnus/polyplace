@@ -25,7 +25,6 @@ class ReservationViewSet(viewsets.ViewSet):
     #
     # input: room and a week (the date the week started) to get reservations from
     # output: the reservations associated with a room from week
-    #
     @action(detail=True)
     def get_week(self, request, pk=None):
 
@@ -48,22 +47,24 @@ class ReservationViewSet(viewsets.ViewSet):
 
     # create method creates a reservation then adds the reservation to the room
     def create(self,request,*args,**kwargs):
-        if not Room.objects.filter(id=request.data['room']).exists(): # check that the room exists
+        if not Room.objects.filter(room_num=request.data['room']).exists(): # check that the room exists
             return Response({'message':"Conflict! Room doesn't exist!"},status=status.HTTP_409_CONFLICT)
-       
-        if check_reservation_time(Reservation.objects.filter(room=request.data['room']), (request.data['start_time'],request.data['end_time'])): # check if room has already been reserved
-            return Response({'message':"Conflict! Room taken at time specified"},status=status.HTTP_409_CONFLICT)
 
+        room = Room.objects.get(room_num=request.data['room'])
+
+        if check_reservation_time(Reservation.objects.filter(room=room.id), (request.data['start_time'],request.data['end_time'])): # check if room has already been reserved
+            return Response({'message':"Conflict! Room taken at time specified"},status=status.HTTP_409_CONFLICT)
+        #
         # TODO students can make more than one reservation
         if Reservation.objects.filter(rin=request.data['rin']).exists():
             return Response({'message':"Conflict! Student already reserved a room!"},status=status.HTTP_409_CONFLICT)
 
         else:
             data = request.data
+            data['room'] = room.id
 
-            serializer = ReservationSerializer(data=request.data) # create the reservation
+            serializer = ReservationSerializer(data=data) # create the reservation
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
             return Response(serializer.data,status=status.HTTP_201_CREATED)
-

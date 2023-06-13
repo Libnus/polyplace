@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from floors.models import Building, Floor, Room
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from reservations.models import Reservation
+
 
 class BuildingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,12 +43,14 @@ class RoomSerializer(serializers.ModelSerializer):
         state = {'status': "", 'time': ""}
 
         # loop over the reservations and find the event closest to the current time
-        current_time = datetime.now()
+        current_time = datetime.now(timezone.utc)
+        print("current time", current_time)
+
         events = []
         for reservation in Reservation.objects.filter(room=room.id):
+            print(reservation.end_time)
             if reservation.end_time > current_time:
-                events.append((reservation.start_time,reservation.end_time))
-
+                events.append((reservation.start_time,reservation.end_time, reservation.event_name))
         # for reservation in Room.objects.get(id=room.id).reservations.all():
         #     reservation_object = Reservation.objects.get(id=reservation.id)
 
@@ -59,6 +62,7 @@ class RoomSerializer(serializers.ModelSerializer):
         if(len(events) == 0):
             state['status'] = "free"
             state['time'] = ""
+            state['event'] = ""
             return state
 
         min_event = min(events, key=lambda time:time[0])
@@ -70,19 +74,21 @@ class RoomSerializer(serializers.ModelSerializer):
             state['status'] = "closed"
             state['time'] = ""
 
-        elif min_event[0] < datetime.now():
+        elif min_event[0] < current_time:
             state['status'] = "reserved"
             events.remove(min_event)
-            state['time'] = get_next_free_time(min_event[1],events).strftime(time_format)
+            state['time'] = get_next_free_time(min_event[1],events).astimezone(timezone(timedelta(hours=-4))).strftime(time_format)
 
-        elif min_event[0] < datetime.now()+timedelta(minutes=30):
+        elif min_event[0] < current_time+timedelta(minutes=30):
             state['status'] = "not_bookable"
             events.remove(min_event)
-            state['time'] = get_next_free_time(min_event[1],events).strftime(time_format)
+            state['time'] = get_next_free_time(min_event[1],events).astimezone(timezone(timedelta(hours=-4))).strftime(time_format)
 
         else:
             state['status'] = "free"
-            state['time'] = min_event[0].strftime(time_format)
+            state['time'] = min_event[0].astimezone(timezone(timedelta(hours=-4))).strftime(time_format)
+
+        state['event'] = min_event[2]
 
         return state
 

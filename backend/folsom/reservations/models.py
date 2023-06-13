@@ -12,6 +12,7 @@ class Reservation(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    event_name = models.CharField(max_length=20, default="")
 
     def time_left(self):
         current = datetime.now()
