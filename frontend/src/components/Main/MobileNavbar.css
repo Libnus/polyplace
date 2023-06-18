@@ -1,0 +1,19 @@
+.navigation{
+    width: 100%;
+    height: 50px;
+    background-color: blue;
+}
+
+.navigation ul{
+    display:flex;
+    flex-wrap: wrap;
+    float:right;
+    margin: 20 0px;
+    padding: 0 25px;
+}
+
+.navigation ul li{
+    list-style-type: none;
+    padding-right: 10px;
+
+}

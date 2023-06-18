@@ -9,6 +9,7 @@ import Test from './pages/Test';
 import Buildings from './pages/Buildings';
 import Building from './pages/Building';
 import './assets/styles/main.css';
+import MobileNavbar from './components/Main/MobileNavbar';
 
 function App() {
 
@@ -32,7 +33,7 @@ function App() {
             <div className="content-container">
                 <BrowserRouter>
                     {buildings.map(building => (<Link to={'/buildings/' + building.id} />))}
-                    <Navbar />
+                    <MobileNavbar/>
                     <Routes>
                         <Route path='/rooms' element={<Rooms />} />
                         <Route path='/history' element={<History />} />
