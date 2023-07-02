@@ -10,7 +10,7 @@ const Footer = () => {
                     onMouseOver={({target})=>target.style.color="white"}
                     onMouseOut={({target})=>target.style.color="black"} /></a>
             </div>
-            © 2023 - Folsom Thing
+            © 2023 - PolyPlace
         </div>
     );
 }
