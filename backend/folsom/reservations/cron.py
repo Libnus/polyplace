@@ -6,6 +6,21 @@ import os
 import json
 from datetime import datetime
 
+def stringify(reservation):
+    dic = {
+        "id": reservation.id,
+        "first_name": reservation.first_name,
+        "last_name": reservation.last_name,
+        "rin": reservation.rin,
+        "email": reservation.email,
+        "start_time": reservation.start_time.strftime(time_format),
+        "end_time": reservation.end_time.strftime(time_format),
+        "room": room.room_num,
+        "building": room.floor.building.building_name
+    }
+    return dic
+
+
 class CleanWeekCron(CronJobBase):
     RUN_AT_TIMES = ['00:01'] # 1 minute after ReservationCron to make sure everything is saved
 
@@ -70,18 +85,7 @@ class ReservationsCron(CronJobBase):
             if reservation.end_time < current_date:
                 room = reservation.room
                 time_format = "%m-%d-%d @ %H:%M"
-
-                new_entry = {
-                    "id": reservation.id,
-                    "first_name": reservation.first_name,
-                    "last_name": reservation.last_name,
-                    "rin": reservation.rin,
-                    "email": reservation.email,
-                    "start_time": reservation.start_time.strftime(time_format),
-                    "end_time": reservation.end_time.strftime(time_format),
-                    "room": room.room_num,
-                    "building": room.floor.building.building_name
-                }
+                new_entry = stringify(reservation)
                 history_json['reservations'].append(new_entry)
                 print(str(reservation) + " added to history.")
 

@@ -74,9 +74,14 @@ const Floor = ({index, floor, building}) => {
 		getRooms();
 	}, []);
 
+<<<<<<< HEAD
 
 	let free = 8/10;
 
+=======
+    let free_rooms = rooms.filter(room => {return room.room_status.status === "free"})
+    const shadow = `inset 2px 2px 0.5px 0px rgba(0, 0, 0, 0.5), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3), inset ${100*(free_rooms.length/rooms.length)-100}px 2px 0px 0px rgba(0, 0, 0, 0.5), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3)`
+>>>>>>> 6bc352fcd560e5bbf4dc4c91ade51008fe83ace8
     return (
     	<div className="divFloor">
 			<div className="floorTest" style={{backgroundColor: floor.color}}>
@@ -84,8 +89,8 @@ const Floor = ({index, floor, building}) => {
 			</div>
 			<div className="roomsContent">
 				<div className="roomAvailable">
-					<button className="bookRoom">8/10</button>
-					<button className="myBook" style={{width: '15%'}}>My reservations</button>
+				  <button className="bookRoom" style={{boxShadow: shadow}} >{free_rooms.length}/{rooms.length}</button>
+					<button className="myBook" style={{width: 'fit-content'}}>My reservations</button>
 				</div>
 				<div className="roomsContainer">
 					{rooms.map((room,index) => (
@@ -95,7 +100,6 @@ const Floor = ({index, floor, building}) => {
 		</div>
     );
 }
-
 const Building = () => {
 
 	let [floors, setFloors] = useState([]);

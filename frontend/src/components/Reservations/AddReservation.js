@@ -211,10 +211,9 @@ const AddReservation = ({ room, open, children ,onClose}) => {
     );
 }
 
-export default AddReservation;
 
 export{
     Form,
     Student,
 }
-
+export default AddReservation;

@@ -4,7 +4,6 @@ import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import './Building.css';
 import '../../assets/styles/main.css';
 
-
 // =========== HELPERS
 
 // find the start of the week given a week offset
@@ -477,6 +476,7 @@ const CalendarView = ( {room} ) => {
             setCalendarIndex(calendarIndex+1);
         }
     }
+
 
     return (
         <>
