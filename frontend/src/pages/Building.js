@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 
+import '../components/Reservations/Building.css';
 import Calendar from '../components/Reservations/Calendar'
 
 const Room = ({index, room, floor, building}) => {
@@ -74,6 +75,8 @@ const Floor = ({index, floor, building}) => {
 	}, []);
 
 
+	let free = 8/10;
+
     return (
     	<div className="divFloor">
 			<div className="floorTest" style={{backgroundColor: floor.color}}>
@@ -113,7 +116,6 @@ const Building = () => {
 
         getFloors();
     },[building]);
-
 
 	return(
 		<>

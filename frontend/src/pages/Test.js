@@ -2,6 +2,8 @@ import React from 'react';
 import '../assets/styles/main.css';
 import './Test.css'
 
+// THIS FILE ALONG WITH TEST.CSS CAN BE REMOVED. THIS FILE IS FOR THE FOLSOM LIBRARY DEMO
+
 const Test = () => {
 
 	const handleClick = () => {
