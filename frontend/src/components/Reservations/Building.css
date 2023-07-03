@@ -226,7 +226,7 @@ button.bookRoom:hover{
     box-sizing: border-box;
     border-left: 6px solid lightgreen;
     #border-radius: 7px;
-    border-top-right-radius: 15px;
+    border-top-right-radius: 0px;
     white-space: nowrap;
     #box-shadow: 2px 2px 0.5px 0px rgba(0, 0, 0, 1.0), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3);
     transition: ease-out 0.2s;

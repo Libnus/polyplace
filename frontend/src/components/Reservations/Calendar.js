@@ -32,6 +32,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         return Math.floor((num)/25)*25;
     }
 
+
     useEffect(() => {
 
         const resizeableElement = refBox.current;
@@ -39,6 +40,26 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         let height = parseInt(styles.height);
 
         let marginTop = convertMargin(parseInt(styles.marginTop));
+        let originalMarginTop = marginTop;
+
+        // check if inputted event collides with another event
+        const checkCollisions = () => {
+            const events = document.getElementsByClassName(day);
+            const resizeableElement = refBox.current;
+            marginTop = convertMargin(parseInt(styles.marginTop));
+
+            for(let i = 0; i < events.length; i++){
+                if(events[i] !== resizeableElement){
+                    const eventStyle = getComputedStyle(events[i]);
+                    const eventTop = convertMargin(parseInt(eventStyle.marginTop));
+                    const eventHeight = parseInt(eventStyle.height);
+
+                    if(marginTop > eventTop && marginTop < eventTop+eventHeight) return true;
+                    if(marginTop+height < eventTop+eventHeight && marginTop+height > eventTop) return true;
+                }
+            }
+            return false; // event does not collide with other events
+        }
 
         // maximum and minimum height div can have
         // maxHeight: height a div can have when resizing the top of the div (top resize). Set it to zero as the default value (top margin in the day)
@@ -46,17 +67,18 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         let maxHeight = 0;
         let minHeight = convertMargin(650 - (marginTop)); //TODO change 619 to maxSize of day as scaling could change
 
+
+
         // get the max and min height our div can be to avoid collisions with other events and not allow users to schedule a reservation during another time.
         const getMaxMinHeights = () => {
             const events = document.getElementsByClassName(day);
             marginTop = convertMargin(parseInt(styles.marginTop));
-            console.log(events);
-            console.log("marginTop", marginTop);
 
             // also define max and min margins for looping and we will set heights after. This is so there is no confusion between heights and margin calculations during iteration
             let maxMargin = 0;
             let minMargin = 650;
 
+            // TODO move to checkCollisions method
             // loop over all events from this day
             // if we find a margin (represents time in the day) that is before us then we consider updating maxHeight to avoid collisions
             for(let i = 0; i < events.length; i++){
@@ -102,14 +124,8 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
                     if(eventTop >= maxHeight && eventTop < marginTop) maxHeight = (eventTop+eventHeight);
                     if((eventTop-height) <= minHeight && eventTop > marginTop) minHeight = eventTop-height;
-                    console.log("eventToppx", eventTop);
-                    console.log("loop_minGrab",minHeight);
-
                 }
             }
-
-            console.log("maxGrab",maxHeight);
-            console.log("minGrab",minHeight);
         }
 
         let y = 0;
@@ -181,9 +197,13 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         const onMouseDownBottomResize = (event) =>{
             getMaxMinHeights();
             y = event.clientY;
+
+            // get styles
             const styles = window.getComputedStyle(resizeableElement);
             resizeableElement.style.top = styles.top;
             resizeableElement.style.bottom = null;
+
+            // event listeners
             document.addEventListener("mousemove", onMouseMoveBottomResize);
             document.addEventListener("mouseup", onMouseUpBottomResize);
         };
@@ -193,31 +213,55 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             if(event.clientY % sensitivity === 0){
                 let dy = (event.clientY) - y;
                 marginTop = marginTop+dy*25;
-
-                if(marginTop < maxHeight){
-                    marginTop = maxHeight;
-                }
-                else if(marginTop > minHeight){
-                    marginTop = minHeight;
-                }
                 resizeableElement.style.marginTop = `${marginTop+20}px`;
 
             }
             y = event.clientY;
-            console.log("change", marginTop);
+            if(checkCollisions()) {
+                resizeableElement.style.marginLeft = '10px';
+                resizeableElement.style.width = '95%';
+            }
+            else {
+                resizeableElement.style.marginLeft = '0px';
+                resizeableElement.style.width = '100%';
+            }
         };
 
         const onMouseUpMiddleResize = (event) => {
+            // check if we can actually move there
+            // if we can move it, otherwise jump event back to original location
+            if(checkCollisions()){
+                marginTop = originalMarginTop;
+                resizeableElement.style.marginTop = `${marginTop+20}px`;
+            }
+            else originalMarginTop = marginTop;
+
+            // reset styles
+            resizeableElement.style.opacity = '1.0';
+            resizeableElement.style.borderTopRightRadius = '0px';
+            resizeableElement.style.borderBottomRightRadius = '0px';
+            resizeableElement.style.marginLeft = '0px';
+            resizeableElement.style.width = '100%';
+
             document.removeEventListener("mousemove", onMouseMoveMiddleResize);
             document.removeEventListener("mouseup", onMouseUpMiddleResize);
         };
 
+        // TODO give different style to events being dragged
         const onMouseDownMiddleResize = (event) => {
             getDragMaxMin();
             y = event.clientY;
 
+            // styles
             resizeableElement.style.top = null;
             resizeableElement.style.bottom = null;
+
+            // change style of event
+            resizeableElement.style.opacity = '0.75';
+            resizeableElement.style.borderTopRightRadius = '15px';
+            resizeableElement.style.borderBottomRightRadius = '15px';
+
+            // event listeners
             document.addEventListener("mousemove", onMouseMoveMiddleResize);
             document.addEventListener("mouseup", onMouseUpMiddleResize)
         };
