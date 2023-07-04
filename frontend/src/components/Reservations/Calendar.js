@@ -10,11 +10,20 @@ import '../../assets/styles/main.css';
 // example: if 0 is inputted, the date returned would be the start of this week. 1 inputted would give the start date of next week
 const getWeekStart = (weekOffset) => {
     const weekStart = new Date();
-    const dateOffset = weekStart.getDate() - (weekStart.getDay()-1); // -1 because python starts the week on monday ;)
+    const dateOffset = weekStart.getDate() - (weekStart.getDay()-1); // -1 because python starts the week on monday...what a stupid bug i know ;)
 
     weekStart.setDate(dateOffset+(weekOffset*7));
 
     return weekStart;
+}
+
+const getWeekEnd = (weekOffset) => {
+    const weekEnd = new Date();
+    const dateOffset = weekEnd.getDate() + (7-weekEnd.getDay());
+
+    weekEnd.setDate(dateOffset+(weekOffset*7));
+    console.log('weekEnd:', weekEnd);
+    return weekEnd;
 }
 
 // ============================================
@@ -493,11 +502,17 @@ const Calendar = ( {room, week} ) => {
     );
 }
 
+const getWeek = (week) => {
+    const weekStart = getWeekStart(week);
+    const weekEnd = getWeekEnd(week);
+
+    return weekStart.getMonth()+1 + '/' + weekStart.getDate() + ' - ' + weekEnd.getMonth()+1 + '/' + weekEnd.getDate();
+}
 
 const CalendarView = ( {room} ) => {
 
     let [calendarIndex, setCalendarIndex] = useState(0);
-
+    let [weekString, setWeekString] = useState(getWeek(0))
 
     // store the calendars
     // just the next two weeks for now
@@ -511,6 +526,7 @@ const CalendarView = ( {room} ) => {
         if(calendarIndex > 0){
             console.log(calendarIndex-1);
             setCalendarIndex(calendarIndex-1);
+            setWeekString(calendarIndex-1);
         }
     }
 
@@ -518,6 +534,7 @@ const CalendarView = ( {room} ) => {
         if(calendarIndex < weekCalendars.length-1){
             console.log(calendarIndex+1);
             setCalendarIndex(calendarIndex+1);
+            setWeekString(calendarIndex+1);
         }
     }
 
@@ -528,6 +545,7 @@ const CalendarView = ( {room} ) => {
         <div className="calendar">
             <div className="calendarBar">
                 <div className="calendarButton" onClick={() => setCalendarLeftArrow()}><HiChevronDoubleLeft size={50} /></div>
+                <div style={{position:'fixed'}}><h2>{weekString}</h2></div>
                 <div className="calendarButton" onClick={() => setCalendarRightArrow()}><HiChevronDoubleRight size={50} /></div>
             </div>
             {weekCalendars[calendarIndex]}

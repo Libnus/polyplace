@@ -297,7 +297,7 @@ button.bookRoom:hover{
 .calendarBar{
   display: flex;
   height: 2%;
-  padding-bottom: 2%;
+  padding-bottom: 3%;
   justify-content: center;
   align-items: center;
 }
