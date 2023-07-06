@@ -5,6 +5,11 @@ import {AiOutlineCloseCircle} from 'react-icons/ai'
 import './Calendar.css';
 import '../../assets/styles/main.css';
 
+
+// options for toLocaleString function in the javascript date class
+// gets the actual weekday string from an int returned from getDay()
+const options = {weekday: 'long'};
+
 // =========== HELPERS
 
 // find the start of the week given a week offset
@@ -27,10 +32,21 @@ const getWeekEnd = (weekOffset) => {
     return weekEnd;
 }
 
+// takes a reservation time and returns the position (margin and height) for rendering
+const getPosition = (startTime,endTime) => {
+    let marginTop = 20 + (startTime.getHours()-8)*50;
+    marginTop += Math.round(startTime.getMinutes()*0.83333333333);
+
+    const height = Math.round(((endTime-startTime)/3.6e+6)*50);
+
+    console.log("calculatedMarginTop:",marginTop);
+
+    return [marginTop, height];
+}
+
 // ============================================
 
 const CalendarEvent = ( { day, time, position, colors } ) => {
-
     const [startTime, setStartTime] = useState(new Date(time[0].getTime()));
     const [endTime, setEndTime] = useState(new Date(time[1].getTime()));
 
@@ -63,8 +79,10 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         const styles = getComputedStyle(resizeableElement);
         let height = parseInt(styles.height);
 
-        let marginTop = convertMargin(parseInt(styles.marginTop));
+       // let marginTop = convertMargin(parseInt(styles.marginTop));
+        let marginTop = parseInt(resizeableElement.style.marginTop);
         let originalMarginTop = marginTop;
+        console.log("oroiginalMarginTop outside:", originalMarginTop);
 
         // check if inputted event collides with another event
         const checkCollisions = () => {
@@ -78,7 +96,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                     const eventTop = convertMargin(parseInt(eventStyle.marginTop));
                     const eventHeight = parseInt(eventStyle.height);
 
-                    if(marginTop > eventTop && marginTop < eventTop+eventHeight) return true;
+                    if(marginTop >= eventTop && marginTop < eventTop+eventHeight) return true;
                     if(marginTop+height < eventTop+eventHeight && marginTop+height > eventTop) return true;
                 }
             }
@@ -250,10 +268,14 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             if(eventY % 10 === 0 && eventY-y !== 0){
                 const dy = (eventY) - y;
                 marginTop += dy*25;
-                console.log("middle dy:", dy*25);
-                resizeableElement.style.marginTop = `${marginTop+20}px`;
-                //update event time
-                updateEventTime(dy, dy);
+                if(marginTop >= 0 && marginTop+height <= 650){
+                    resizeableElement.style.marginTop = `${marginTop+20}px`;
+                    //update event time
+                    updateEventTime(dy, dy);
+                }
+                else if(marginTop < 0) marginTop = 0;
+                else if(marginTop+height > 650) marginTop = 650-height;
+
             }
             y = event.clientY;
             if(checkCollisions()) {
@@ -273,9 +295,9 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             // if we can move it, otherwise jump event back to original location
             if(checkCollisions()){
                 marginTop = originalMarginTop;
-                resizeableElement.style.marginTop = `${marginTop+20}px`;
+                resizeableElement.style.marginTop = `${marginTop}px`;
+                console.log("reset marginTop:", marginTop);
             }
-            else originalMarginTop = marginTop;
 
             // reset styles
             resizeableElement.style.opacity = '1.0';
@@ -290,8 +312,10 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
         // TODO give different style to events being dragged
         const onMouseDownMiddleResize = (event) => {
-            getDragMaxMin();
+            //getDragMaxMin();
             y = event.clientY;
+            originalMarginTop = parseInt(resizeableElement.style.marginTop);
+            console.log("original:", originalMarginTop);
 
             // styles
             resizeableElement.style.top = null;
@@ -321,8 +345,15 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         }
         }, [day, time, startTime, endTime]);
 
+    const backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(colors.background);
+    const borderColor = getComputedStyle(document.documentElement).getPropertyValue(colors.border);
+
+    //const currentTime = new Date().gtHours();
+    let opacity = 1.0;
+    if( endTime < (new Date())) opacity= 0.5;
+
     return (
-        <div className={day + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], backgroundColor: colors.background, borderColor: colors.border}}>
+        <div className={day + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], WebkitBackdropFilter:'blur(10px)',  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
                 <div className="labels">
@@ -348,8 +379,25 @@ const Hour = ({ hour, createEvent, last }) => {
         createEvent(hour);
     };
 
+    // check if the hour has passed
+    // TODO more advanced checking. For example, if we are still in the hour allow user to create the event but at the current min
+    let passed = false;
+    const currentHour = new Date().getHours();
+    if(hour <= currentHour) passed = true;
+
     return (
-        <div className={ last ? "hourLast" : "hour" } onClick={() => handleClick()}></div>
+        <div className={` ${last ? "hourLast" : "hour"} ${passed ? "notClickable" : ""}`} onClick={() => !passed ? handleClick() : undefined}></div>
+    );
+}
+
+const TimeMarker = () => {
+    const marginTop = getPosition(new Date(), undefined)[0]-9;
+
+    return (
+        <div className="timeMarkerWrapper" style={{marginTop:`${marginTop}px`}}>
+            <div className="timeMarkerCircle"></div>
+            <hr className="timeMarkerLine"></hr>
+        </div>
     );
 }
 
@@ -358,20 +406,16 @@ const Day = ( {day, events, index, addCreatedEvent} ) => {
         return s[0].toUpperCase() + s.slice(1);
     }
 
+    // check if today's date matches this day component
+    let isToday = false;
+    const newDay = new Date().toLocaleDateString(undefined, options).toLowerCase()
+    if(newDay === day) isToday = true;
+
     let last = false;
     if(day === "friday"){
         last = true;
     }
 
-    // takes a reservation time and returns the position (margin and height) for rendering
-    const getPosition = (startTime,endTime) => {
-        const marginTop = 20 + (startTime.getHours()-8)*50;
-        const height = Math.round(((endTime-startTime)/3.6e+6)*50);
-
-        console.log(marginTop);
-
-        return [marginTop, height];
-    }
 
     const handleCreate = (hour) => {
         let startTime = new Date();
@@ -401,12 +445,13 @@ const Day = ( {day, events, index, addCreatedEvent} ) => {
     const getColor = (index,eventsIndex) => {
         const color = index % eventsIndex;
         return {
-            background: "var(--color-background-" + color + ")",
-            border: "var(--color-border-" + color + ")",
+            background: "--color-background-" + color,
+            border: "--color-border-" + color
         };
     }
     return(
         <div className="day">
+            {isToday && <TimeMarker />}
             {events.map((event,index) => (
                 <CalendarEvent
                     day={day}
@@ -453,7 +498,6 @@ const Calendar = ( {room, week} ) => {
         // parse reservations json returned from db
         // dates are turned into date objects and sorted into appropriate days
         const parseReservationsJson = (data) => {
-            const options = {weekday: 'long'};
 
             let newEvents = {
                 monday: [],

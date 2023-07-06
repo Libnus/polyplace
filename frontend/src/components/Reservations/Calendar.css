@@ -1,4 +1,32 @@
+:root{
+    #--color-background-0: #FFFDD0;
+    --color-background-0: 255,253,208;
+    #--color-border-0: #90EE90;
+    --color-border-0: 144,238,144;
+
+    #--color-background-1: #F7C59F;
+    --color-background-1: 247,197,159;
+    #--color-border-1: #FF6B35;
+    --color-border-1: 255,107,53;
+
+    #--color-background-2: #1A659E;
+    --color-background-2: 26,101,158;
+    #--color-border-2: #004E89;
+    --color-border-2: 0,78,137;
+
+    #--color-background-3: #EFEFD0;
+    --color-background-3: 239,239,208;
+    #--color-border-3: #456972;
+    --color-border-3: 69,105,114;
+
+    #--color-background-4: #D667A5;
+    --color-background-4: 214,103,165;
+    #--color-border-4: #6D5B79;
+    --color-border-4: 109,91,121;
+}
+
 .overlay{
+
   position: fixed;
   user-select: none;
   top: 0;
@@ -47,6 +75,30 @@
     position: relative;
 }
 
+.timeMarkerWrapper{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    z-index: 2000;
+}
+
+.timeMarkerLine{
+    width: 100%;
+    border: 0;
+    border-top: 2px solid red;
+    border-right-radius: 2px;
+}
+
+.timeMarkerCircle{
+    margin-top: 2%;
+    margin-left: -2.5%;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
 .dayLabel{
     text-align: center;
     font-weight: bold;
@@ -67,7 +119,11 @@
     box-sizing: border-box;
     height: 5%;
     border-top: 1px solid white;
-    cursor: pointer;
+    cursor: copy;
+}
+
+.notClickable{
+    cursor: not-allowed;
 }
 
 .eventCard{
@@ -86,23 +142,10 @@
     #box-shadow: 2px 2px 0.5px 0px rgba(0, 0, 0, 1.0), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3);
     transition: ease-out 0.2s;
     padding: 2%;
-    overflow-y: scroll;
-    overflow-x: hidden;
+    /* overflow-y: scroll; */
+    /* overflow-x: hidden; */
+    overflow: hidden;
 
-    --color-background-0: #FFFDD0;
-    --color-border-0: #90EE90;
-
-    --color-background-1: #F7C59F;
-    --color-border-1: #FF6B35;
-
-    --color-background-2: #1A659E;
-    --color-border-2: #004E89;
-
-    --color-background-3: #EFEFD0;
-    --color-border-3: #456972;
-
-    --color-background-4: #D667A5;
-    --color-border-4: #6D5B79;
 }
 
 .labels{
