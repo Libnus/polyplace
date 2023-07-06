@@ -1,7 +1,8 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
-import './Building.css';
+import {AiOutlineCloseCircle} from 'react-icons/ai'
+import './Calendar.css';
 import '../../assets/styles/main.css';
 
 // =========== HELPERS
@@ -19,7 +20,7 @@ const getWeekStart = (weekOffset) => {
 
 const getWeekEnd = (weekOffset) => {
     const weekEnd = new Date();
-    const dateOffset = weekEnd.getDate() + (7-weekEnd.getDay());
+    const dateOffset = weekEnd.getDate() + (6-weekEnd.getDay());
 
     weekEnd.setDate(dateOffset+(weekOffset*7));
     console.log('weekEnd:', weekEnd);
@@ -29,6 +30,10 @@ const getWeekEnd = (weekOffset) => {
 // ============================================
 
 const CalendarEvent = ( { day, time, position, colors } ) => {
+
+    const [startTime, setStartTime] = useState(new Date(time[0].getTime()));
+    const [endTime, setEndTime] = useState(new Date(time[1].getTime()));
+
     const sensitivity = 15;
 
     const refBox = useRef(null);
@@ -43,6 +48,16 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 
     useEffect(() => {
+
+        const updateEventTime = (dy_top, dy_bottom) => {
+            // i have no idea why we have to update the time[0] variable but if i put the new Date
+            // into another variable it never updates
+            time[0] = new Date(time[0].getTime() - (((-1*dy_top)*30) * 60000));
+            setStartTime(time[0]);
+
+            time[1] = new Date(time[1].getTime() - (((-1*dy_bottom)*30) * 60000));
+            setEndTime(time[1]);
+        }
 
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
@@ -141,6 +156,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
         // TOP RESIZE
         const onMouseMoveTopResize = (event) => {
+            let updateTime = true;
             if(event.clientY % sensitivity === 0){
 
                 let dy = (event.clientY) - y;
@@ -149,9 +165,11 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
                 if(height > maxHeight){
                     height = maxHeight;
+                    updateTime = false;
                 }
                 if(height < 50){
                     height = 50;
+                    updateTime = false;
                 }
 
                 // update height and marginTop
@@ -159,6 +177,9 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 resizeableElement.style.marginTop = `${marginTop+19}px`;
 
                 resizeableElement.style.height = `${height}px`;
+
+                //update event time
+                if(updateTime) updateEventTime(dy, 0);
             }
             y = event.clientY;
         };
@@ -180,18 +201,24 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
         // BOTTOM RESIZE
         const onMouseMoveBottomResize = (event) => {
+            let updateTime = true;
             if(event.clientY % sensitivity === 0){
                 let dy = (event.clientY) - y;
                 height = height+dy*25;
 
                 if(height > minHeight){
                     height = minHeight;
+                    updateTime = false;
                 }
                 if(height < 50){
                     height = 50;
+                    updateTime = false;
                 }
 
                 resizeableElement.style.height = `${height}px`;
+
+                //update event time
+                if(updateTime) updateEventTime(0, dy);
             }
             y = event.clientY;
             console.log("height", height);
@@ -219,11 +246,14 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
         // GRAB EVENT
         const onMouseMoveMiddleResize = (event) => {
-            if(event.clientY % sensitivity === 0){
-                let dy = (event.clientY) - y;
-                marginTop = marginTop+dy*25;
+            const eventY = event.clientY
+            if(eventY % 10 === 0 && eventY-y !== 0){
+                const dy = (eventY) - y;
+                marginTop += dy*25;
+                console.log("middle dy:", dy*25);
                 resizeableElement.style.marginTop = `${marginTop+20}px`;
-
+                //update event time
+                updateEventTime(dy, dy);
             }
             y = event.clientY;
             if(checkCollisions()) {
@@ -234,6 +264,8 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 resizeableElement.style.marginLeft = '0px';
                 resizeableElement.style.width = '100%';
             }
+
+
         };
 
         const onMouseUpMiddleResize = (event) => {
@@ -287,7 +319,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             resizerBottom.removeEventListener("mousedown", onMouseDownBottomResize);
             resizerMiddle.removeEventListener("mousedown", onMouseDownMiddleResize);
         }
-    }, [day]);
+        }, [day, time, startTime, endTime]);
 
     return (
         <div className={day + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], backgroundColor: colors.background, borderColor: colors.border}}>
@@ -303,7 +335,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                     Henry, Brian & Zwaka, Linus
                 </div>
                 <div className="time">
-                    {time[0].toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}-{time[1].toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}
+                    {startTime.toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}-{time[1].toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}
                 </div>
             <div className="resizeBottom" ref={refBottom}></div>
         </div>
@@ -313,7 +345,6 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 const Hour = ({ hour, createEvent, last }) => {
     const handleClick = () => {
-        console.log("creating event");
         createEvent(hour);
     };
 
@@ -506,11 +537,14 @@ const getWeek = (week) => {
     const weekStart = getWeekStart(week);
     const weekEnd = getWeekEnd(week);
 
-    return weekStart.getMonth()+1 + '/' + weekStart.getDate() + ' - ' + weekEnd.getMonth()+1 + '/' + weekEnd.getDate();
+    return weekStart.getMonth()+1 + '/' + weekStart.getDate() + ' - ' + (weekEnd.getMonth()+1) + '/' + weekEnd.getDate();
 }
 
-const CalendarView = ( {room} ) => {
+const CalendarView = ( {room, handleOpen} ) => {
 
+    // don't be confused by the jank code below...
+    // calendarIndex specifies the "calendar index" the page is currently rendering while weekString is the string associated with that calendar index
+    // when use selects left or right arrow we update the index and week string based on that index and then we render the page again
     let [calendarIndex, setCalendarIndex] = useState(0);
     let [weekString, setWeekString] = useState(getWeek(0))
 
@@ -521,23 +555,25 @@ const CalendarView = ( {room} ) => {
         <Calendar key={1} week={1} room={room} />
     ];
 
+    useEffect(() => {
+        setWeekString(getWeek(calendarIndex));
+    });
 
+    // controls what week is selected by user
     const setCalendarLeftArrow = () => {
         if(calendarIndex > 0){
-            console.log(calendarIndex-1);
             setCalendarIndex(calendarIndex-1);
-            setWeekString(calendarIndex-1);
         }
     }
 
     const setCalendarRightArrow = () => {
         if(calendarIndex < weekCalendars.length-1){
-            console.log(calendarIndex+1);
             setCalendarIndex(calendarIndex+1);
-            setWeekString(calendarIndex+1);
         }
     }
 
+
+                // <div className="calendarButton" style={{marginLeft: '95%', position:'fixed'}} onClick={() => {handleOpen()}}><AiOutlineCloseCircle size={25} /></div>
 
     return (
         <>
@@ -553,6 +589,8 @@ const CalendarView = ( {room} ) => {
         <div className="main"/>
         </>
     );
+
+
 };
 
 export default CalendarView;

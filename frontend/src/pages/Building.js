@@ -8,8 +8,9 @@ import Calendar from '../components/Reservations/Calendar'
 const Room = ({index, room, floor, building}) => {
 	let [isCalendarOpen, setCalendarOpen] = useState(false);
 
-	const handleClick = () => {
-		setCalendarOpen(true);
+	const handleOpen = () => {
+		if(isCalendarOpen === false) setCalendarOpen(true);
+		else setCalendarOpen(false);
 	};
 
 	console.log(room);
@@ -41,8 +42,8 @@ const Room = ({index, room, floor, building}) => {
 	
 	return (
 		<>
-		{isCalendarOpen && <Calendar room={room} />}
-		<div className={statusClass} onClick={handleClick}>
+		{isCalendarOpen && <Calendar room={room} handleOpen={handleOpen} />}
+			<div className={statusClass} onClick={() => handleOpen()}>
 			<div className="labels">
 				Room {room.room_num}
 			</div>

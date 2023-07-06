@@ -143,6 +143,8 @@ button.bookRoom:hover{
   padding-bottom: 1%;
 }
 
+# TODO move to Calendar.css
+
 .overlay{
   position: fixed;
   user-select: none;
