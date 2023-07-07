@@ -34,14 +34,24 @@ const getWeekEnd = (weekOffset) => {
 
 // takes a reservation time and returns the position (margin and height) for rendering
 const getPosition = (startTime,endTime) => {
-    let marginTop = 20 + (startTime.getHours()-8)*50;
+    let marginTop = Math.floor(19 + (startTime.getHours()-8)*50);
     marginTop += Math.round(startTime.getMinutes()*0.83333333333);
 
     const height = Math.round(((endTime-startTime)/3.6e+6)*50);
 
-    console.log("calculatedMarginTop:",marginTop);
-
     return [marginTop, height];
+}
+
+const getTimeFromPosition = (margin) => {
+    margin -= 19;
+    let time = new Date()
+    const hours = Math.floor(((margin) / 50) + 8); // use same formula as getting position ((hours - 8)*50) + 20
+                                                        // where 8 is the starting time of the calendar, 50 is one hour, and 20 is the starting offset of the calendar
+    time.setHours(hours);
+    margin -= ((hours-8)*50); // get minutes alone without hours margin and 20 offset
+    const minutes = Math.round(margin / 0.83333333333);
+    time.setMinutes(minutes);
+    return time;
 }
 
 // ============================================
@@ -65,35 +75,46 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
     useEffect(() => {
 
-        const updateEventTime = (dy_top, dy_bottom) => {
-            // i have no idea why we have to update the time[0] variable but if i put the new Date
-            // into another variable it never updates
-            time[0] = new Date(time[0].getTime() - (((-1*dy_top)*30) * 60000));
-            setStartTime(time[0]);
 
-            time[1] = new Date(time[1].getTime() - (((-1*dy_bottom)*30) * 60000));
-            setEndTime(time[1]);
-        }
+        // const updateEventTime = (dy_top, dy_bottom) => {
+        //     // i have no idea why we have to update the time[0] variable but if i put the new Date
+        //     // into another variable it never updates
+        //     time[0] = new Date(time[0].getTime() - (((-1*dy_top)*30) * 60000));
+        //     setStartTime(time[0]);
+
+        //     time[1] = new Date(time[1].getTime() - (((-1*dy_bottom)*30) * 60000));
+        //     setEndTime(time[1]);
+        // };
 
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
         let height = parseInt(styles.height);
 
-       // let marginTop = convertMargin(parseInt(styles.marginTop));
-        let marginTop = parseInt(resizeableElement.style.marginTop);
+        let marginTop = parseInt(styles.marginTop);
+        //let marginTop = parseInt(resizeableElement.style.marginTop);
         let originalMarginTop = marginTop;
-        console.log("oroiginalMarginTop outside:", originalMarginTop);
+        let currTime = getPosition(new Date(), new Date())[0];
+
+
+        const updateEventTime = () => {
+            console.log("here");
+            time[0] = getTimeFromPosition(marginTop);
+            time[1] = getTimeFromPosition(marginTop + height);
+
+            setStartTime(time[0]);
+            setEndTime(time[1]);
+        };
 
         // check if inputted event collides with another event
         const checkCollisions = () => {
             const events = document.getElementsByClassName(day);
             const resizeableElement = refBox.current;
-            marginTop = convertMargin(parseInt(styles.marginTop));
+            marginTop = parseInt(styles.marginTop);
 
             for(let i = 0; i < events.length; i++){
                 if(events[i] !== resizeableElement){
                     const eventStyle = getComputedStyle(events[i]);
-                    const eventTop = convertMargin(parseInt(eventStyle.marginTop));
+                    const eventTop = parseInt(eventStyle.marginTop);
                     const eventHeight = parseInt(eventStyle.height);
 
                     if(marginTop >= eventTop && marginTop < eventTop+eventHeight) return true;
@@ -107,18 +128,21 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         // maxHeight: height a div can have when resizing the top of the div (top resize). Set it to zero as the default value (top margin in the day)
         // minHeight: height a div can have when resizing the bottom of the div (bottom resize)
         let maxHeight = 0;
-        let minHeight = convertMargin(650 - (marginTop)); //TODO change 619 to maxSize of day as scaling could change
+        let minHeight = 650 - (marginTop); //TODO change 650 to maxSize of day as scaling could change
 
 
 
         // get the max and min height our div can be to avoid collisions with other events and not allow users to schedule a reservation during another time.
         const getMaxMinHeights = () => {
+            height = parseInt(resizeableElement.style.height);
             const events = document.getElementsByClassName(day);
-            marginTop = convertMargin(parseInt(styles.marginTop));
+            //marginTop = convertMargin(parseInt(styles.marginTop));
+            marginTop = parseInt(styles.marginTop);
 
             // also define max and min margins for looping and we will set heights after. This is so there is no confusion between heights and margin calculations during iteration
-            let maxMargin = 0;
-            let minMargin = 650;
+            let maxMargin = 19;
+            //if(maxMargin < 0) maxMargin = 0;
+            let minMargin = 669;
 
             // TODO move to checkCollisions method
             // loop over all events from this day
@@ -126,31 +150,26 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             for(let i = 0; i < events.length; i++){
                 if(events[i] !== resizeableElement){
                     const eventStyle = getComputedStyle(events[i]);
-                    const eventTop = convertMargin(parseInt(eventStyle.marginTop)); // the top margin of the event aka the "position" or "time" in the day the event is
-                    console.log("eventTop", eventTop);
+                    const eventTop = parseInt(eventStyle.marginTop); // the top margin of the event aka the "position" or "time" in the day the event is
 
                     // if the event is "later" than our current max and the event is actually before us then update maxMargin to be the margin of the event + the events height
                     if(eventTop >= maxMargin && eventTop < marginTop) maxMargin = eventTop + parseInt(eventStyle.height);
 
                     // if the event margin is lower or "later" than the current minHeight then update minHeight to be event the marginTop of that event - our marginTop
                     if(eventTop <= minMargin && eventTop > marginTop) minMargin = eventTop;
-                    //console.log("maxMargin = inloop", maxMargin);
-                    console.log("minHeight in loop", minHeight);
                 }
             }
 
             // we calculate maxHeight as (our margin - the max margin we found in the loop) + current height of our div :)
             maxHeight = (marginTop - maxMargin) + height;
+            console.log("marginTop in max min calculations", marginTop);
             minHeight = minMargin - marginTop;
-            console.log("maxHeight", maxHeight);
-            console.log("minheight",minHeight);
         };
 
         // get the max and min div margins for draggable events
         // check other divs for collisions
         const getDragMaxMin = () => {
             //const marginTop = parseInt(styles.marginTop);
-            console.log("marginTop getDragMaxmin",marginTop)
 
             maxHeight = 0; // 0 is the max margin
             minHeight = 650 - height; // 650 is the min margin
@@ -162,7 +181,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 if(events[i] !== resizeableElement){
                     const eventStyle = getComputedStyle(events[i]);
                     const eventHeight = parseInt(eventStyle.height); // height + 19 offset for day label
-                    const eventTop = convertMargin(parseInt(eventStyle.marginTop));
+                    const eventTop = parseInt(eventStyle.marginTop);
 
                     if(eventTop >= maxHeight && eventTop < marginTop) maxHeight = (eventTop+eventHeight);
                     if((eventTop-height) <= minHeight && eventTop > marginTop) minHeight = eventTop-height;
@@ -176,10 +195,9 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         const onMouseMoveTopResize = (event) => {
             let updateTime = true;
             if(event.clientY % sensitivity === 0){
-
-                let dy = (event.clientY) - y;
+                const dy = (event.clientY) - y;
                 const originalHeight = height;
-                height = height-dy*25;
+                height -= dy*25;
 
                 if(height > maxHeight){
                     height = maxHeight;
@@ -192,27 +210,30 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
                 // update height and marginTop
                 marginTop -= (height-originalHeight);
-                resizeableElement.style.marginTop = `${marginTop+19}px`;
-
+                resizeableElement.style.marginTop = `${marginTop}px`;
                 resizeableElement.style.height = `${height}px`;
 
                 //update event time
-                if(updateTime) updateEventTime(dy, 0);
+                if(updateTime) updateEventTime();
             }
             y = event.clientY;
         };
 
         const onMouseUpTopResize = (event) => {
+            console.log("end height:",height);
             document.removeEventListener("mousemove", onMouseMoveTopResize);
             document.removeEventListener("mouseup", onMouseUpTopResize);
         };
 
         const onMouseDownTopResize = (event) => {
             getMaxMinHeights();
+            console.log("start maxheight:",maxHeight);
             y = event.clientY;
             const styles = window.getComputedStyle(resizeableElement);
-            resizeableElement.style.bottom = styles.bottom;
+
             resizeableElement.style.top = null;
+            resizeableElement.style.bottom = styles.bottom;
+
             document.addEventListener("mousemove", onMouseMoveTopResize);
             document.addEventListener("mouseup", onMouseUpTopResize);
         };
@@ -236,20 +257,22 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 resizeableElement.style.height = `${height}px`;
 
                 //update event time
-                if(updateTime) updateEventTime(0, dy);
+                if(updateTime) {
+                    updateEventTime();
+                }
             }
             y = event.clientY;
             console.log("height", height);
         };
 
         const onMouseUpBottomResize = (event) => {
-            console.log("new maxHeight", maxHeight);
             document.removeEventListener("mousemove", onMouseMoveBottomResize)
             document.removeEventListener("mouseup", onMouseUpBottomResize);
         };
 
         const onMouseDownBottomResize = (event) =>{
             getMaxMinHeights();
+            console.log("start min height", minHeight);
             y = event.clientY;
 
             // get styles
@@ -265,15 +288,22 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         // GRAB EVENT
         const onMouseMoveMiddleResize = (event) => {
             const eventY = event.clientY
+            let maxDragMargin = getPosition(new Date(), new Date())[0];
+
+            if (maxDragMargin < 0) maxDragMargin = 0;
             if(eventY % 10 === 0 && eventY-y !== 0){
                 const dy = (eventY) - y;
                 marginTop += dy*25;
-                if(marginTop >= 0 && marginTop+height <= 650){
+                if(marginTop >= maxDragMargin && marginTop+height <= 650){
                     resizeableElement.style.marginTop = `${marginTop+20}px`;
                     //update event time
-                    updateEventTime(dy, dy);
+                    updateEventTime();
                 }
-                else if(marginTop < 0) marginTop = 0;
+                else if(marginTop < maxDragMargin) {
+                    marginTop = maxDragMargin;
+                    resizeableElement.style.marginTop = `${marginTop}px`
+                    updateEventTime();
+                }
                 else if(marginTop+height > 650) marginTop = 650-height;
 
             }
@@ -296,7 +326,6 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             if(checkCollisions()){
                 marginTop = originalMarginTop;
                 resizeableElement.style.marginTop = `${marginTop}px`;
-                console.log("reset marginTop:", marginTop);
             }
 
             // reset styles
@@ -315,7 +344,6 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             //getDragMaxMin();
             y = event.clientY;
             originalMarginTop = parseInt(resizeableElement.style.marginTop);
-            console.log("original:", originalMarginTop);
 
             // styles
             resizeableElement.style.top = null;
@@ -391,7 +419,7 @@ const Hour = ({ hour, createEvent, last }) => {
 }
 
 const TimeMarker = () => {
-    const marginTop = getPosition(new Date(), undefined)[0]-9;
+    const marginTop = getPosition(new Date(), new Date())[0]-9;
 
     return (
         <div className="timeMarkerWrapper" style={{marginTop:`${marginTop}px`}}>

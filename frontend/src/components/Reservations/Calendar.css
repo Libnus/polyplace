@@ -132,7 +132,7 @@
     position: absolute;
     z-index: 2000;
     margin-top: 120px;
-    height: 5%;
+    height: 50px;
     width: 100%;
     box-sizing: border-box;
     border-left: 6px solid lightgreen;
