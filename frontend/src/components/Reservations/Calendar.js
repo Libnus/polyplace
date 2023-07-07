@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
+import { throttle } from 'lodash';
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import {AiOutlineCloseCircle} from 'react-icons/ai'
 import './Calendar.css';
@@ -67,10 +68,16 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
     const refBottom = useRef(null);
     const refMiddle = useRef(null);
 
+    // NOTE: please leave this EVIL function here
+    // i would like to preserve this function in as a reminder of how simple life
+    // is if you don't ever try to make a website
+
     // convert from px to int for height calculations
-    const convertMargin = (num) => {
-        return Math.floor((num)/25)*25;
-    }
+    // const convertMargin = (num) => {
+    //     return Math.floor((num)/25)*25;
+    // }
+
+    // ---- please continue with your day now ----
 
 
     useEffect(() => {
@@ -94,6 +101,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         //let marginTop = parseInt(resizeableElement.style.marginTop);
         let originalMarginTop = marginTop;
         let currTime = getPosition(new Date(), new Date())[0];
+        let y = null;
 
 
         const updateEventTime = () => {
@@ -109,7 +117,6 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         const checkCollisions = () => {
             const events = document.getElementsByClassName(day);
             const resizeableElement = refBox.current;
-            marginTop = parseInt(styles.marginTop);
 
             for(let i = 0; i < events.length; i++){
                 if(events[i] !== resizeableElement){
@@ -140,7 +147,9 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             marginTop = parseInt(styles.marginTop);
 
             // also define max and min margins for looping and we will set heights after. This is so there is no confusion between heights and margin calculations during iteration
-            let maxMargin = 19;
+            //let maxMargin = 19;
+            let maxMargin = currTime;
+            if(maxMargin < 19) maxMargin = 19;
             //if(maxMargin < 0) maxMargin = 0;
             let minMargin = 669;
 
@@ -188,8 +197,6 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 }
             }
         }
-
-        let y = 0;
 
         // TOP RESIZE
         const onMouseMoveTopResize = (event) => {
@@ -287,20 +294,25 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
         // GRAB EVENT
         const onMouseMoveMiddleResize = (event) => {
-            const eventY = event.clientY
-            let maxDragMargin = getPosition(new Date(), new Date())[0];
+            const eventY = event.clientY;
+
+            day.setHours(8);
+            let maxDragMargin = 19;
+            if( new Date() >= day ) maxDragMargin = getPosition(day, day)[0];
 
             if (maxDragMargin < 0) maxDragMargin = 0;
-            if(eventY % 10 === 0 && eventY-y !== 0){
-                const dy = (eventY) - y;
+            const dy = (eventY) - y;
+            if(eventY % 15 === 0 && eventY-y !== 0 && dy !== 0){
                 marginTop += dy*25;
+                console.log(dy*25, marginTop);
                 if(marginTop >= maxDragMargin && marginTop+height <= 650){
-                    resizeableElement.style.marginTop = `${marginTop+20}px`;
+                    resizeableElement.style.marginTop = `${marginTop}px`;
                     //update event time
                     updateEventTime();
                 }
                 else if(marginTop < maxDragMargin) {
                     marginTop = maxDragMargin;
+                    console.log("im not supposed to be here");
                     resizeableElement.style.marginTop = `${marginTop}px`
                     updateEventTime();
                 }
@@ -319,6 +331,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 
         };
+        //const throttleMouseMove = onMouseMoveMiddleResize();
 
         const onMouseUpMiddleResize = (event) => {
             // check if we can actually move there
@@ -344,6 +357,8 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             //getDragMaxMin();
             y = event.clientY;
             originalMarginTop = parseInt(resizeableElement.style.marginTop);
+            marginTop = originalMarginTop;
+            console.log("start marginTop",marginTop);
 
             // styles
             resizeableElement.style.top = null;
@@ -402,7 +417,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 }
 
-const Hour = ({ hour, createEvent, last }) => {
+const Hour = ({ hour, day, createEvent, last }) => {
     const handleClick = () => {
         createEvent(hour);
     };
@@ -410,8 +425,9 @@ const Hour = ({ hour, createEvent, last }) => {
     // check if the hour has passed
     // TODO more advanced checking. For example, if we are still in the hour allow user to create the event but at the current min
     let passed = false;
-    const currentHour = new Date().getHours();
-    if(hour <= currentHour) passed = true;
+    day.setHours(hour);
+    day.setMinutes(0);
+    if(new Date() > day) passed = true;
 
     return (
         <div className={` ${last ? "hourLast" : "hour"} ${passed ? "notClickable" : ""}`} onClick={() => !passed ? handleClick() : undefined}></div>
@@ -429,35 +445,36 @@ const TimeMarker = () => {
     );
 }
 
-const Day = ( {day, events, index, addCreatedEvent} ) => {
+const Day = ( {dayIndex, events, index, addCreatedEvent} ) => {
     const capitalize = (s) => {
         return s[0].toUpperCase() + s.slice(1);
     }
 
     // check if today's date matches this day component
-    let isToday = false;
-    const newDay = new Date().toLocaleDateString(undefined, options).toLowerCase()
-    if(newDay === day) isToday = true;
+    const day = new Date();
+    day.setDate(dayIndex);
 
-    let last = false;
-    if(day === "friday"){
-        last = true;
-    }
+    const isToday = new Date().getDate() === day.getDate();
+    const weekday = day.toLocaleDateString(undefined, options).toLowerCase()
+
+    const last = weekday === "friday";
 
 
     const handleCreate = (hour) => {
         let startTime = new Date();
+        startTime.setDate(dayIndex);
         startTime.setHours(hour);
         startTime.setMinutes(0);
         startTime.setSeconds(0);
     
         let endTime = new Date();
+        endTime.setDate(dayIndex);
         endTime.setHours(hour+1);
         endTime.setMinutes(0);
         endTime.setSeconds(0);
 
         const newEvent = {
-            day: day,
+            day: weekday,
             first_name: "Linus",
             last_name: "Zwaka",
             email: "zwakal@rpi.edu", // temp email
@@ -466,7 +483,7 @@ const Day = ( {day, events, index, addCreatedEvent} ) => {
             end_time: endTime,
         }
         
-        addCreatedEvent(day,newEvent);
+        addCreatedEvent(newEvent);
 
     }
 
@@ -489,64 +506,57 @@ const Day = ( {day, events, index, addCreatedEvent} ) => {
                     colors={getColor(index,5)} 
                 />
             ))}
-            <div className="dayLabel">{capitalize(day)}</div>
-            <Hour hour={8} last={last} createEvent={handleCreate} />
-            <Hour hour={9} last={last} createEvent={handleCreate}/>
-            <Hour hour={10} last={last} createEvent={handleCreate}/>
-            <Hour hour={11} last={last} createEvent={handleCreate}/>
-            <Hour hour={12} last={last} createEvent={handleCreate}/>
-            <Hour hour={13} last={last} createEvent={handleCreate}/>
-            <Hour hour={14} last={last} createEvent={handleCreate}/>
-            <Hour hour={15} last={last} createEvent={handleCreate}/>
-            <Hour hour={16} last={last} createEvent={handleCreate}/>
-            <Hour hour={17} last={last} createEvent={handleCreate}/>
-            <Hour hour={18} last={last} createEvent={handleCreate}/>
-            <Hour hour={19} last={last} createEvent={handleCreate}/>
-            <Hour hour={20} last={last} createEvent={handleCreate}/>
+            <div className="dayLabel">{capitalize(weekday)}</div>
+            <Hour hour={8}i day={day} last={last} createEvent={handleCreate} />
+            <Hour hour={9} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={10} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={11} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={12} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={13} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={14} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={15} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={16} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={17} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={18} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={19} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={20} day={day} last={last} createEvent={handleCreate}/>
         </div>
     );
 }
 
+// creates a week dictionary to store events in
+// takes in the week start date (sunday)
+const createWeek = (weekStart) => {
+    const week = {};
+    for(let i = 0; i < 5; i++){
+        week[weekStart.getDate()+i] = [];
+    }
+
+    return week;
+}
 
 const Calendar = ( {room, week} ) => {
     let [eventCreated, setEventCreated] = useState(false);
 
     let [events,setEvents] = useState({
-        monday: [],
-        tuesday: [],
-        wednesday: [],
-        thursday: [],
-        friday: [],
     });
 
     useEffect(() => {
         const weekStart = getWeekStart(week);
-        console.log("Week start", weekStart, week);
 
         // parse reservations json returned from db
         // dates are turned into date objects and sorted into appropriate days
         const parseReservationsJson = (data) => {
 
-            let newEvents = {
-                monday: [],
-                tuesday: [],
-                wednesday: [],
-                thursday: [],
-                friday: [],
-            };
+            const newEvents = createWeek(weekStart);
+            console.log("newevents",newEvents);
 
             for(let i = 0; i < data.length; i++){
                 data[i].start_time = new Date(data[i].start_time);
                 data[i].end_time = new Date(data[i].end_time);
 
-                //events[data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()] = "yes";
-                const day = data[i].start_time.toLocaleDateString(undefined, options).toLowerCase()
-
-                data[i].day = day;
-
-                //newEvents[day].push(newCalendarEvent(day,data[i],i));
-                newEvents[day].push(data[i]);
-                console.log("newevents", newEvents);
+                console.log("data[i]",newEvents[data[i].start_time]);
+                newEvents[data[i].start_time.getDate()].push(data[i]);
             }
 
             setEvents(newEvents);
@@ -568,15 +578,18 @@ const Calendar = ( {room, week} ) => {
 
 
 
-    const addCreatedEvent = (day, newEvent) => {
+    const addCreatedEvent = (newEvent) => {
         if(!eventCreated){
-            let newEvents = events[day];
-            newEvents.push(newEvent);
-            setEvents({...events, [day]: newEvents});
+            const newEvents = events;
+            console.log("adding craeted event", newEvents, newEvent);
+            newEvents[newEvent.start_time.getDate()].push(newEvent);
 
-            console.log("newly created", events);
+            // let newEvents = events[day];
+            // newEvents.push(newEvent);
+            // setEvents({...events, [day]: newEvents});
 
             setEventCreated(true);
+            setEvents(newEvents);
         }
     }
 
@@ -599,7 +612,7 @@ const Calendar = ( {room, week} ) => {
             </div>
 
             {Object.entries(events).map(([dayKey,value]) => (
-                <Day day={dayKey} events={value} key={dayKey} addCreatedEvent={addCreatedEvent}/>
+                <Day dayIndex={dayKey} events={value} addCreatedEvent={addCreatedEvent}/>
             ))}
         </div>
     );
