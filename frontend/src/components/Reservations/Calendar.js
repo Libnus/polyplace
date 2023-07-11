@@ -35,10 +35,14 @@ const getWeekEnd = (weekOffset) => {
 
 // takes a reservation time and returns the position (margin and height) for rendering
 const getPosition = (startTime,endTime) => {
+    console.log("endtimeKKKKKKKK", endTime);
     let marginTop = Math.floor(19 + (startTime.getHours()-8)*50);
     marginTop += Math.round(startTime.getMinutes()*0.83333333333);
 
-    const height = Math.round(((endTime-startTime)/3.6e+6)*50);
+
+    let height = (endTime.getHours()-startTime.getHours()) * 50;
+    height += Math.round(endTime.getMinutes()-startTime.getMinutes())*0.83333333333;
+    console.log('height',height);
 
     return [marginTop, height];
 }
@@ -60,7 +64,33 @@ const getTimeFromPosition = (margin) => {
 // calendar event editor
 // this allows the user to edit event details like time and in the future day. This window also allows the user to confirm their reservation
 // TODO allow date to be edited and it will move day
-const EventEdit = ( { time, marginTop , setStartTime, setEndTime } ) => {
+const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime } ) => {
+    const startDateString = `${startTime.getFullYear()}-${('0' + (startTime.getMonth()+1)).slice(-2)}-${startTime.getDate()}`;
+    const startTimeString = `${('0' + startTime.getHours()).slice(-2)}:${(startTime.getMinutes()+'0').slice(-2)}`
+    const endTimeString = `${('0' + endTime.getHours()).slice(-2)}:${(endTime.getMinutes()+'0').slice(-2)}`
+    console.log("starttime",startTimeString);
+
+    const handleStartChange = (event) => {
+        const newStart = new Date();
+        newStart.setHours(parseInt(event.target.value.slice(0,2)));
+        newStart.setMinutes(parseInt(event.target.value.slice(3)));
+
+        console.log("startnenwnwnw");
+        if(newStart.getHours() >= 8){
+            setStartTime(newStart);
+        }
+    };
+
+    const handleEndChange = (event) => {
+        const newEnd = new Date();
+        newEnd.setHours(parseInt(event.target.value.slice(0,2)));
+        newEnd.setMinutes(parseInt(event.target.value.slice(3)));
+
+        console.log("newEvd",newEnd.getHours());
+        if(newEnd.getHours() <= 20){
+            setEndTime(newEnd);
+        }
+    };
 
     return (
         <div class="message" style={{marginTop: `${marginTop-27}px`}}>
@@ -70,17 +100,17 @@ const EventEdit = ( { time, marginTop , setStartTime, setEndTime } ) => {
 
                 <div className="dateWrapper">
                     <div className="formField" style={{fontSize: "10pt"}}>Date:</div>
-                    <input className="date" type="date" id="start" name="trip-start" value="2023-07-11" min="2018-01-01" max="2018-12-31" />
+                    <input className="date" type="date" id="start" name="reserveStart" defaultValue={startDateString} min={startDateString} max="2018-12-31"/>
                 </div>
 
                 <div className="times">
                     <div className="start">
                         <div className="formField">Start Time</div>
-                        <input className="time" type="time" id="appt" name="appt" min="08:00" max="20:00"/>
+                        <input className="time" type="time" id="start" name="start" defaultValue={startTimeString} min="08:00" max="20:00" onChange={handleStartChange}/>
                     </div>
                     <div class="end">
                         <div className="formField">End Time</div>
-                        <input className="time" type="time" id="appt" name="appt" min="08:00" max="20:00"/>
+                        <input className="time" type="time" id="start" name="end" value={endTimeString} min="08:00" max="20:00" onChange={handleEndChange}/>
                     </div>
                 </div>
             </div>
@@ -120,9 +150,20 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
-        let height = parseInt(styles.height);
+        //let height = parseInt(styles.height);
 
-        let marginTop = parseInt(styles.marginTop);
+        // get position from the time the event is set to
+        //let marginTop = parseInt(styles.marginTop);
+        console.log('start', startTime);
+        console.log('end', endTime);
+        let position = getPosition(startTime, endTime);
+        let marginTop = position[0];
+        let height = position[1];
+
+        // set the margin and height to the given pixels from position
+        resizeableElement.style.marginTop = `${marginTop}px`;
+        resizeableElement.style.height = `${height}px`;
+
         //let marginTop = parseInt(resizeableElement.style.marginTop);
         let originalMarginTop = marginTop;
         let currTime = getPosition(new Date(), new Date())[0];
@@ -339,7 +380,6 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 }
                 else if(marginTop < maxDragMargin) {
                     marginTop = maxDragMargin;
-                    console.log("im not supposed to be here");
                     resizeableElement.style.marginTop = `${marginTop}px`
                     updateEventTime();
                 }
@@ -445,7 +485,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
     return (
         <>
-        {editEvent && <EventEdit time={time} marginTop={getPosition(startTime,endTime)[0]} setStartTime={setStartTime} setEndTime={setEndTime} />}
+        {editEvent && <EventEdit marginTop={getPosition(startTime,endTime)[0]} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} />}
         <div className={day + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], WebkitBackdropFilter:'blur(10px)',  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
