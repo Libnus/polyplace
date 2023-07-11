@@ -600,8 +600,8 @@ const Day = ( {dayIndex, events, index, addCreatedEvent} ) => {
                 />
             ))}
             <div className="dayLabel">{capitalize(weekday)}</div>
-            <Hour hour={8}i day={day} last={last} createEvent={handleCreate} />
-            <Hour hour={9} day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={8}  day={day} last={last} createEvent={handleCreate}/>
+            <Hour hour={9}  day={day} last={last} createEvent={handleCreate}/>
             <Hour hour={10} day={day} last={last} createEvent={handleCreate}/>
             <Hour hour={11} day={day} last={last} createEvent={handleCreate}/>
             <Hour hour={12} day={day} last={last} createEvent={handleCreate}/>
@@ -753,16 +753,15 @@ const CalendarView = ( {room, handleOpen} ) => {
     }
 
 
-                // <div className="calendarButton" style={{marginLeft: '95%', position:'fixed'}} onClick={() => {handleOpen()}}><AiOutlineCloseCircle size={25} /></div>
-
     return (
         <>
         <div className="overlay"/>
         <div className="calendar">
             <div className="calendarBar">
                 <div className="calendarButton" onClick={() => setCalendarLeftArrow()}><HiChevronDoubleLeft size={50} /></div>
-                <div style={{position:'fixed'}}><h2>{weekString}</h2></div>
+                <div style={{position:'center'}}><h2>{weekString}</h2></div>
                 <div className="calendarButton" onClick={() => setCalendarRightArrow()}><HiChevronDoubleRight size={50} /></div>
+              <div className="calendarButton" style={{width:'35px', height:'35px', position:'absolute', marginLeft:'98%', marginTop:'-2%'}} onClick={() => {handleOpen()}}><AiOutlineCloseCircle size={35} /></div>
             </div>
             {weekCalendars[calendarIndex]}
         </div>
