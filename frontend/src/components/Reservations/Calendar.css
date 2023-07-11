@@ -126,6 +126,34 @@
     cursor: not-allowed;
 }
 
+.message{
+        display: flex;
+        flex-direction: column;
+        width: 200px;
+        height: 100px;
+        margin: 220px;
+        border-radius: 5px;
+        background-color: #ffffff;
+}
+.bar{
+    width: 100%;
+    height: 20%;
+    box-shadow: 0px 1px 2px 0px #888888;
+    background-color: #f1f3f4;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.eventTitle{
+    padding-left: 3%;
+    padding-top: 1.5%;
+    font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.details{
+    padding-left: 5%;
+    padding-top: 3%;
+}
+
 .eventCard{
     user-select: none;
     color: black;
@@ -206,4 +234,98 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
+}
+
+.message{
+    position: fixed;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    height: 170px;
+    margin-left: 212px;
+    border-radius: 5px;
+    background-color: rgba(220,253,243,1.0);
+    color: black;
+    transition: 0.5s ease-out;
+}
+.message:hover{
+    box-shadow: 5px 5px 0px 0px rgba(30,30,30);
+    transition: 0.2s ease-in;
+}
+
+.bar{
+    width: 100%;
+    height: 15%;
+    padding-top: 1%;
+    box-shadow: 0px 1px 2px 0px #888888;
+    #background-color: #f1f3f4;
+    background-color: rgba(175 ,209,211,0.75);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.eventTitle{
+    padding-left: 3%;
+
+    padding-top: 1.5%;
+    font-size: 10pt;
+}
+
+.details{
+    margin-left: 5%;
+    margin-top: 8%;
+    width: 85%;
+    border-style: none none inset none;
+    border-width: 2px;
+    transition: all 0.1s ease-in;
+    height: 14px;
+}
+
+.details:focus{
+    border-style: none inset inset none;
+    border-width: 2px;
+    outline: none;
+    transition: all 0.1s ease-in;
+}
+
+span{
+    font-family: Arial;
+    font-size: 10pt;
+    padding: 5%;
+}
+
+.timeWrapper{
+    margin-left: 5%;
+    #margin-top: 8%;
+}
+
+.formField{
+    margin-top: 5%;
+    margin-left: 5%;
+    #margin-right: %;
+    width: auto;
+    font-size: 8pt;
+    margin-bottom: 2%;
+    border-width: 1px;
+}
+
+.times{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-top: 5%;
+    width: 100%;
+}
+
+.date{
+    margin-left: 2%;
+    border-style: none none inset none;
+    padding-top: 4.5%;
+}
+
+.dateWrapper{
+    display: flex;
+    padding-top: 2%;
+    flex-direction: row;
 }

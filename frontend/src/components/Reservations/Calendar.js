@@ -57,9 +57,43 @@ const getTimeFromPosition = (margin) => {
 
 // ============================================
 
+// calendar event editor
+// this allows the user to edit event details like time and in the future day. This window also allows the user to confirm their reservation
+// TODO allow date to be edited and it will move day
+const EventEdit = ( { time, marginTop , setStartTime, setEndTime } ) => {
+
+    return (
+        <div class="message" style={{marginTop: `${marginTop-27}px`}}>
+            <div class="bar">
+                <div className="eventTitle">Reservation</div>
+                <input className="details" placeholder="Linus' Reservation"/>
+
+                <div className="dateWrapper">
+                    <div className="formField" style={{fontSize: "10pt"}}>Date:</div>
+                    <input className="date" type="date" id="start" name="trip-start" value="2023-07-11" min="2018-01-01" max="2018-12-31" />
+                </div>
+
+                <div className="times">
+                    <div className="start">
+                        <div className="formField">Start Time</div>
+                        <input className="time" type="time" id="appt" name="appt" min="08:00" max="20:00"/>
+                    </div>
+                    <div class="end">
+                        <div className="formField">End Time</div>
+                        <input className="time" type="time" id="appt" name="appt" min="08:00" max="20:00"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// calendar event card
 const CalendarEvent = ( { day, time, position, colors } ) => {
     const [startTime, setStartTime] = useState(new Date(time[0].getTime()));
     const [endTime, setEndTime] = useState(new Date(time[1].getTime()));
+
+    const [editEvent, setEdit] = useState(true); // are we editing event details
 
     const sensitivity = 15;
 
@@ -67,6 +101,8 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
     const refTop = useRef(null);
     const refBottom = useRef(null);
     const refMiddle = useRef(null);
+
+    let listenerEventStartTimer = 0; // capture time between events which we can use to tell between clicks, holds, double clicks etc.
 
     // NOTE: please leave this EVIL function here
     // i would like to preserve this function in as a reminder of how simple life
@@ -81,17 +117,6 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 
     useEffect(() => {
-
-
-        // const updateEventTime = (dy_top, dy_bottom) => {
-        //     // i have no idea why we have to update the time[0] variable but if i put the new Date
-        //     // into another variable it never updates
-        //     time[0] = new Date(time[0].getTime() - (((-1*dy_top)*30) * 60000));
-        //     setStartTime(time[0]);
-
-        //     time[1] = new Date(time[1].getTime() - (((-1*dy_bottom)*30) * 60000));
-        //     setEndTime(time[1]);
-        // };
 
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
@@ -278,6 +303,8 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
         };
 
         const onMouseDownBottomResize = (event) =>{
+            setEdit(false);
+
             getMaxMinHeights();
             console.log("start min height", minHeight);
             y = event.clientY;
@@ -354,6 +381,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
         // TODO give different style to events being dragged
         const onMouseDownMiddleResize = (event) => {
+
             //getDragMaxMin();
             y = event.clientY;
             originalMarginTop = parseInt(resizeableElement.style.marginTop);
@@ -371,15 +399,35 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
             // event listeners
             document.addEventListener("mousemove", onMouseMoveMiddleResize);
-            document.addEventListener("mouseup", onMouseUpMiddleResize)
+            document.addEventListener("mouseup", onMouseUpMiddleResize);
         };
 
+        const onMouseUpEvent = (event) => {
+            const endTime = new Date();
+
+            // if we only clicked
+            if(endTime-listenerEventStartTimer <= 100) {
+                console.log("cloicked");
+            }
+
+            listenerEventStartTimer = 0;
+        };
+
+        const onMouseDownEvent = (event) => {
+            listenerEventStartTimer = new Date();
+
+            document.addEventListener("mouseup", onMouseUpEvent);
+        };
+
+        const editEvent = refBox.current;
+        editEvent.addEventListener("mousedown", onMouseDownEvent);
         const resizerTop = refTop.current;
         resizerTop.addEventListener("mousedown", onMouseDownTopResize);
         const resizerBottom = refBottom.current;
         resizerBottom.addEventListener("mousedown", onMouseDownBottomResize);
         const resizerMiddle = refMiddle.current;
         resizerMiddle.addEventListener("mousedown", onMouseDownMiddleResize);
+
 
         return () => {
             resizerTop.removeEventListener("mousedown", onMouseDownTopResize);
@@ -396,6 +444,8 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
     if( endTime < (new Date())) opacity= 0.5;
 
     return (
+        <>
+        {editEvent && <EventEdit time={time} marginTop={getPosition(startTime,endTime)[0]} setStartTime={setStartTime} setEndTime={setEndTime} />}
         <div className={day + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], WebkitBackdropFilter:'blur(10px)',  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
@@ -413,6 +463,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                 </div>
             <div className="resizeBottom" ref={refBottom}></div>
         </div>
+        </>
     );
 
 }
@@ -481,6 +532,7 @@ const Day = ( {dayIndex, events, index, addCreatedEvent} ) => {
             rin: "662017350",
             start_time: startTime,
             end_time: endTime,
+            user_event: true,
         }
         
         addCreatedEvent(newEvent);
@@ -503,7 +555,8 @@ const Day = ( {dayIndex, events, index, addCreatedEvent} ) => {
                     time={[event.start_time,event.end_time]}
                     position={getPosition(event.start_time, event.end_time)}
                     key={index}
-                    colors={getColor(index,5)} 
+                    colors={getColor(index,5)}
+                    user={event.user_event}
                 />
             ))}
             <div className="dayLabel">{capitalize(weekday)}</div>
@@ -537,6 +590,7 @@ const createWeek = (weekStart) => {
 
 const Calendar = ( {room, week} ) => {
     let [eventCreated, setEventCreated] = useState(false);
+    let [createdEvent, setCreatedEvent] = useState(null);
 
     let [events,setEvents] = useState({
     });
@@ -590,6 +644,7 @@ const Calendar = ( {room, week} ) => {
 
             setEventCreated(true);
             setEvents(newEvents);
+            setCreatedEvent(newEvent);
         }
     }
 
