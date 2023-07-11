@@ -713,7 +713,6 @@ const CalendarView = ( {room, handleOpen} ) => {
     }
 
 
-
     return (
         <>
         <div className="overlay"/>
