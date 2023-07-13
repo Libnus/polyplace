@@ -56,8 +56,8 @@ class ReservationViewSet(viewsets.ViewSet):
             return Response({'message':"Conflict! Room taken at time specified"},status=status.HTTP_409_CONFLICT)
         #
         # TODO students can make more than one reservation
-        if Reservation.objects.filter(rin=request.data['rin']).exists():
-            return Response({'message':"Conflict! Student already reserved a room!"},status=status.HTTP_409_CONFLICT)
+        # if Reservation.objects.filter(rin=request.data['rin']).exists():
+        #     return Response({'message':"Conflict! Student already reserved a room!"},status=status.HTTP_409_CONFLICT)
 
         else:
             data = request.data

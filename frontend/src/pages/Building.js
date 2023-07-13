@@ -65,7 +65,7 @@ const Floor = ({index, floor, building}) => {
 
 	useEffect(() => {
 		let getRooms = async () => {
-			const response = await fetch(`http://127.0.0.1:8000/floors_api/rooms/${floor.id}/`);
+			const response = await fetch(process.env.REACT_APP_API_URL + `/floors_api/rooms/${floor.id}/`);
 			const data = await response.json();
 			setRooms(data);
 		}
@@ -104,7 +104,7 @@ const Building = () => {
 	useEffect(() => {
 
 		const getFloors = async () => {
-			const response = await fetch(`http://127.0.0.1:8000/floors_api/floors/${building}/`);
+			const response = await fetch(process.env.REACT_APP_API_URL + `/floors_api/floors/${building}/`);
 			const floors = await response.json();
 
 			console.log('DATA:', floors);

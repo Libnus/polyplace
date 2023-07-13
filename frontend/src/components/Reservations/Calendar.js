@@ -401,7 +401,7 @@ const Calendar = ( {room, week} ) => {
             const weekString = weekStart.getMonth()+1 + "-" + weekStart.getDate() + "-" + weekStart.getFullYear();
             console.log("weekString",weekString);
 
-            const response = await fetch(`http://127.0.0.1:8000/reservations_api/${room.id}/get_week/?date=${weekString}/`);
+            const response = await fetch(process.env.REACT_APP_API_URL + `/reservations_api/${room.id}/get_week/?date=${weekString}/`);
             const data = await response.json();
             console.log(data);
             parseReservationsJson(data);

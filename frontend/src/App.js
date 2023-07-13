@@ -19,7 +19,7 @@ function App() {
     },[])
 
     const getBuildings = async () => {
-        const response = await fetch('http://127.0.0.1:8000/floors_api/buildings/');
+        const response = await fetch(process.env.REACT_APP_API_URL +'/floors_api/buildings/');
         const data = await response.json();
         setBuildings(data);
     };
