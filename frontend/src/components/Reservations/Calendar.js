@@ -70,7 +70,6 @@ const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime, 
 
     useEffect(() => {
 
-        console.log("updated start time ",('0' + startTime.getMinutes()).slice(-2));
         setDateString(`${startTime.getFullYear()}-${('0' + (startTime.getMonth()+1)).slice(-2)}-${startTime.getDate()}`);
         setStartString(`${('0' + startTime.getHours()).slice(-2)}:${('0'+startTime.getMinutes()).slice(-2)}`);
         setEndString(`${('0' + endTime.getHours()).slice(-2)}:${('0'+endTime.getMinutes()).slice(-2)}`);
@@ -150,7 +149,6 @@ const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , sub
     const refBottom = useRef(null);
     const refMiddle = useRef(null);
 
-
     // NOTE: please leave this EVIL function here
     // i would like to preserve this function in as a reminder of how simple life
     // is if you don't ever try to make a website
@@ -164,8 +162,6 @@ const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , sub
 
 
     useEffect(() => {
-        if(event.created_event) setEdit(true);
-        else setEdit(false);
 
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
@@ -189,7 +185,6 @@ const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , sub
 
 
         const updateEventTime = () => {
-            console.log("endtime", endTime);
             event.start_time = getTimeFromPosition(marginTop, event.start_time);
             event.end_time = getTimeFromPosition(marginTop + height, event.end_time);
 
@@ -252,7 +247,6 @@ const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , sub
             // we calculate maxHeight as (our margin - the max margin we found in the loop) + current height of our div :)
             maxHeight = (marginTop - maxMargin) + height;
             minHeight = minMargin - marginTop;
-            console.log("caulcated margintop and maxmargin and height from this", maxHeight, marginTop, maxMargin, height);
         };
 
         // get the max and min div margins for draggable events
