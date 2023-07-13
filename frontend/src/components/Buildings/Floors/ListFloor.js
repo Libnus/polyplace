@@ -114,7 +114,7 @@ const ListFloor = ({ floor, getRoomSelected }) => {
             for(var i=0; i < rooms.length; i++){
 
                 // fetch the reservation if room has reservation
-                const response = await fetch(`http://127.0.0.1:8000/reservations_api/${rooms[i]['id']}/`)
+                const response = await fetch(process.env.API_URL + `/reservations_api/${rooms[i]['id']}/`)
                 const reservations =  await response.json();
                 //const reservation = reservations[0];
 

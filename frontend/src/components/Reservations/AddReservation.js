@@ -153,8 +153,6 @@ const AddReservation = ({ room, open, children ,onClose}) => {
                 start_time: new Date(),
                 end_time: endTime
             }
-            console.log("date",data.start_time)
-            console.log("date",data.end_time)
 
             try{
                 // try upload
@@ -181,8 +179,7 @@ const AddReservation = ({ room, open, children ,onClose}) => {
         }
 
         setSubmitError({submitError: error, errorMessage: message});
-        return;
-    }
+    };
 
     const showEdit = () => {
         setEdit(!edit);

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { throttle } from 'lodash';
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import {AiOutlineCloseCircle} from 'react-icons/ai'
+import {AiOutlineCheckCircle} from 'react-icons/ai'
 import './Calendar.css';
 import '../../assets/styles/main.css';
 
@@ -57,10 +58,12 @@ const getTimeFromPosition = (margin, date) => {
 
 // ============================================
 
+//TODO delete event with backspace/delete button
+
 // calendar event editor
 // this allows the user to edit event details like time and in the future day. This window also allows the user to confirm their reservation
 // TODO allow date to be edited and it will move day
-const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime } ) => {
+const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime, removeCreatedEvent , submitEvent, error} ) => {
     const [startDateString, setDateString] = useState('');
     const [startTimeString, setStartString] = useState('');
     const [endTimeString, setEndString] = useState('');
@@ -94,6 +97,14 @@ const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime }
         }
     };
 
+    const handleSubmit = (event) => {
+        submitEvent();
+    };
+
+    const handleClose = (event) => {
+        removeCreatedEvent();
+    };
+
     return (
         <div class="eventEditor" style={{marginTop: `${marginTop-27}px`, marginLeft: startTime.getDay() === 5 ? '-21%' : '19%'}}>
             <div class="bar">
@@ -115,17 +126,22 @@ const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime }
                         <input className="time" type="time" id="start" name="end" value={endTimeString} min="08:00" max="20:00" onChange={handleEndChange}/>
                     </div>
                 </div>
+                <div className="calendarBar" style={{marginLeft: '70%',marginTop: '15%'}}>
+                    <div className="calendarButton" onClick={handleClose}><AiOutlineCloseCircle color="red" size={25} /></div>
+                    <div className="calendarButton" style={{marginRight: "5%"}} onClick={handleSubmit}><AiOutlineCheckCircle color="green" size={25} /></div>
+                </div>
+                {error.error && <div>kill</div>}
             </div>
         </div>
     );
 };
 
 // calendar event card
-const CalendarEvent = ( { day, time, position, colors } ) => {
-    const [startTime, setStartTime] = useState(new Date(time[0].getTime()));
-    const [endTime, setEndTime] = useState(new Date(time[1].getTime()));
+const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , submitEvent , submitError } ) => {
+    const [startTime, setStartTime] = useState(new Date(event.start_time.getTime()));
+    const [endTime, setEndTime] = useState(new Date(event.end_time.getTime()));
 
-    const [editEvent, setEdit] = useState(true); // are we editing event details
+    const [editEvent, setEdit] = useState(false); // are we editing event details
 
     const sensitivity = 15;
 
@@ -148,6 +164,8 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
 
     useEffect(() => {
+        if(event.created_event) setEdit(true);
+        else setEdit(false);
 
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
@@ -172,11 +190,11 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
         const updateEventTime = () => {
             console.log("endtime", endTime);
-            time[0] = getTimeFromPosition(marginTop, time[0]);
-            time[1] = getTimeFromPosition(marginTop + height, time[1]);
+            event.start_time = getTimeFromPosition(marginTop, event.start_time);
+            event.end_time = getTimeFromPosition(marginTop + height, event.end_time);
 
-            setStartTime(time[0]);
-            setEndTime(time[1]);
+            setStartTime(event.start_time);
+            setEndTime(event.end_time);
         };
 
         // check if inputted event collides with another event
@@ -465,7 +483,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
             resizerBottom.removeEventListener("mousedown", onMouseDownBottomResize);
             resizerMiddle.removeEventListener("mousedown", onMouseDownMiddleResize);
         }
-    }, [day, time, startTime, endTime, editEvent]);
+    }, [day, event, startTime, endTime, editEvent]);
 
     const backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(colors.background);
     const borderColor = getComputedStyle(document.documentElement).getPropertyValue(colors.border);
@@ -475,7 +493,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
 
     return (
         <>
-        {editEvent && <EventEdit marginTop={getPosition(startTime,endTime)[0]} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} />}
+            {editEvent && <EventEdit marginTop={getPosition(startTime,endTime)[0]} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} removeCreatedEvent={removeCreatedEvent} submitEvent={submitEvent} error={submitError}/>}
         <div className={day + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], WebkitBackdropFilter:'blur(10px)',  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
@@ -489,7 +507,7 @@ const CalendarEvent = ( { day, time, position, colors } ) => {
                     Henry, Brian & Zwaka, Linus
                 </div>
                 <div className="time">
-                    {startTime.toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}-{time[1].toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}
+                    {startTime.toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}-{endTime.toLocaleTimeString([],{hour: 'numeric', minute:'2-digit'})}
                 </div>
             <div className="resizeBottom" ref={refBottom}></div>
         </div>
@@ -526,7 +544,7 @@ const TimeMarker = () => {
     );
 }
 
-const Day = ( {dayIndex, events, index, addCreatedEvent} ) => {
+const Day = ( {dayIndex, events, index, addCreatedEvent, removeCreatedEvent , submitEvent, submitError } ) => {
     const capitalize = (s) => {
         return s[0].toUpperCase() + s.slice(1);
     }
@@ -563,6 +581,7 @@ const Day = ( {dayIndex, events, index, addCreatedEvent} ) => {
             start_time: startTime,
             end_time: endTime,
             user_event: true,
+            created_event: true,
         }
         
         addCreatedEvent(newEvent);
@@ -582,12 +601,14 @@ const Day = ( {dayIndex, events, index, addCreatedEvent} ) => {
             {isToday && <TimeMarker />}
             {events.map((event,index) => (
                 <CalendarEvent
+                    event={event}
                     day={day}
-                    time={[event.start_time,event.end_time]}
                     position={getPosition(event.start_time, event.end_time)}
                     key={index}
                     colors={getColor(index,5)}
-                    user={event.user_event}
+                    removeCreatedEvent={removeCreatedEvent}
+                    submitEvent={submitEvent}
+                    submitError={submitError}
                 />
             ))}
             <div className="dayLabel">{capitalize(weekday)}</div>
@@ -626,6 +647,11 @@ const Calendar = ( {room, week} ) => {
     let [events,setEvents] = useState({
     });
 
+    const [submitError, setError] = useState({
+        submitError: false,
+        errorMessage: ""
+    });
+
     useEffect(() => {
         const weekStart = getWeekStart(week);
 
@@ -639,8 +665,9 @@ const Calendar = ( {room, week} ) => {
             for(let i = 0; i < data.length; i++){
                 data[i].start_time = new Date(data[i].start_time);
                 data[i].end_time = new Date(data[i].end_time);
+                data[i].user_event = false;
+                data[i].created_event= false;
 
-                console.log("data[i]",newEvents[data[i].start_time]);
                 newEvents[data[i].start_time.getDate()].push(data[i]);
             }
 
@@ -666,18 +693,75 @@ const Calendar = ( {room, week} ) => {
     const addCreatedEvent = (newEvent) => {
         if(!eventCreated){
             const newEvents = events;
-            console.log("adding craeted event", newEvents, newEvent);
             newEvents[newEvent.start_time.getDate()].push(newEvent);
-
-            // let newEvents = events[day];
-            // newEvents.push(newEvent);
-            // setEvents({...events, [day]: newEvents});
 
             setEventCreated(true);
             setEvents(newEvents);
             setCreatedEvent(newEvent);
         }
-    }
+    };
+
+    const removeCreatedEvent = () => {
+        if(eventCreated){
+            const newEvents = events;
+            console.log("newevents",newEvents);
+            const eventsIndex = createdEvent.start_time.getDate();
+            newEvents[eventsIndex].splice(newEvents[eventsIndex].indexOf(createdEvent, 1));
+
+            setEventCreated(false);
+            setEvents(newEvents);
+            setCreatedEvent(null);
+        }
+    };
+
+    // make the create reservation api call
+    const submitEvent = async () => {
+        if(eventCreated){
+            setError({submitError: false, errorMessage: ""});
+
+            let error = false;
+            let message = "";
+
+            try{
+                const data = {
+                    room: room.room_num,
+                    first_name: createdEvent.first_name,
+                    last_name: createdEvent.last_name,
+                    rin: createdEvent.rin,
+                    start_time: createdEvent.start_time,
+                    end_time: createdEvent.end_time
+                };
+
+                // try upload
+                console.log(data);
+                const response = await fetch("http://127.0.0.1:8000/reservations_api/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+                if(response.status===409){
+                    error = true;
+                    message=result.message;
+                    console.error("error!!!", result.message);
+                }
+            } catch(error){
+                error = true;
+                message = "something tragic has happened :(";
+                console.error("error:", error);
+            }
+
+            setError({submitError: error, errorMessage: message});
+            if(error === false){
+                console.log("event false");
+                setEventCreated(false);
+                createdEvent.created_event = false;
+                setCreatedEvent(null);
+            }
+        }
+    };
 
     return (
         <div className="calendarContainer">
@@ -698,7 +782,7 @@ const Calendar = ( {room, week} ) => {
             </div>
 
             {Object.entries(events).map(([dayKey,value]) => (
-                <Day dayIndex={dayKey} events={value} addCreatedEvent={addCreatedEvent}/>
+                <Day room={room} dayIndex={dayKey} events={value} addCreatedEvent={addCreatedEvent} removeCreatedEvent={removeCreatedEvent} submitEvent={submitEvent} submitError={submitError} />
             ))}
         </div>
     );
