@@ -11,7 +11,6 @@ import Building from './pages/Building';
 import './assets/styles/main.css';
 import MobileNavbar from './components/Main/MobileNavbar';
 import Sidebar from './components/Main/Sidebar';
-import Header from './components/Main/Header';
 function App() {
 
     let [buildings,setBuildings] = useState([]);
@@ -26,18 +25,16 @@ function App() {
         setBuildings(data);
     };
 
+        //<div id="outer-container">
+        //<Sidebar pageWrapId={'page-wrap'} outerContainerId={'outer-container'} />
     return (
-        <div className="page-container">
- 
-
-            
-            <Sidebar/>
-            <Header/>
-    
+            <div className="inner-container" id ="page-wrap">
+                <div className="header">
+                    <h1 style={{left: "20%", color: "white"}}>PolyPlace</h1>
+                </div>
                 <div className="content-container">
-                    <BrowserRouter>
-                        {buildings.map(building => (<Link to={'/buildings/' + building.id} />))}
-                
+                 <BrowserRouter>
+                    {buildings.map(building => (<Link to={'/buildings/' + building.id} />))}
                         <Routes>
                             <Route path='/rooms' element={<Rooms />} />
                             <Route path='/history' element={<History />} />
@@ -48,7 +45,7 @@ function App() {
                     </BrowserRouter>
                 </div>
                 <Footer />
-        </div>
+            </div>
     );
 }
 
