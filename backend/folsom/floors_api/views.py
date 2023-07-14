@@ -31,7 +31,19 @@ class RoomViewSet(viewsets.ViewSet):
     def list(self, request):
         return Response(RoomSerializer(Room.objects.all(),many=True).data)
 
-    # retrieves a room with a particular floor number
+    # retrieves room(s) with a particular floor number
     def retrieve(self,request,pk=None):
         rooms = Room.objects.filter(floor=pk)
         return Response(RoomSerializer(rooms,many=True).data)
+
+    @action(detail=True)
+    def get_room(self, request, pk=None):
+        room = Room.objects.get(id=pk)
+        return Response(RoomSerializer(room,many=False).data)
+
+    # gets the building associated with a particular room id passed as pk
+    @action(detail=True)
+    def get_building(self,request,pk=None):
+        floor = Room.objects.get(id=pk).floor
+        building = Floor.objects.get(id=floor.id).building
+        return Response(BuildingSerializer(building,many=False).data)
