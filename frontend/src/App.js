@@ -30,10 +30,10 @@ function App() {
         <div className="page-container">
  
 
-            
             <Sidebar/>
             <Header/>
     
+         
                 <div className="content-container">
                     <BrowserRouter>
                         {buildings.map(building => (<Link to={'/buildings/' + building.id} />))}
