@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.core.exceptions import PermissionDenied
 
 from rest_framework import viewsets
 from rest_framework import status
@@ -12,13 +13,19 @@ from .serializers import ReservationSerializer
 import datetime
 
 from .utils import check_reservation_time
+from shibboleth.utils import check_token
 
 class ReservationViewSet(viewsets.ViewSet):
     def list(self, request):
+        if 'polyplace_token' not in request.session or not check_token(request.session['polyplace_token']):
+            print("invalid token")
+            raise PermissionDenied()
         return Response(ReservationSerializer(Reservation.objects.all(),many=True).data)
 
     # get reservations associated with room
     def retrieve(self, request, pk=None):
+        if not check_token(request.session['polyplace_token']):
+            raise PermissionDenied()
         return Response(ReservationSerializer(Reservation.objects.filter(room=pk),many=True).data)
 
     # get all reservations in a given week
@@ -27,7 +34,8 @@ class ReservationViewSet(viewsets.ViewSet):
     # output: the reservations associated with a room from week
     @action(detail=True)
     def get_week(self, request, pk=None):
-
+        if not check_token(request.session['polyplace_token']):
+            raise PermissionDenied()
 
         # get the week of date
         parsed_date = [int(x) for x in request.query_params.get('date')[:-1].split('-')]
@@ -47,6 +55,9 @@ class ReservationViewSet(viewsets.ViewSet):
 
     # create method creates a reservation then adds the reservation to the room
     def create(self,request,*args,**kwargs):
+        if not check_token(request.session['polyplace_token']):
+            raise PermissionDenied()
+
         if not Room.objects.filter(room_num=request.data['room']).exists(): # check that the room exists
             return Response({'message':"Conflict! Room doesn't exist!"},status=status.HTTP_409_CONFLICT)
 

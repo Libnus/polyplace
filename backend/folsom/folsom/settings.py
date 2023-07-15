@@ -26,8 +26,12 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# site will update the database/send cookie on every request
+SESSION_SAVE_EVERY_REQUEST = True
+
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = "users.PolyUser"
 
 # Application definition
 
@@ -42,10 +46,13 @@ INSTALLED_APPS = [
     'reservations.apps.ReservationsConfig',
     'floors_api.apps.FloorsApiConfig',
     'floors.apps.FloorsConfig',
+    'users.apps.UsersConfig',
+    'shibboleth.apps.ShibbolethConfig',
 
     'rest_framework',
     'corsheaders',
     'django_cron',
+
 ]
 
 MIDDLEWARE = [
