@@ -25,6 +25,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+ENV = 'devel'
 
 # site will update the database/send cookie on every request
 SESSION_SAVE_EVERY_REQUEST = True

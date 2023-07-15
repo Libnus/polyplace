@@ -1,6 +1,9 @@
 import React from 'react';
+import { Consumer } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
 import '../assets/styles/main.css';
+import UserSession from '../UserSession';
 import './Buildings.css';
 
 const BuildingContainer = ( {buildingName, buildingId} ) => {
@@ -21,9 +24,6 @@ const BuildingContainer = ( {buildingName, buildingId} ) => {
 }
 
 const Buildings = ( {buildings} ) => {
-
-    //const buildings= ["Amos Eaton","Folsom Library", "Colonie","DCC"];
-
     return (
         <>
         <div className="main">

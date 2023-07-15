@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 
 from .serializers import PolyUserSerializer
 
-from shibboleth.utils import check_token, decode
+from shibboleth.utils import check_token
 
 from users.models import PolyUser
 
@@ -17,12 +17,12 @@ class PolyUserViewSet(viewsets.ViewSet):
     # it will return name, email, rin, and the user's roles
     @action(detail=False, methods=['get'])
     def user(self, request):
-        if 'polyplace_token' not in request.session or not check_token(request.session['polyplace_token']):
+        token = check_token(request)
+        if token == False:
             raise PermissionDenied()
+        print(token)
+        token = token[1]
 
         # check user from their token
-        user_token = decode(request.session['polyplace_token'])
-        user = PolyUser.objects.get(rcs=user_token['user'])
-        print(user)
-
+        user = PolyUser.objects.get(rcs=token['user'])
         return Response(PolyUserSerializer(user, many=False).data)

@@ -17,14 +17,13 @@ from shibboleth.utils import check_token
 
 class ReservationViewSet(viewsets.ViewSet):
     def list(self, request):
-        if 'polyplace_token' not in request.session or not check_token(request.session['polyplace_token']):
-            print("invalid token")
+        if check_token(request) == False:
             raise PermissionDenied()
         return Response(ReservationSerializer(Reservation.objects.all(),many=True).data)
 
     # get reservations associated with room
     def retrieve(self, request, pk=None):
-        if not check_token(request.session['polyplace_token']):
+        if check_token(request) == False:
             raise PermissionDenied()
         return Response(ReservationSerializer(Reservation.objects.filter(room=pk),many=True).data)
 
@@ -34,7 +33,7 @@ class ReservationViewSet(viewsets.ViewSet):
     # output: the reservations associated with a room from week
     @action(detail=True)
     def get_week(self, request, pk=None):
-        if not check_token(request.session['polyplace_token']):
+        if check_token(request) == False:
             raise PermissionDenied()
 
         # get the week of date
@@ -55,7 +54,7 @@ class ReservationViewSet(viewsets.ViewSet):
 
     # create method creates a reservation then adds the reservation to the room
     def create(self,request,*args,**kwargs):
-        if not check_token(request.session['polyplace_token']):
+        if check_token(request) == False:
             raise PermissionDenied()
 
         if not Room.objects.filter(room_num=request.data['room']).exists(): # check that the room exists
