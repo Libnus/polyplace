@@ -93,6 +93,7 @@ const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime, 
         setDateString(`${startTime.getFullYear()}-${('0' + (startTime.getMonth()+1)).slice(-2)}-${startTime.getDate()}`);
         setStartString(`${('0' + startTime.getHours()).slice(-2)}:${('0'+startTime.getMinutes()).slice(-2)}`);
         setEndString(`${('0' + endTime.getHours()).slice(-2)}:${('0'+endTime.getMinutes()).slice(-2)}`);
+        console.log("edit event",error);
 
     });
 
@@ -125,7 +126,7 @@ const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime, 
     };
 
     return (
-        <div class="eventEditor" style={{marginTop: `${marginTop-27}px`, marginLeft: startTime.getDay() === 5 ? '-21%' : '19%'}}>
+        <div class="eventEditor" style={{marginTop: `${marginTop-27}px`, marginLeft: startTime.getDay() === 6 ? '-240px' : '160px'}}>
             <div class="bar">
                 <div className="eventTitle">Reservation</div>
                 <input className="details" placeholder="Linus' Reservation"/>
@@ -222,7 +223,7 @@ const CalendarEvent = ( { thisEvent, day, position, colors, removeCreatedEvent ,
 
         // check if inputted event collides with another event
         const checkCollisions = () => {
-            const events = document.getElementsByClassName(day);
+            const events = document.getElementsByClassName(day.getDate() + " eventCard");
             const resizeableElement = refBox.current;
 
             for(let i = 0; i < events.length; i++){
@@ -231,6 +232,7 @@ const CalendarEvent = ( { thisEvent, day, position, colors, removeCreatedEvent ,
                     const eventTop = parseInt(eventStyle.marginTop);
                     const eventHeight = parseInt(eventStyle.height);
 
+                    console.log("checkCollisions", marginTop, eventTop, eventTop+eventHeight)
                     if(marginTop >= eventTop && marginTop < eventTop+eventHeight) return true;
                     if(marginTop+height < eventTop+eventHeight && marginTop+height > eventTop) return true;
                 }
@@ -248,7 +250,7 @@ const CalendarEvent = ( { thisEvent, day, position, colors, removeCreatedEvent ,
         // get the max and min height our div can be to avoid collisions with other events and not allow users to schedule a reservation during another time.
         const getMaxMinHeights = () => {
             height = parseInt(resizeableElement.style.height);
-            const events = document.getElementsByClassName(day);
+            const events = document.getElementsByClassName(day.getDate() + " eventCard");
             marginTop = parseInt(styles.marginTop);
 
             // also define max and min margins for looping and we will set heights after. This is so there is no confusion between heights and margin calculations during iteration
@@ -437,6 +439,7 @@ const CalendarEvent = ( { thisEvent, day, position, colors, removeCreatedEvent ,
             if(checkCollisions()){
                 marginTop = originalMarginTop;
                 resizeableElement.style.marginTop = `${marginTop}px`;
+                updateEventTime();
             }
 
             // reset styles
@@ -505,18 +508,19 @@ const CalendarEvent = ( { thisEvent, day, position, colors, removeCreatedEvent ,
             resizerBottom.removeEventListener("mousedown", onMouseDownBottomResize);
             resizerMiddle.removeEventListener("mousedown", onMouseDownMiddleResize);
         }
-    }, [editEvent, submitError]);
+    });
 
     const backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(colors.background);
     const borderColor = getComputedStyle(document.documentElement).getPropertyValue(colors.border);
 
     let opacity = 1.0;
-    if( endTime < (new Date())) opacity= 0.5;
+    if( endTime < (new Date())) opacity=0.5; // if the event has passed
+    else if(thisEvent.created_event) opacity=0.4; // otherwise, it could be a created event
 
     return (
         <>
             {editEvent && <EventEdit marginTop={getPosition(startTime,endTime)[0]} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} removeCreatedEvent={removeCreatedEvent} submitEvent={submitEvent} error={submitError}/>}
-        <div className={day + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], WebkitBackdropFilter:'blur(10px)',  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
+            <div className={day.getDate() + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], WebkitBackdropFilter:'blur(10px)',  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
                 <div className="labels">
@@ -686,9 +690,10 @@ const Calendar = ( {room, week} ) => {
             for(let i = 0; i < data.length; i++){
                 data[i].start_time = new Date(data[i].start_time);
                 data[i].end_time = new Date(data[i].end_time);
-                data[i].user_event = false;
+                data[i].user_event = (data[i].first_name === "Linus" ? true : false);
                 data[i].created_event= false;
 
+                console.log("new_events", newEvents, data[i]);
                 newEvents[data[i].start_time.getDate()].push(data[i]);
             }
 
@@ -698,8 +703,10 @@ const Calendar = ( {room, week} ) => {
         const getReservations = async () => {
             const weekString = weekStart.getMonth()+1 + "-" + weekStart.getDate() + "-" + weekStart.getFullYear();
 
+            console.log("week_string", weekString);
             const response = await fetch(`http://127.0.0.1:8000/reservations_api/${room.id}/get_week/?date=${weekString}/`);
             const data = await response.json();
+            console.log("returned from back", data);
             parseReservationsJson(data);
         };
 

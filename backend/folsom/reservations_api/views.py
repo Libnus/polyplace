@@ -28,18 +28,24 @@ class ReservationViewSet(viewsets.ViewSet):
     @action(detail=True)
     def get_week(self, request, pk=None):
 
-
         # get the week of date
         parsed_date = [int(x) for x in request.query_params.get('date')[:-1].split('-')]
-        print(parsed_date)
-        week = datetime.date(parsed_date[2],parsed_date[0],parsed_date[1]).isocalendar()[1]
+        date = datetime.date(parsed_date[2],parsed_date[0],parsed_date[1])
+        week = date.isocalendar()[1]
+
+        # but wait! python starts the week on monday (:
+        # check if the day inputted is sunday, if so, consider it the next week already
+        if date.weekday() == 6: week+=1
 
         all_reservations = Reservation.objects.filter(room=pk)
 
         reservations = []
         for reservation in all_reservations:
-            print("current week vs week", week, reservation.start_time.isocalendar()[1])
-            if reservation.start_time.isocalendar()[1] == week:
+            reservation_week = reservation.start_time.isocalendar()[1]
+            # maybe there is a better way to solve this problem of the week starting on monday
+            if reservation.start_time.weekday() == 6: reservation_week+=1
+
+            if reservation_week == week:
                 reservations.append(reservation)
 
         return Response(ReservationSerializer(reservations,many=True).data)

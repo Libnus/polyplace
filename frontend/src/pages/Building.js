@@ -101,15 +101,12 @@ const Building = () => {
 
 	let building = useParams().building;
 
-	console.log("building", building);
-
 	useEffect(() => {
 
 		const getFloors = async () => {
 			const response = await fetch(`http://127.0.0.1:8000/floors_api/floors/${building}/`);
 			const floors = await response.json();
 
-			console.log('DATA:', floors);
 			setFloors(floors);
 		}
 
