@@ -1,10 +1,6 @@
 /* Position and sizing of burger button */
 .bm-burger-button {
-    position: absolute;
-    width: 36px;
-    height: 30px;
-    top: 2.5%;
-    right:2%;
+    display:none;
   }
   
   /* Color/shape of burger icon bars */
@@ -69,4 +65,15 @@
   .bm-overlay {
     background: rgba(0, 0, 0, 0.3);
     color: #ffffff;
+  }
+
+  @media screen and (max-width: 720px) {
+    .bm-burger-button {
+      display:block;
+      position: absolute;
+      width: 36px;
+      height: 30px;
+      top: 2.5%;
+      right:2%; 
+    } 
   }

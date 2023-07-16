@@ -21,6 +21,7 @@ const Header = () => {
             <ul>
               <li>
                 <a
+                  className="logo"
                   style={{
                     left: "20%",
                     color: "white",
@@ -36,7 +37,7 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a href="/">
+                <a className="home" href="/">
                   <div
                     style={{
                       verticalAlign: "middle",
@@ -50,7 +51,7 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a href="/buildings">
+                <a class="reservations" href="/buildings">
                   <div
                     style={{
                       verticalAlign: "middle",
@@ -64,7 +65,7 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a href="/rooms">
+                <a className="staff" href="/rooms">
                   <div
                     style={{
                       verticalAlign: "middle",
@@ -78,7 +79,7 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a href="/history">
+                <a className="history" href="/history">
                   <div
                     style={{
                       verticalAlign: "middle",
