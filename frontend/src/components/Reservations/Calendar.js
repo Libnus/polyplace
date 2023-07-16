@@ -17,22 +17,22 @@ const options = {weekday: 'long'};
 
 // find the start of the week given a week offset
 // example: if 0 is inputted, the date returned would be the start of this week. 1 inputted would give the start date of next week
-const getWeekStart = (weekOffset) => {
-    const weekStart = new Date();
-    const dateOffset = weekStart.getDate() - (weekStart.getDay()-1); // -1 because python starts the week on monday...what a stupid bug i know ;)
+// const getWeekStart = (weekOffset) => {
+//     const weekStart = new Date();
+//     const dateOffset = weekStart.getDate() - (weekStart.getDay()-1); // -1 because python starts the week on monday...what a stupid bug i know ;)
 
-    weekStart.setDate(dateOffset+(weekOffset*7));
+//     weekStart.setDate(dateOffset+(weekOffset*7));
 
-    return weekStart;
-}
+//     return weekStart;
+// }
 
-const getWeekEnd = (weekOffset) => {
-    const weekEnd = new Date();
-    const dateOffset = weekEnd.getDate() + (6-weekEnd.getDay());
+// const getWeekEnd = (weekOffset) => {
+//     const weekEnd = new Date();
+//     const dateOffset = weekEnd.getDate() + (6-weekEnd.getDay());
 
-    weekEnd.setDate(dateOffset+(weekOffset*7));
-    return weekEnd;
-}
+//     weekEnd.setDate(dateOffset+(weekOffset*7));
+//     return weekEnd;
+// }
 
 // given an weekOffset, get the start of the week and the end of the week
 // example: current date is Sat. July 15th. If weekOffset is set to 1, go forward one week and grab the start and end dates of that week
@@ -41,14 +41,14 @@ const getWeek = (weekOffset) => {
     const start = new Date();
     start.setDate(start.getDate()+weekOffset*7);
 
-    if(start.getDay() === 6) start.setDate(start.getDate()+2) // if saturday go to monday
-    else if(start.getDay() === 0) start.setDate(start.getDate()+1) // if sunday go to monday
-    else{
-        start.setDate(start.getDate()-start.getDay()+1)
-    }
+    // if(start.getDay() === 6) start.setDate(start.getDate()+2) // if saturday go to monday
+    // else if(start.getDay() === 0) start.setDate(start.getDate()+1) // if sunday go to monday
+    // else{
+    start.setDate(start.getDate()-start.getDay())
+    //}
 
     const end = new Date();
-    end.setDate(start.getDate()+4);
+    end.setDate(start.getDate()+6);
 
     return [start, end];
 }
@@ -578,7 +578,7 @@ const Day = ( {dayIndex, events, index, addCreatedEvent, removeCreatedEvent , su
     const isToday = new Date().getDate() === day.getDate();
     const weekday = day.toLocaleDateString(undefined, options).toLowerCase()
 
-    const last = weekday === "friday";
+    const last = weekday === "saturday";
 
 
     const handleCreate = (hour) => {
@@ -655,7 +655,7 @@ const Day = ( {dayIndex, events, index, addCreatedEvent, removeCreatedEvent , su
 // takes in the week start date (sunday)
 const createWeek = (weekStart) => {
     const week = {};
-    for(let i = 0; i < 5; i++){
+    for(let i = 0; i < 7; i++){
         week[weekStart.getDate()+i] = [];
     }
 
