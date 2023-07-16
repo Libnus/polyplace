@@ -1,6 +1,5 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import Navbar from './components/Main/Navbar';
 import Footer from './components/Main/Footer';
 import { Routes, BrowserRouter, Route, Link } from 'react-router-dom';
 import Rooms from './pages/Rooms';
@@ -9,7 +8,6 @@ import Test from './pages/Test';
 import Buildings from './pages/Buildings';
 import Building from './pages/Building';
 import './assets/styles/main.css';
-import MobileNavbar from './components/Main/MobileNavbar';
 import Sidebar from './components/Main/Sidebar';
 import Header from './components/Main/Header';
 function App() {

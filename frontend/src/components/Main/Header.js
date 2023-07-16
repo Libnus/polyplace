@@ -1,15 +1,6 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
 import "../../assets/styles/main.css";
-import {
-  FaHome,
-  FaTicketAlt,
-  FaBuilding,
-  FaCalendarAlt,
-  FaUsers,
-  FaHandMiddleFinger,
-  FaHistory,
-} from "react-icons/fa";
+import { FaHome, FaCalendarAlt, FaUsers, FaHistory } from "react-icons/fa";
 
 const Header = () => {
   return (
@@ -22,6 +13,7 @@ const Header = () => {
               <li>
                 <a
                   className="logo"
+                  href="page.hmtl"
                   style={{
                     left: "20%",
                     color: "white",
@@ -31,6 +23,8 @@ const Header = () => {
                       "0px 0px 0px 0px rgba(0, 0, 0, 0.5), inset 0px -3px 1px -2px rgba(0, 0, 0, 0.3)",
                     fontSize: "30px",
                     fontWeight: "900",
+                    pointerEvents: "none",
+                    cursor: "default",
                   }}
                 >
                   Polyplace
