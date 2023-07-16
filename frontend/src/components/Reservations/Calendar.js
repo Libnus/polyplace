@@ -14,6 +14,7 @@ const options = {weekday: 'long'};
 
 // =========== HELPERS
 
+
 // find the start of the week given a week offset
 // example: if 0 is inputted, the date returned would be the start of this week. 1 inputted would give the start date of next week
 const getWeekStart = (weekOffset) => {
@@ -31,6 +32,25 @@ const getWeekEnd = (weekOffset) => {
 
     weekEnd.setDate(dateOffset+(weekOffset*7));
     return weekEnd;
+}
+
+// given an weekOffset, get the start of the week and the end of the week
+// example: current date is Sat. July 15th. If weekOffset is set to 1, go forward one week and grab the start and end dates of that week
+// NOTE that the weekStarts on Monday for reservations and the week ends on Friday (for now)
+const getWeek = (weekOffset) => {
+    const start = new Date();
+    start.setDate(start.getDate()+weekOffset*7);
+
+    if(start.getDay() === 6) start.setDate(start.getDate()+2) // if saturday go to monday
+    else if(start.getDay() === 0) start.setDate(start.getDate()+1) // if sunday go to monday
+    else{
+        start.setDate(start.getDate()-start.getDay()+1)
+    }
+
+    const end = new Date();
+    end.setDate(start.getDate()+4);
+
+    return [start, end];
 }
 
 // takes a reservation time and returns the position (margin and height) for rendering
@@ -136,11 +156,12 @@ const EventEdit = ( { marginTop , startTime, setStartTime, endTime, setEndTime, 
 };
 
 // calendar event card
-const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , submitEvent , submitError } ) => {
-    const [startTime, setStartTime] = useState(new Date(event.start_time.getTime()));
-    const [endTime, setEndTime] = useState(new Date(event.end_time.getTime()));
+const CalendarEvent = ( { thisEvent, day, position, colors, removeCreatedEvent , submitEvent , submitError } ) => {
+    const [startTime, setStartTime] = useState(new Date(thisEvent.start_time.getTime()));
+    const [endTime, setEndTime] = useState(new Date(thisEvent.end_time.getTime()));
 
     const [editEvent, setEdit] = useState(false); // are we editing event details
+
 
     const sensitivity = 15;
 
@@ -160,9 +181,16 @@ const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , sub
 
     // ---- please continue with your day now ----
 
+    useEffect(() => {
+        console.log("error",submitError.submitError)
+        if(submitError.submitError === null && thisEvent.created_event) setEdit(true);
+        else if(submitError.submitError === false && editEvent) {
+            thisEvent.created_event = false;
+            setEdit(false);
+        }
+    },[submitError]);
 
     useEffect(() => {
-
         const resizeableElement = refBox.current;
         const styles = getComputedStyle(resizeableElement);
         //let height = parseInt(styles.height);
@@ -185,11 +213,11 @@ const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , sub
 
 
         const updateEventTime = () => {
-            event.start_time = getTimeFromPosition(marginTop, event.start_time);
-            event.end_time = getTimeFromPosition(marginTop + height, event.end_time);
+            thisEvent.start_time = getTimeFromPosition(marginTop, thisEvent.start_time);
+            thisEvent.end_time = getTimeFromPosition(marginTop + height, thisEvent.end_time);
 
-            setStartTime(event.start_time);
-            setEndTime(event.end_time);
+            setStartTime(thisEvent.start_time);
+            setEndTime(thisEvent.end_time);
         };
 
         // check if inputted event collides with another event
@@ -446,7 +474,7 @@ const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , sub
             const endTime = new Date();
 
             // if we only clicked
-            if(endTime-listenerEventStartTimer <= 200) {
+            if(thisEvent.user_event && endTime-listenerEventStartTimer <= 200) {
                 console.log("clicked", editEvent, !editEvent);
                 setEdit(!editEvent);
             }
@@ -477,7 +505,7 @@ const CalendarEvent = ( { event, day, position, colors, removeCreatedEvent , sub
             resizerBottom.removeEventListener("mousedown", onMouseDownBottomResize);
             resizerMiddle.removeEventListener("mousedown", onMouseDownMiddleResize);
         }
-    }, [day, event, startTime, endTime, editEvent]);
+    }, [editEvent, submitError]);
 
     const backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(colors.background);
     const borderColor = getComputedStyle(document.documentElement).getPropertyValue(colors.border);
@@ -595,7 +623,7 @@ const Day = ( {dayIndex, events, index, addCreatedEvent, removeCreatedEvent , su
             {isToday && <TimeMarker />}
             {events.map((event,index) => (
                 <CalendarEvent
-                    event={event}
+                    thisEvent={event}
                     day={day}
                     position={getPosition(event.start_time, event.end_time)}
                     key={index}
@@ -642,19 +670,18 @@ const Calendar = ( {room, week} ) => {
     });
 
     const [submitError, setError] = useState({
-        submitError: false,
+        submitError: null,
         errorMessage: ""
     });
 
     useEffect(() => {
-        const weekStart = getWeekStart(week);
+        const weekStart = week[0];
 
         // parse reservations json returned from db
         // dates are turned into date objects and sorted into appropriate days
         const parseReservationsJson = (data) => {
 
             const newEvents = createWeek(weekStart);
-            console.log("newevents",newEvents);
 
             for(let i = 0; i < data.length; i++){
                 data[i].start_time = new Date(data[i].start_time);
@@ -670,11 +697,9 @@ const Calendar = ( {room, week} ) => {
 
         const getReservations = async () => {
             const weekString = weekStart.getMonth()+1 + "-" + weekStart.getDate() + "-" + weekStart.getFullYear();
-            console.log("weekString",weekString);
 
             const response = await fetch(`http://127.0.0.1:8000/reservations_api/${room.id}/get_week/?date=${weekString}/`);
             const data = await response.json();
-            console.log(data);
             parseReservationsJson(data);
         };
 
@@ -706,13 +731,15 @@ const Calendar = ( {room, week} ) => {
             setEvents(newEvents);
             setCreatedEvent(null);
         }
+        else{
+            // TODO make api call to delete the event
+            return;
+        }
     };
 
     // make the create reservation api call
     const submitEvent = async () => {
         if(eventCreated){
-            setError({submitError: false, errorMessage: ""});
-
             let error = false;
             let message = "";
 
@@ -749,7 +776,6 @@ const Calendar = ( {room, week} ) => {
 
             setError({submitError: error, errorMessage: message});
             if(error === false){
-                console.log("event false");
                 setEventCreated(false);
                 createdEvent.created_event = false;
                 setCreatedEvent(null);
@@ -782,12 +808,6 @@ const Calendar = ( {room, week} ) => {
     );
 }
 
-const getWeek = (week) => {
-    const weekStart = getWeekStart(week);
-    const weekEnd = getWeekEnd(week);
-
-    return weekStart.getMonth()+1 + '/' + weekStart.getDate() + ' - ' + (weekEnd.getMonth()+1) + '/' + weekEnd.getDate();
-}
 
 const CalendarView = ( {room, handleOpen} ) => {
 
@@ -795,18 +815,26 @@ const CalendarView = ( {room, handleOpen} ) => {
     // calendarIndex specifies the "calendar index" the page is currently rendering while weekString is the string associated with that calendar index
     // when use selects left or right arrow we update the index and week string based on that index and then we render the page again
     let [calendarIndex, setCalendarIndex] = useState(0);
-    let [weekString, setWeekString] = useState(getWeek(0))
+    let [weekString, setWeekString] = useState();
+
 
     // store the calendars
     // just the next two weeks for now
+    // TODO  key can be calendar index but make week a new Date being the start date of the week (monday)
+    const thisWeek = getWeek(0);
+    const nextWeek = getWeek(1);
+
     const weekCalendars = [
-        <Calendar key={0} week={0} room={room} />,
-        <Calendar key={1} week={1} room={room} />
+        <Calendar key={0} week={thisWeek} room={room} />,
+        <Calendar key={1} week={nextWeek} room={room} />
     ];
 
     useEffect(() => {
-        setWeekString(getWeek(calendarIndex));
-    });
+        const week = ((calendarIndex === 0) ? thisWeek : nextWeek)
+        const weekString = week[0].getMonth()+1 + '/' + week[0].getDate() + ' - ' + (week[1].getMonth()+1) + '/' + week[1].getDate();
+
+        setWeekString(weekString);
+    }, [calendarIndex]);
 
     // controls what week is selected by user
     const setCalendarLeftArrow = () => {
