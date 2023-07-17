@@ -32,6 +32,10 @@ def get_next_free_time(last_event, events):
 
 class RoomSerializer(serializers.ModelSerializer):
     room_status = serializers.SerializerMethodField('get_room_status')
+    location = serializers.SerializerMethodField('get_location')
+
+    def get_location(self, room):
+        return room.floor.building.building_name + ", " + room.floor.floor_num + " Floor"
 
     # returns the current status of a room in a json where the first element is the status and second is the time this status ends:
     # examples:
@@ -51,13 +55,6 @@ class RoomSerializer(serializers.ModelSerializer):
             print(reservation.end_time)
             if reservation.end_time > current_time:
                 events.append((reservation.start_time,reservation.end_time, reservation.event_name))
-        # for reservation in Room.objects.get(id=room.id).reservations.all():
-        #     reservation_object = Reservation.objects.get(id=reservation.id)
-
-        #     print("hi")
-
-        #     if reservation_object.end_time > current_time: # if the event has not passed
-        #         events.append((reservation_object.start_time,reservation_object.end_time))
 
         if(len(events) == 0):
             state['status'] = "free"
@@ -67,7 +64,7 @@ class RoomSerializer(serializers.ModelSerializer):
 
         min_event = min(events, key=lambda time:time[0])
         time_format = "%I:%M %p"
-
+        print(min_event[0])
 
         # find the status of the event
         if min_event == None:
