@@ -13,6 +13,7 @@ def check_reservation_time(reservations, new_reservation_time):
 	parsed_start_string = new_reservation_time[0][0:16] + new_reservation_time[0][-1]
 	parsed_end_string = new_reservation_time[1][0:16] + new_reservation_time[1][-1]
 
+
 	new_reservation_time_start = parser.parse(parsed_start_string).timetuple()
 	new_reservation_time_end = parser.parse(parsed_end_string).timetuple()
 
@@ -22,7 +23,6 @@ def check_reservation_time(reservations, new_reservation_time):
 		reservation_end = reservation_object.end_time.timetuple()
 
 		## check that reservation times don't overlap ##
-		if (new_reservation_time_start > reservation_start and new_reservation_time_start < reservation_end) or (new_reservation_time_end > reservation_start and new_reservation_time_end < reservation_end):
+		if (new_reservation_time_start >= reservation_start and new_reservation_time_start < reservation_end) or (new_reservation_time_end > reservation_start and new_reservation_time_end <= reservation_end):
 			return True
-
 	return False

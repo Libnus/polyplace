@@ -5,8 +5,11 @@ import { useParams } from 'react-router-dom';
 import '../components/Reservations/Building.css';
 import Calendar from '../components/Reservations/Calendar'
 
+const RoomContext = React.createContext();
+
 const Room = ({index, room, floor, building}) => {
 	let [isCalendarOpen, setCalendarOpen] = useState(false);
+
 
 	const handleOpen = () => {
 		if(isCalendarOpen === false) setCalendarOpen(true);
@@ -41,23 +44,23 @@ const Room = ({index, room, floor, building}) => {
 	}
 	
 	return (
-		<>
-		{isCalendarOpen && <Calendar room={room} handleOpen={handleOpen} />}
-			<div className={statusClass} onClick={() => handleOpen()}>
-			<div className="labels">
-				Room {room.room_num}
+		<RoomContext.Provider value={room}>
+			{isCalendarOpen && <Calendar handleOpen={handleOpen} />}
+				<div className={statusClass} onClick={() => handleOpen()}>
+				<div className="labels">
+					Room {room.room_num}
+				</div>
+				<div className="location">
+					{room.location}
+				</div>
+				<div className="reserveName">
+					<u>Next Event:</u> {room.room_status.event}
+				</div>
+				<div class="time">
+					{statusMessage}
+				</div>
 			</div>
-			<div className="location">
-				Amos Eaton, {floor} Floor
-			</div>
-			<div className="reserveName">
-				<u>{room.room_status.event}</u>
-			</div>
-			<div class="time">
-				{statusMessage}
-			</div>
-		</div>
-		</>
+		</RoomContext.Provider>
 	);
 }
 
@@ -125,5 +128,7 @@ const Building = () => {
 		</>
 	);
 }
+
+export {RoomContext};
 
 export default Building;

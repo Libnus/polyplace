@@ -32,6 +32,10 @@ def get_next_free_time(last_event, events):
 
 class RoomSerializer(serializers.ModelSerializer):
     room_status = serializers.SerializerMethodField('get_room_status')
+    location = serializers.SerializerMethodField('get_location')
+
+    def get_location(self, room):
+        return room.floor.building.building_name + ", " + room.floor.floor_num + " Floor"
 
     # returns the current status of a room in a json where the first element is the status and second is the time this status ends:
     # examples:
