@@ -49,19 +49,22 @@ const History = () => {
 
 
             const response = await fetch(process.env.REACT_APP_API_URL + '/reservations_api/');
-            const data = await response.json();
+            let data = await response.json();
 
             for(var i=0; i<data.length; i++){
                 data[i]['start_time'] = new Date(data[i]['start_time']);
                 data[i]['end_time'] = new Date(data[i]['end_time']);
 
-                data[i]['building_name'] = await fetch(process.env.REACT_APP_API_URL + '/floors_api/rooms/'+ data[i]["id"] +'/get_building/')
-                data[i]['building_name'] = await data[i]['building_name'].json()
-                data[i]['building_name'] = data[i]['building_name']['building_name']
+                data[i]['building_name'] = await fetch(process.env.REACT_APP_API_URL + '/floors_api/rooms/'+ data[i]["room"] +'/get_building/');
+                data[i]['building_name'] = await data[i]['building_name'].json();
+                data[i]['building_name'] = data[i]['building_name']['building_name'];
+                data[i]['date'] = data[i]['end_time'].toDateString();
             }
 
+            let now = new Date();
+            data = data.filter(res => res['end_time'].getTime() < now.getTime());
+
             setData(data)
-            console.log(data)
         }
 
         getData();
@@ -72,10 +75,11 @@ const History = () => {
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'Building', width: 120, sortable: true, valueGetter: ({value}) => getBuilding(value)},
         { field: 'room', headerName: 'Room', width: 70, sortable: true, valueGetter: ({value}) => getRoom(value)},
-        { field: 'first_name', headerName: 'First name', maxWidth: 200, sortable: true, valueGetter: ({value}) => getField(value)},
-        { field: 'last_name', headerName: 'Last name', maxWidth: 300, sortable: true, valueGetter: ({value}) => getField(value)},
+        { field: 'first_name', headerName: 'First name', maxWidth: 200, align: 'center',headerAlign: 'center', sortable: true, valueGetter: ({value}) => getField(value)},
+        { field: 'last_name', headerName: 'Last name', maxWidth: 300, align: 'center', headerAlign: 'center', sortable: true, valueGetter: ({value}) => getField(value)},
         { field: 'start_time', headerName: 'Start Time', maxWidth: 100, align: 'center',headerAlign: 'center',sortable: true, valueGetter: ({value}) => getTime(value)},
         { field: 'end_time',headerName: 'End Time', maxWidth: 100, align: 'center',headerAlign: 'center',sortable: true, valueGetter: ({value}) => getTime(value)},
+        { field: 'date', headerName: 'Date', width: 125, align: 'center', headerAlign: 'center', sortable: true}
     ]
 
 
