@@ -40,22 +40,29 @@ const getPosition = (startTime,endTime) => {
     let marginTop = 19 + (startTime.getHours()-8)*50;
     marginTop += startTime.getMinutes()*0.83333333333;
 
-    let height = (endTime.getHours()-startTime.getHours()) * 50;
-    height += (endTime.getMinutes()-startTime.getMinutes())*0.83333333333;
+    //let height = (endTime.getHours()-startTime.getHours()) * 50; //150
+
+    const endTimeMinutes = (endTime.getHours()*60) + endTime.getMinutes();
+    const startTimeMinutes = (startTime.getHours()*60) + startTime.getMinutes();
+
+    console.log("well well", endTimeMinutes-startTimeMinutes);
+    let height = (endTimeMinutes-startTimeMinutes)*0.83333333333;
 
     return [marginTop, height];
 }
 
 // given a pixel position and a given day, calculate the time in that day from the pixel
-const getTimeFromPosition = (margin, date) => {
-    margin -= 19;
+const getTimeFromPosition = (pixel, date) => {
+    console.log("pixel from getTimefromPos", pixel);
+    pixel -= 19;
     const time = new Date(date.getTime());
-    const hours = Math.floor(((margin) / 50) + 8); // use same formula as getting position ((hours - 8)*50) + 20
+    const hours = Math.floor(((pixel) / 50) + 8); // use same formula as getting position ((hours - 8)*50) + 20
                                                         // where 8 is the starting time of the calendar, 50 is one hour, and 20 is the starting offset of the calendar
 
     time.setHours(hours);
-    margin -= ((hours-8)*50); // get minutes alone without hours margin and 20 offset
-    const minutes = Math.round(margin / 0.83333333333);
+    pixel -= ((hours-8)*50); // get minutes alone without hours margin and 20 offset
+    const minutes = Math.ceil(pixel / 0.83333333333);
+    console.log("calculated minutes", minutes);
     time.setMinutes(minutes);
     return time;
 }
@@ -291,6 +298,15 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
 
     const sensitivity = 15;
 
+    // fetch the current time, if the current day is not this calendar events set day then default the current time to 8 am
+    let currTime = new Date();
+    if (currTime.getDate() < day.getDate()) {
+        currTime.setDate(day.getDate());
+        currTime.setHours(8);
+        currTime.setMinutes(0);
+        currTime.setSeconds(0);
+    }
+
     const refBox = useRef(null);
     const refTop = useRef(null);
     const refBottom = useRef(null);
@@ -312,8 +328,8 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
     // check if inputted event collides with another event
     const checkCollisions = (startTime, endTime, returnEvent=false) => {
         const position = getPosition(startTime, endTime);
-        const marginTop = Math.round(position[0]);
-        const height = Math.round(position[1]);
+        const marginTop = position[0];
+        const height = position[1];
 
         const end = marginTop+height;
 
@@ -323,13 +339,13 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
         for(let i = 0; i < events.length; i++){
             if(events[i] !== resizeableElement){
                 const eventStyle = getComputedStyle(events[i]);
-                const eventTop = parseInt(eventStyle.marginTop);
-                const eventHeight = parseInt(eventStyle.height);
+                const eventTop = parseFloat(eventStyle.marginTop);
+                const eventHeight = parseFloat(eventStyle.height);
 
-                const eventEnd = eventTop + eventHeight
+                const eventEnd = eventTop + eventHeight;
 
                 if(eventTop < end && eventEnd > marginTop) {
-                    console.log(end, eventTop);
+                    console.log("collision found", eventTop, end, eventEnd, marginTop);
                     if(returnEvent) return events[i];
                     return true;
                 }
@@ -339,18 +355,71 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
         return false; // event does not collide with other events
     }
 
+    // get the max and min height our div can be to avoid collisions with other events and not allow users to schedule a reservation during another time.
+    const getMaxMinHeights = () => {
+        const resizeableElement = refBox.current;
+
+        const position = getPosition(thisEvent.start_time, thisEvent.end_time);
+        let marginTop = position[0];
+        let height = position[1];
+
+        const events = document.getElementsByClassName(day.getDate() + " eventCard");
+
+        // also define max and min margins for looping and we will set heights after. This is so there is no confusion between heights and margin calculations during iteration
+        let maxMargin = getPosition(currTime, currTime)[1]+19;
+        let minMargin = 669;
+
+
+        // TODO move to checkCollisions method
+        // loop over all events from this day
+        // if we find a margin (represents time in the day) that is before us then we consider updating maxHeight to avoid collisions
+        for(let i = 0; i < events.length; i++){
+            if(events[i] !== resizeableElement){
+                const eventStyle = getComputedStyle(events[i]);
+                const eventTop = parseFloat(eventStyle.marginTop); // the top margin of the event aka the "position" or "time" in the day the event is
+
+                // if the event is "later" than our current max and the event is actually before us then update maxMargin to be the margin of the event + the events height
+                if(eventTop >= maxMargin && eventTop < marginTop) maxMargin = eventTop + parseFloat(eventStyle.height);
+
+                // if the event margin is lower or "later" than the current minHeight then update minHeight to be event the marginTop of that event - our marginTop
+                if(eventTop <= minMargin && eventTop > marginTop) minMargin = eventTop;
+            }
+        }
+        //console.log("ododoodod", marginTop, maxMargin,minMargin);
+
+        let minTime = getTimeFromPosition(maxMargin, day);
+        let maxTime = getTimeFromPosition(minMargin,day);
+        console.log("what is it",minTime, maxTime);
+
+        return [minTime, maxTime];
+    }
+
     // on first render
     useEffect(() => {
         if(thisEvent.created_event){
-            const event = checkCollisions(thisEvent.start_time, thisEvent.end_time, true);
+            let position = getPosition(thisEvent.start_time, thisEvent.end_time);
 
-            if(event !== null){
-                const eventStartTime = getTimeFromPosition(parseInt(event.style.marginTop), day);
-                const eventEndTime = getTimeFromPosition(parseInt(event.style.marginTop + event.style.height), day);
+            let startTime = new Date(thisEvent.start_time);
+            let endTime = new Date(thisEvent.end_time);
 
-                if(thisEvent.start_time.getMinutes() < eventStartTime.getMinutes()) dispatch({type: 'updateEndTime', value: new Date(eventStartTime.getTime())});
-                else dispatch({type: 'updateStartTime', value: new Date(eventStartTime.getTime())});
+            // calculate what the max and min are
+            let [minTime, maxTime] = getMaxMinHeights();
+            console.log("calcdive",minTime,maxTime);
+
+            // check if there are events during this hour already
+            if(startTime < minTime) {
+                startTime = minTime;
             }
+            if(endTime > maxTime) {
+                endTime = maxTime;
+            }
+            else{
+                endTime = new Date(startTime.getTime() + 3600000);
+            }
+
+            // set the time to conform to those events
+            dispatch({type: 'updateStartTime', value: startTime});
+            dispatch({type: 'updateEndTime', value: endTime});
         }
     },[]);
 
@@ -361,6 +430,8 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
         const resizeableElement = refBox.current;
 
         const position = getPosition(thisEvent.start_time, thisEvent.end_time);
+        console.log("resize", thisEvent.start_time, thisEvent.end_time);
+        console.log("positiongs got", position[0], position[1]);
         resizeableElement.style.marginTop = `${position[0]}px`;
         resizeableElement.style.height = `${position[1]}px`;
 
@@ -399,8 +470,8 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
             // let maxHeight = 0;
             // let minHeight = 650 - (marginTop); //TODO change 650 to maxSize of day as scaling could change
 
-            let minTime = new Date(thisEvent.start_time.getTime());
-            minTime.setHours(8);
+            //let minTime = new Date(thisEvent.start_time.getTime());
+            let minTime = new Date(currTime.getTime());
             let maxTime = new Date(thisEvent.end_time.getTime());
             maxTime.setHours(21);
 
@@ -410,13 +481,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
             // this is a simple "fail safe" to make sure the pixels actually match the start and end times
             //resizeableElement.style.marginTop = `${marginTop}px`;
             //resizeableElement.style.height = `${height}px`;
-
-            // fetch the current time, if the current day is not this calendar events set day then default the current time to 8 am
-            let currTime = new Date();
-            if (currTime < day) {
-                currTime.setDate(day.getDate());
-                currTime.setHours(8);
-            }
 
             let originalStartTime = startTime;
             let originalEndTime = endTime;
@@ -431,85 +495,8 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
             };
 
 
-            // get the max and min height our div can be to avoid collisions with other events and not allow users to schedule a reservation during another time.
-            const getMaxMinHeights = () => {
-                const position = getPosition(startTime, endTime);
-                let marginTop = position[0];
-                let height = position[1];
-
-                const events = document.getElementsByClassName(day.getDate() + " eventCard");
-
-                // also define max and min margins for looping and we will set heights after. This is so there is no confusion between heights and margin calculations during iteration
-                let maxMargin = getPosition(currTime, currTime)[1]+19;
-                let minMargin = 669;
-
-                //console.log("ododoodod", marginTop, maxMargin,minMargin);
-
-                // TODO move to checkCollisions method
-                // loop over all events from this day
-                // if we find a margin (represents time in the day) that is before us then we consider updating maxHeight to avoid collisions
-                for(let i = 0; i < events.length; i++){
-                    if(events[i] !== resizeableElement){
-                        const eventStyle = getComputedStyle(events[i]);
-                        const eventTop = parseInt(eventStyle.marginTop); // the top margin of the event aka the "position" or "time" in the day the event is
-
-                        // if the event is "later" than our current max and the event is actually before us then update maxMargin to be the margin of the event + the events height
-                        if(eventTop >= maxMargin && eventTop < marginTop) maxMargin = eventTop + parseInt(eventStyle.height);
-
-                        // if the event margin is lower or "later" than the current minHeight then update minHeight to be event the marginTop of that event - our marginTop
-                        if(eventTop <= minMargin && eventTop > marginTop) minMargin = eventTop;
-                    }
-                }
-
-                // we calculate maxHeight as (our margin - the max margin we found in the loop) + current height of our div :)
-                // maxHeight = (marginTop - maxMargin) + height;
-                // minHeight = minMargin - marginTop;
-
-                // console.log("minTimeold", minTime);
-                // console.log("maxTimeold", maxTime);
-                // console.log("otbained", marginTop, maxMargin,minMargin);
-
-
-                minTime = getTimeFromPosition(maxMargin, day);
-                maxTime = getTimeFromPosition(minMargin,day);
-
-
-                // console.log("minTime", minTime);
-                // console.log("maxTime", maxTime);
-            };
-
-            // get the max and min div margins for draggable events
-            // check other divs for collisions
-            const getDragMaxMin = () => {
-                const position = getPosition(startTime, endTime)[0];
-                const marginTop = position[0];
-                const height = position[1];
-
-                const maxHeight = getPosition(currTime, currTime)[0]; // 0 is the max margin
-                const minHeight = 650 - height; // 650 is the min margin
-
-                const events = document.getElementsByClassName(day);
-                console.log(events);
-
-                for(let i = 0; i < events.length; i++){
-                    if(events[i] !== resizeableElement){
-                        const eventStyle = getComputedStyle(events[i]);
-                        const eventHeight = parseInt(eventStyle.height); // height + 19 offset for day label
-                        const eventTop = parseInt(eventStyle.marginTop);
-
-                        if(eventTop >= maxHeight && eventTop < marginTop) maxHeight = (eventTop+eventHeight);
-                        if((eventTop-height) <= minHeight && eventTop > marginTop) minHeight = eventTop-height;
-                    }
-                }
-
-                minTime = getTimeFromPosition(maxHeight);
-                maxTime = getTimeFromPosition(minHeight);
-            }
-
             // TOP RESIZE
             const onMouseMoveTopResize = (event) => {
-                let updateTime = true;
-
                 if(event.clientY % sensitivity === 0){
                     const dy = (event.clientY) - y;
                     //const originalHeight = height;
@@ -518,11 +505,10 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
 
                     if(startTime < minTime){
                         startTime = new Date(minTime.getTime());
-                        updateTime = false;
+                        console.log("blocked", startTime);
                     }
                     if(endTime.getHours() - startTime.getHours() < 1){
                         startTime = new Date(minTime.getTime());
-                        updateTime = false;
                     }
 
                     // update height and marginTop
@@ -531,18 +517,22 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
                     //resizeableElement.style.height = `${height}px`;
 
                     //update event time
-                    if(updateTime) updateEventTime();
+                    updateEventTime();
                 }
                 y = event.clientY;
             };
 
             const onMouseUpTopResize = (event) => {
+                console.log("over",thisEvent.start_time, thisEvent.end_time);
                 document.removeEventListener("mousemove", onMouseMoveTopResize);
                 document.removeEventListener("mouseup", onMouseUpTopResize);
             };
 
             const onMouseDownTopResize = (event) => {
-                getMaxMinHeights();
+                [minTime, maxTime] = getMaxMinHeights();
+
+                console.log("minTime", minTime);
+
                 y = event.clientY;
                 const styles = window.getComputedStyle(resizeableElement);
 
@@ -583,7 +573,7 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
             };
 
             const onMouseDownBottomResize = (event) =>{
-                getMaxMinHeights();
+                [minTime, maxTime] = getMaxMinHeights();
                 y = event.clientY;
 
                 console.log("bottomeresize click",minTime, maxTime);
@@ -603,7 +593,7 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
                 const eventY = event.clientY;
 
                 const dy = (eventY) - y;
-                if(eventY % 15 === 0){
+                if(eventY % 10 === 0){
                     //marginTop += dy*25;
                     startTime.setMinutes(startTime.getMinutes() + dy*30);
                     endTime.setMinutes(endTime.getMinutes() + dy*30);
@@ -614,8 +604,13 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
                         updateEventTime();
                     }
                     else if(startTime < minTime){
-                        startTime.setMinutes(startTime.getMinutes() - dy*30);
-                        endTime.setMinutes(endTime.getMinutes() - dy*30);
+                        console.log("end",startTime, minTime);
+                        startTime.setHours(minTime.getHours());
+                        startTime.setMinutes(minTime.getMinutes());
+                        endTime.setTime(startTime.getTime()+(originalEndTime.getTime() - originalStartTime.getTime()));
+                        console.log("end",endTime);
+
+                        updateEventTime();
                     }
                     else{
                         startTime.setMinutes(startTime.getMinutes() + dy*30);
@@ -656,6 +651,7 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
             // TODO give different style to events being dragged
             const onMouseDownMiddleResize = (event) => {
                 y = event.clientY;
+                console.log(minTime, currTime);
 
                 originalStartTime = new Date(startTime.getTime());
                 originalEndTime = new Date(endTime.getTime());
