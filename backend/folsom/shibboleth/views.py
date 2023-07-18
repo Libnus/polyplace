@@ -56,7 +56,7 @@ class ShibbolethAuthViewSet(viewsets.ViewSet):
         token = {}
 
         token['iat'] = datetime.utcnow()
-        token['exp'] = datetime.utcnow() + timedelta(hours=1) # NOTE: expiring tokens isn't really needed as shib should reauthenticate when they feel the session is expired so this will rerun anyways
+        token['exp'] = 1752867891422
         token['user'] = rcs
         token['is_admin'] = user.is_admin
         token['session_id'] = str(uuid.uuid4())

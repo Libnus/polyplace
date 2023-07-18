@@ -8,7 +8,7 @@ secret_key = config('TOKEN_SECRET_KEY')
 def  check_token(request):
     if settings.ENV == 'devel':
         # NOTE: generic token is a token only valid in development
-        generic_token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODk0NDQyNDksImV4cCI6MTY4OTQ4MDI0OSwidXNlciI6ImRldmVsIiwiaXNfYWRtaW4iOnRydWUsInNlc3Npb25faWQiOiIxIn0._uO5z7h5TN23xF44zjtvu3OcK3XNcSTxO9ke_32YoCQ"
+        generic_token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODk3MDk3OTMsImV4cCI6MTc1Mjg2Nzg5MTQyMiwidXNlciI6ImRldmVsIiwiaXNfYWRtaW4iOnRydWUsInNlc3Npb25faWQiOiIxIn0.RJ97f4aOeuroSd0b7-oF-ahdOtcNqOQHNPu9uVw32XA"
         token = jwt.decode(generic_token, secret_key, algorithms=["HS256"])
         return (True,token)
 
