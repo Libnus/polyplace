@@ -125,8 +125,8 @@ const EventEdit = ( { marginTop , thisEvent, dispatch, removeEvent} ) => {
 
     const handleStartChange = (event) => {
         const newStart = new Date();
-        newStart.setHours(parseInt(thisEvent.target.value.slice(0,2)));
-        newStart.setMinutes(parseInt(thisEvent.target.value.slice(3)));
+        newStart.setHours(parseInt(event.target.value.slice(0,2)));
+        newStart.setMinutes(parseInt(event.target.value.slice(3)));
 
         if(newStart.getHours() >= 8){
             dispatch({type: 'updateStartTime', value: newStart});
@@ -135,8 +135,8 @@ const EventEdit = ( { marginTop , thisEvent, dispatch, removeEvent} ) => {
 
     const handleEndChange = (event) => {
         const newEnd = new Date();
-        newEnd.setHours(parseInt(thisEvent.target.value.slice(0,2)));
-        newEnd.setMinutes(parseInt(thisEvent.target.value.slice(3)));
+        newEnd.setHours(parseInt(event.target.value.slice(0,2)));
+        newEnd.setMinutes(parseInt(event.target.value.slice(3)));
 
         if(newEnd.getHours() <= 20){
             dispatch({type: 'updateEndTime', value: newEnd});
