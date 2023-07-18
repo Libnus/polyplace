@@ -19,8 +19,9 @@ pip install markdown       # Markdown support for the browsable API.
 pip install django-filter  # Filtering support
 
 pip3 install django-cors-headers
-
 pip3 install django_cron
+pip3 install python-dateutil
+pip3 install jwt
 
 # Django set up
 cd backend/folsom

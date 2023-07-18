@@ -24,5 +24,8 @@ def check_reservation_time(reservations, new_reservation_time):
 
 		## check that reservation times don't overlap ##
 		if (new_reservation_time_start >= reservation_start and new_reservation_time_start < reservation_end) or (new_reservation_time_end > reservation_start and new_reservation_time_end <= reservation_end):
+			print(new_reservation_time_start, reservation_start)
+			print()
+			print(new_reservation_time_end, reservation_end)
 			return True
 	return False
