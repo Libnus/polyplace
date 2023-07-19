@@ -802,7 +802,7 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent , update
     return (
         <>
             {editEvent && <EventEdit marginTop={getPosition(thisEvent.start_time,thisEvent.end_time)[0]} thisEvent={thisEvent} setEdit={setEdit} dispatch={dispatch} checkCollisions={checkCollisions} removeEvent={handleRemove} updateEvents={updateEvents}/>}
-            <div className={day.getDate() + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], WebkitBackdropFilter:'blur(10px)',  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
+            <div className={day.getDate() + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1],  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
                 <div className="labels">
