@@ -293,7 +293,7 @@
     margin-left: 5%;
     margin-top: 8%;
     width: 85%;
-    border-style: none none inset none;
+    border-style: none none inset;
     border-width: 2px;
     transition: all 0.1s ease-in;
     height: 14px;
@@ -337,7 +337,7 @@ span{
 
 .date{
     margin-left: 2%;
-    border-style: none none inset none;
+    border-style: none none inset;
     padding-top: 4.5%;
 }
 
