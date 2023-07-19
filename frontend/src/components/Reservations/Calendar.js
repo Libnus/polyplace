@@ -1,6 +1,5 @@
 import React from 'react';
-import { useState, useEffect, useRef, useReducer, useContext, useLayoutEffect } from 'react';
-import { throttle } from 'lodash';
+import { useState, useEffect, useRef, useReducer, useContext } from 'react';
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 import { AiOutlineCheckCircle } from 'react-icons/ai';
@@ -383,8 +382,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent , update
     const [thisEvent, dispatch] = useReducer(eventReducer,eventData);
     const [editEvent, setEdit] = useState(false); // are we editing event details
 
-    const { submitReservation, submitError } = useSubmitContext();
-
     const room = useContext(RoomContext);
 
     let isDragging = false; // check if the user is currently dragging an event
@@ -462,7 +459,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent , update
 
         const position = getPosition(thisEvent.start_time, thisEvent.end_time);
         let marginTop = position[0];
-        let height = position[1];
 
         const events = document.getElementsByClassName(day.getDate() + " eventCard");
 
@@ -496,8 +492,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent , update
     // on first render
     useEffect(() => {
         if(thisEvent.created_event){
-            let position = getPosition(thisEvent.start_time, thisEvent.end_time);
-
             let startTime = new Date(thisEvent.start_time);
             let endTime = new Date(thisEvent.end_time);
 
@@ -549,13 +543,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent , update
     useEffect(() => {
         if(thisEvent.user_event){
             const resizeableElement = refBox.current;
-            const styles = getComputedStyle(resizeableElement);
-            //let height = parseInt(styles.height);
-
-            // get position from the time the event is set to
-            // let position = getPosition(thisEvent.start_time, thisEvent.end_time);
-            // let marginTop = position[0]; // keep track of our own marginTop and height then update the event details later
-            // let height = position[1];
 
             let startTime = new Date(thisEvent.start_time.getTime());
             let endTime = new Date(thisEvent.end_time.getTime());
