@@ -22,11 +22,7 @@ const getWeek = (weekOffset) => {
     const start = new Date();
     start.setDate(start.getDate()+weekOffset*7);
 
-    // if(start.getDay() === 6) start.setDate(start.getDate()+2) // if saturday go to monday
-    // else if(start.getDay() === 0) start.setDate(start.getDate()+1) // if sunday go to monday
-    // else{
     start.setDate(start.getDate()-start.getDay())
-    //}
 
     const end = new Date();
     end.setDate(start.getDate()+6);
@@ -71,7 +67,8 @@ const getDayMargin = (weekday) => {
     console.log(weekday);
     const dayElement = document.getElementById(weekday);
 
-    return weekday * dayElement.clientWidth;
+
+    if(dayElement !== null) return weekday * dayElement.clientWidth;
 };
 
 // check to see if an inputted date is past an hour and minute
@@ -159,6 +156,7 @@ const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions,
     // calculate position of the editor relative to the screen width and height
     // position one is the marginTop of the event editor and the second position is the marginLeft value
     const [position, setPosition] = useState(calculateEditorPosition([marginTop, 160], thisEvent.start_time.getDay()));
+    //const [position, setPosition] = useState([marginTop, 160]);
 
     useEffect(() => {
         const newPosition = calculateEditorPosition(position, thisEvent.start_time.getDay());
@@ -223,7 +221,6 @@ const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions,
     // },[thisEvent.start_time, thisEvent.end_time]);
 
     const handleFocus = () => {
-        console.log("hey");
         setStart(new Date(thisEvent.start_time.getTime()));
         setEnd(new Date(thisEvent.end_time.getTime()));
     }
@@ -234,48 +231,78 @@ const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions,
         dispatch({type: "updateEventName", value: newName})
     };
 
-    const handleStartChange = (event) => {
-        const newStart = new Date(thisEvent.start_time.getTime());
-        let newEnd = new Date(thisEvent.end_time.getTime());
-
-        newStart.setHours(parseInt(event.target.value.slice(0,2)));
-        newStart.setMinutes(parseInt(event.target.value.slice(3)));
-
-
-        if(isTimePast(newStart, 21, 0)) newStart.setHours(newStart.getHours()-12); // same for if they entered something greater than 8 pm (snap to -12). if hour is 11 pm they probably meant 11 am
-        else if(!isTimePast(newStart, 8, 0)) newStart.setHours(newStart.getHours()+12);
-
-        if(isTimePast(newStart, newEnd.getHours(), newEnd.getMinutes())){
-            newEnd = new Date(newStart.getTime() + (originalEndTime - originalStartTime));
+    const checkTimes = (newStart, newEnd) => {
+        if(isTimePast(newEnd, 21, 1)){
+            newEnd.setHours(21); newEnd.setMinutes(0);
+            newStart.setHours(20); newStart.setMinutes(0);
         }
 
-        setStartString(`${('0' + newStart.getHours()).slice(-2)}:${('0'+newStart.getMinutes()).slice(-2)}`);
-        setEndString(`${('0' + newEnd.getHours()).slice(-2)}:${('0'+ newEnd.getMinutes()).slice(-2)}`);
+        else if(!isTimePast(newStart, 8, 0)){
+            newStart.setHours(8); newStart.setMinutes(0);
+            newEnd.setHours(9); newStart.setMinutes(0);
+        }
 
-        dispatch({type: 'updateStartTime', value: newStart});
-        dispatch({type: 'updateEndTime', value: newEnd});
+        return [newStart, newEnd];
+    };
+
+    const handleStartChange = (event) => {
+        if(event.target.value !== ""){
+            let newStart = new Date(thisEvent.start_time.getTime());
+            let newEnd = new Date(thisEvent.end_time.getTime());
+
+            newStart.setHours(parseInt(event.target.value.slice(0,2)));
+            newStart.setMinutes(parseInt(event.target.value.slice(3)));
+
+            if(isTimePast(newStart, 21, 0)) {
+                console.log("invalid hour", newStart);
+                newStart.setHours(newStart.getHours()-12); // same for if they entered something greater than 8 pm (snap to -12). if hour is 11 pm they probably meant 11 am
+                console.log("invalid hour after", newStart);
+            }
+            else if(!isTimePast(newStart, 8, 0)) newStart.setHours(newStart.getHours()+12);
+
+            if(isTimePast(newStart, newEnd.getHours(), newEnd.getMinutes())){
+                //newEnd = new Date(newStart.getTime() + (originalEndTime - originalStartTime));
+                newEnd = new Date(newStart.getTime() + 60*60*1000); // 1 hour
+            }
+
+            // chcek to make sure end time is valid
+            [newStart, newEnd] = checkTimes(newStart, newEnd);
+
+            setStartString(`${('0' + newStart.getHours()).slice(-2)}:${('0'+newStart.getMinutes()).slice(-2)}`);
+            setEndString(`${('0' + newEnd.getHours()).slice(-2)}:${('0'+ newEnd.getMinutes()).slice(-2)}`);
+
+            console.log('eventStartTme', newStart, event.target.value);
+
+            dispatch({type: 'updateStartTime', value: newStart});
+            dispatch({type: 'updateEndTime', value: newEnd});
+        }
     };
 
     const handleEndChange = (event) => {
-        const newEnd = new Date(thisEvent.end_time.getTime());
-        let newStart = new Date(thisEvent.start_time.getTime());
+        if(event.target.value !== ""){
+            let newEnd = new Date(thisEvent.end_time.getTime());
+            let newStart = new Date(thisEvent.start_time.getTime());
 
-        newEnd.setHours(parseInt(event.target.value.slice(0,2)));
-        newEnd.setMinutes(parseInt(event.target.value.slice(3)));
+            newEnd.setHours(parseInt(event.target.value.slice(0,2)));
+            newEnd.setMinutes(parseInt(event.target.value.slice(3)));
 
-        if(isTimePast(newEnd, 21, 0) && !isTimeEqual(newEnd, 21, 0)) newEnd.setHours(newEnd.getHours()-12); // same for if they entered something greater than 8 pm (snap to -12). if hour is 11 pm they probably meant 11 am
-        else if(!isTimePast(newEnd, 8, 0) && !isTimeEqual(newEnd, 8, 0)) newEnd.setHours(newEnd.getHours()+12);
+            if(isTimePast(newEnd, 21, 0) && !isTimeEqual(newEnd, 21, 0)) newEnd.setHours(newEnd.getHours()-12); // same for if they entered something greater than 8 pm (snap to -12). if hour is 11 pm they probably meant 11 am
+            else if(!isTimePast(newEnd, 8, 0) && !isTimeEqual(newEnd, 8, 0)) newEnd.setHours(newEnd.getHours()+12);
 
-        if(isTimePast(newStart, newEnd.getHours(), newEnd.getMinutes())){
-            newStart = new Date(newEnd.getTime() - (originalEndTime - originalStartTime));
+            if(isTimePast(newStart, newEnd.getHours(), newEnd.getMinutes())){
+                newStart = new Date(newStart.getTime() - 60*60*1000);
+            }
+
+            // check times are valid
+            [newStart, newEnd] = checkTimes(newStart, newEnd);
+
+            setStartString(`${('0' + newStart.getHours()).slice(-2)}:${('0'+newStart.getMinutes()).slice(-2)}`);
+            setEndString(`${('0' + newEnd.getHours()).slice(-2)}:${('0'+ newEnd.getMinutes()).slice(-2)}`);
+
+            // still check that the hour is valid though
+            dispatch({type: 'updateEndTime', value: newEnd});
+            dispatch({type: 'updateStartTime', value: newStart});
         }
-
-        setStartString(`${('0' + newStart.getHours()).slice(-2)}:${('0'+newStart.getMinutes()).slice(-2)}`);
-        setEndString(`${('0' + newEnd.getHours()).slice(-2)}:${('0'+ newEnd.getMinutes()).slice(-2)}`);
-
-        // still check that the hour is valid though
-        dispatch({type: 'updateEndTime', value: newEnd});
-        dispatch({type: 'updateStartTime', value: newStart});
     };
 
     const handleTimeStartChangeBlur = (event) => {
@@ -933,77 +960,11 @@ const createWeek = (weekStart) => {
     return week;
 }
 
-const Calendar = ( {room, week} ) => {
-    const [events,setEvents] = useState({
-    });
-
-    const roomContext = useContext(RoomContext);
+const Calendar = ( { room, week, events, addCreatedEvent, updateEventsId, removeEvent } ) => {
 
     useEffect(() => {
-        const weekStart = week[0];
-
-        // parse reservations json returned from db
-        // dates are turned into date objects and sorted into appropriate days
-        const parseReservationsJson = (data) => {
-
-            const newEvents = createWeek(weekStart);
-
-            for(let i = 0; i < data.length; i++){
-                data[i].start_time = new Date(data[i].start_time);
-                data[i].end_time = new Date(data[i].end_time);
-
-                data[i].user_event = (data[i].first_name === "Linus" ? true : false);
-                data[i].created_event= false;
-
-                data[i].room_num = roomContext.room_num;
-
-                newEvents[data[i].start_time.getDate()].push(data[i]);
-            }
-            setEvents(newEvents);
-        };
-
-        const getReservations = async () => {
-            const weekString = weekStart.getMonth()+1 + "-" + weekStart.getDate() + "-" + weekStart.getFullYear();
-
-            const response = await fetch(`http://127.0.0.1:8000/reservations_api/${roomContext.id}/get_week/?date=${weekString}/`);
-            const data = await response.json();
-            parseReservationsJson(data);
-        };
-        getReservations();
-    },[]);
-
-
-    const addCreatedEvent = (newEvent) => {
-        const newEvents = {...events};
-        newEvents[newEvent.start_time.getDate()] = [...newEvents[newEvent.start_time.getDate()], newEvent];
-        setEvents(newEvents);
-    };
-
-    // takes in an old id and a newId and replaces the old eventId with the newly submitted event id
-    const updateEventsId = (oldId, newId) => {
-        const newEvents = events;
-        for(let i in newEvents){
-            for(let j = 0; j < newEvents[i].length; j++){
-                console.log(newEvents[i][j]);
-                if(newEvents[i][j].id === oldId){
-                    newEvents[i][j].id = newId;
-                    break;
-                }
-            }
-        }
-        setEvents(newEvents); // note that this does not "update" the value of the useState and thus the page is not rendered again
-    };
-
-    const removeEvent = (removeEvent) => {
-        if(removeEvent.user_event){
-            console.log("removing event...", removeEvent);
-            const newEvents = {...events};
-            const eventsIndex = removeEvent.start_time.getDate();
-            newEvents[eventsIndex] = newEvents[eventsIndex].filter(curr => curr.id !== removeEvent.id);
-
-            setEvents(newEvents);
-        }
-    };
+        console.log("calendar created with events", events);
+    },[events])
 
     return (
         <div className="calendarContainer">
@@ -1031,31 +992,103 @@ const Calendar = ( {room, week} ) => {
 }
 
 
-const CalendarView = ( {handleOpen} ) => {
+const CalendarView = ( { handleOpen } ) => {
 
     // don't be confused by the jank code below...
     // calendarIndex specifies the "calendar index" the page is currently rendering while weekString is the string associated with that calendar index
     // when use selects left or right arrow we update the index and week string based on that index and then we render the page again
-    let [calendarIndex, setCalendarIndex] = useState(0);
-    let [weekString, setWeekString] = useState();
+    const [calendarIndex, setCalendarIndex] = useState(0);
+    const [weekString, setWeekString] = useState();
+
+    const [events, setEvents] = useState([]); // an array of events for each week being rendered
+
+    const roomContext = useContext(RoomContext);
 
 
     // store the calendars
     // just the next two weeks for now
     // TODO  key can be calendar index but make week a new Date being the start date of the week (monday)
-    const thisWeek = getWeek(0);
-    const nextWeek = getWeek(1);
+    let week = getWeek(0);
 
-    const weekCalendars = [
-        <Calendar key={0} week={thisWeek}  />,
-        <Calendar key={1} week={nextWeek}  />
-    ];
 
+    /* ====== FUNCTIONS ASSOCIATED WITH ADDING, UPDATING, OR DELETING EVENTS FROM THE CALENDAR ====== */
+
+    const addCreatedEvent = (newEvent) => {
+        const newEvents = [...events];
+        newEvents[calendarIndex][newEvent.start_time.getDate()] = [...newEvents[calendarIndex][newEvent.start_time.getDate()], newEvent];
+        setEvents(newEvents);
+    };
+
+    // takes in an old id and a newId and replaces the old eventId with the newly submitted event id
+    const updateEventsId = (oldId, newId) => {
+        for(let i in events[calendarIndex]){
+            for(let j = 0; j < events[calendarIndex][i].length; j++){
+                if(events[calendarIndex][i][j].id === oldId){
+                    events[calendarIndex][i][j].id = newId;
+                    break;
+                }
+            }
+        }
+    };
+
+    const removeEvent = (removeEvent) => {
+        if(removeEvent.user_event){
+            const newEvents = [...events];
+            const eventsIndex = removeEvent.start_time.getDate();
+            newEvents[calendarIndex][eventsIndex] = newEvents[calendarIndex][eventsIndex].filter(curr => curr.id !== removeEvent.id);
+
+            setEvents(newEvents);
+        }
+    };
+
+    /* ====== */
+
+    const getReservations = async () => {
+        const weekString = week[0].getMonth()+1 + "-" + week[0].getDate() + "-" + week[0].getFullYear();
+
+        const response = await fetch(`http://127.0.0.1:8000/reservations_api/${roomContext.id}/get_week/?date=${weekString}/`);
+        const data = await response.json();
+        return data;
+    };
+
+    // take a weekIndex and fetch the events from that week
+    // if they don't exist, create the week and then make an api call to fetch them
     useEffect(() => {
-        const week = ((calendarIndex === 0) ? thisWeek : nextWeek)
+        week = getWeek(calendarIndex);
         const weekString = week[0].getMonth()+1 + '/' + week[0].getDate() + ' - ' + (week[1].getMonth()+1) + '/' + week[1].getDate();
 
         setWeekString(weekString);
+
+        console.log("calendarIndex updated", calendarIndex, events.length);
+
+        if(events.length <= calendarIndex){
+            fetch();
+
+            async function fetch() {
+                const data = await getReservations();
+                console.log("saw calendar was empty so called api and got", data);
+
+                let newEvents = [...events];
+                const newWeekEvents = createWeek(week[0]);
+
+                for(let i = 0; i < data.length; i++){
+                    data[i].start_time = new Date(data[i].start_time);
+                    data[i].end_time = new Date(data[i].end_time);
+
+                    data[i].user_event = (data[i].first_name === "Linus" ? true : false);
+                    data[i].created_event= false;
+
+                    data[i].room_num = roomContext.room_num;
+
+                    newWeekEvents[data[i].start_time.getDate()].push(data[i]);
+                }
+
+                console.log("parsed reservations for the week and weekEvents is now", newWeekEvents)
+
+                newEvents[calendarIndex] = newWeekEvents;
+                setEvents(newEvents);
+            }
+        }
     }, [calendarIndex]);
 
     // controls what week is selected by user
@@ -1066,7 +1099,7 @@ const CalendarView = ( {handleOpen} ) => {
     }
 
     const setCalendarRightArrow = () => {
-        if(calendarIndex < weekCalendars.length-1){
+        if(calendarIndex < 1){
             setCalendarIndex(calendarIndex+1);
         }
     }
@@ -1080,9 +1113,17 @@ const CalendarView = ( {handleOpen} ) => {
                     <div className="calendarButton" onClick={() => setCalendarLeftArrow()}><HiChevronDoubleLeft size={50} /></div>
                     <div style={{position:'center'}}><h2>{weekString}</h2></div>
                     <div className="calendarButton" onClick={() => setCalendarRightArrow()}><HiChevronDoubleRight size={50} /></div>
-                <div className="calendarButton" style={{width:'35px', height:'35px', position:'absolute', marginLeft:'98%', marginTop:'-2%'}} onClick={() => {handleOpen()}}><AiOutlineCloseCircle size={35} /></div>
+                    <div className="calendarButton" style={{width:'35px', height:'35px', position:'absolute', marginLeft:'98%', marginTop:'-2%'}} onClick={() => {handleOpen()}}><AiOutlineCloseCircle size={35} /></div>
                 </div>
-                {weekCalendars[calendarIndex]}
+                {events.length > calendarIndex &&
+                 <Calendar
+                     key={calendarIndex}
+                     week={getWeek(calendarIndex)}
+                     events={events[calendarIndex]}
+                     addCreatedEvent={addCreatedEvent}
+                     updateEventsId={updateEventsId}
+                     removeEvent={removeEvent}
+                 />}
             </div>
             <div className="main"/>
         </SubmitProvider>

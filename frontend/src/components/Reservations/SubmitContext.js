@@ -19,6 +19,7 @@ const SubmitProvider = ({ children }) => {
         try{
             const data = {
                 room: event.room_num,
+                event_name: event.event_name,
                 first_name: event.first_name,
                 last_name: event.last_name,
                 rin: event.rin,
