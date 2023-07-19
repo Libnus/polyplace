@@ -1,6 +1,5 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import Navbar from './components/Main/Navbar';
 import Footer from './components/Main/Footer';
 import { Routes, BrowserRouter, Route, Link } from 'react-router-dom';
 import Rooms from './pages/Rooms';
@@ -10,7 +9,8 @@ import Buildings from './pages/Buildings';
 import Building from './pages/Building';
 import UserSession from './UserSession';
 import './assets/styles/main.css';
-
+import Sidebar from './components/Main/Sidebar';
+import Header from './components/Main/Header';
 function App() {
     const [user, setUser] = useState(null);
     const [buildings,setBuildings] = useState([]);
@@ -27,7 +27,7 @@ function App() {
     }
 
     const getBuildings = async () => {
-        const response = await fetch('http://127.0.0.1:8000/floors_api/buildings/');
+        const response = await fetch(process.env.REACT_APP_API_URL + '/floors_api/buildings/');
         const data = await response.json();
         setBuildings(data);
     };
