@@ -241,18 +241,29 @@
     z-index: 3000;
     display: flex;
     flex-direction: column;
-    width: 20%;
-    height: 26%;
-    #margin-left: 19%;
+    width: 228px;
+    #width: 20%;
+    #height: 26%;
+    height: 200px;
     margin-left: 160px;
     border-radius: 5px;
     background-color: rgba(220,253,243,1.0);
     color: black;
-    transition: 0.5s ease-out;
+    transition: 0.4s ease-in;
 }
 .eventEditor:hover{
     box-shadow: 5px 5px 0px 0px rgba(30,30,30);
     transition: 0.2s ease-in;
+}
+
+.success:hover{
+    box-shadow: 0px 0px 0px 3px lightgreen;
+    transition: ease-in 0.3s;
+}
+
+.error:hover{
+    box-shadow: 0px 0px 0px 3px red;
+    transition: ease-in 0.3s;
 }
 
 .bar{
@@ -271,6 +282,12 @@
     font-weight: bold;
     padding-top: 1.5%;
     font-size: 11pt;
+    display: flex;
+}
+
+.eventError{
+    padding-left: 4%;
+    color: red;
 }
 
 .details{

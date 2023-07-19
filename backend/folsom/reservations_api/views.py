@@ -73,4 +73,36 @@ class ReservationViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
+            return Response({'id': serializer.data['id']}, status=status.HTTP_201_CREATED)
+
+    def update(self, request, pk=None):
+        if not Room.objects.filter(room_num=request.data['room']).exists(): # check that the room exists
+            return Response({'message':"Conflict! Room doesn't exist!"},status=status.HTTP_409_CONFLICT)
+
+        room = Room.objects.get(room_num=request.data['room'])
+
+        if check_reservation_time(Reservation.objects.filter(room=room.id), (request.data['start_time'],request.data['end_time'])): # check if room has already been reserved
+            return Response({'message':"Conflict! Room taken at time specified"},status=status.HTTP_409_CONFLICT)
+        #
+        # TODO students can make more than one reservation
+        # if Reservation.objects.filter(rin=request.data['rin']).exists():
+        #     return Response({'message':"Conflict! Student already reserved a room!"},status=status.HTTP_409_CONFLICT)
+
+        else:
+            data = request.data
+            data['room'] = room.id
+
+            reservation = Reservation.objects.get(pk=pk)
+            serializer = ReservationSerializer(reservation, data=data) # create the reservation
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(serializer.data,status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk=None):
+        if not Reservation.objects.filter(pk=pk).exists():
+            return Response({'message': "Reservation doesn't exist!"}, status=status.HTTP_404_NOT_FOUND)
+
+        reservation = Reservation.objects.get(pk=pk)
+        reservation.delete();
+        return Response(status=status.HTTP_200_OK)

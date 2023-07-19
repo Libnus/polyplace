@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect, useRef, useReducer, useContext } from 'react';
+import { useState, useEffect, useRef, useReducer, useContext, useLayoutEffect } from 'react';
 import { throttle } from 'lodash';
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
@@ -8,7 +8,6 @@ import { SubmitProvider, useSubmitContext } from './SubmitContext';
 import { RoomContext } from '../../pages/Building';
 import './Calendar.css';
 import '../../assets/styles/main.css';
-
 
 // options for toLocaleString function in the javascript date class
 // gets the actual weekday string from an int returned from getDay()
@@ -67,6 +66,14 @@ const getTimeFromPosition = (pixel, date) => {
     return time;
 }
 
+// from a weekday, determine the marginLeft position on the screen
+const getDayMargin = (weekday) => {
+    console.log(weekday);
+    const dayElement = document.getElementById(weekday);
+
+    return weekday * dayElement.clientWidth;
+};
+
 // check to see if an inputted date is past an hour and minute
 // because javascript date library is bad
 const isTimePast = (date, hour, minute) => {
@@ -110,16 +117,35 @@ const eventReducer = (state, action) => {
                 created_event: action.value,
             };
         }
+        case 'updateID': {
+            return{
+                ...state,
+                id: action.value,
+            }
+        }
         default: {
             return state;
         }
     }
 }
 
+
+const calculateEditorPosition = (position, weekday) => {
+    const newPosition = {...position};
+    if(position[0]+300 >= window.innerHeight){
+        newPosition[0] = window.innerHeight - 300;
+    }
+    //magic number ;)
+    if((160+228+280)+getDayMargin(weekday) > window.innerWidth){
+        newPosition[1] = -240;
+    }
+    return newPosition;
+}
+
 // calendar event editor
 // this allows the user to edit event details like time and in the future day. This window also allows the user to confirm their reservation
 // TODO allow date to be edited and it will move day
-const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions, removeEvent} ) => {
+const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions, removeEvent, updateEvents } ) => {
     const [startDateString, setDateString] = useState('');
     const [startTimeString, setStartString] = useState('');
     const [endTimeString, setEndString] = useState('');
@@ -127,20 +153,60 @@ const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions,
     const [originalStartTime, setStart] = useState(null);
     const [originalEndTime, setEnd]= useState(null);
 
-    const { submitReservation, submitError } = useSubmitContext();
+    const [thisEventError, setError] = useState(false);
+    const [submitSuccess, setSuccess] = useState(null);
 
-    const handleSubmit = () => {
+    // calculate position of the editor relative to the screen width and height
+    // position one is the marginTop of the event editor and the second position is the marginLeft value
+    const [position, setPosition] = useState(calculateEditorPosition([marginTop, 160], thisEvent.start_time.getDay()));
+
+    useEffect(() => {
+        const newPosition = calculateEditorPosition(position, thisEvent.start_time.getDay());
+        setPosition(newPosition);
+    },[thisEvent]);
+
+    const { submitReservation, updateReservation, deleteReservation, submitError } = useSubmitContext();
+
+    const handleSubmit = async () => {
+        let submitted = false;
         if(thisEvent.created_event){
-            const submitted = submitReservation(thisEvent);
-            // TODO update events ID in Calendar from the returned id from backend
+            submitted = await submitReservation(thisEvent);
             if(submitted) {
+                updateEvents(thisEvent.id, submitted)
                 dispatch({type: 'updateCreatedEvent', value: false});
+                dispatch({type: 'updateID', value: submitted});
                 setEdit(false);
             }
         }
+        else{ // otherwise we are updating an existing event
+            submitted = updateReservation(thisEvent);
+            if(submitted){ // if success then update the eventEditor style
+                setSuccess(true);
+                setTimeout(() => {
+                   setSuccess(null);
+                }, 400)
+            }
+            else{
+                setSuccess(false);
+                setTimeout(() => {
+                    setSuccess(null);
+                }, 400)
+            }
+        }
+        submitted = false;
+        setError(!submitted);
     };
 
-    const handleClose = (event) => {
+    const handleClose = async (event) => {
+        // if the event has been created make an api call to delete it
+        console.log("handle close ");
+        if(!thisEvent.created_event) {
+            console.log("id", thisEvent.id);
+            const response = await deleteReservation(thisEvent.id);
+            console.log("response", response);
+            if(!response) return; // there was an error
+        }
+        console.log("removing event");
         removeEvent(thisEvent);
     };
 
@@ -161,6 +227,12 @@ const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions,
         setStart(new Date(thisEvent.start_time.getTime()));
         setEnd(new Date(thisEvent.end_time.getTime()));
     }
+
+    const handleNameUpdate = (event) => {
+        let newName = event.target.value;
+        if(newName.length === 0) newName = "Reservation";
+        dispatch({type: "updateEventName", value: newName})
+    };
 
     const handleStartChange = (event) => {
         const newStart = new Date(thisEvent.start_time.getTime());
@@ -248,10 +320,12 @@ const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions,
 
 
     return (
-        <div class="eventEditor" style={{marginTop: `${marginTop-27}px`, marginLeft: thisEvent.start_time.getDay() === 6 ? '-240px' : '160px'}}>
+        <div class={"eventEditor " + (submitSuccess === true ? "success" : "") + (submitSuccess === false ? "error" : "")} style={{marginTop: `${position[0]-27}px`, marginLeft: `${position[1]}px`}}>
             <div class="bar">
-                <div className="eventTitle">Reservation</div>
-                <input className="details" placeholder="Linus' Reservation"/>
+                <div className="eventTitle" >
+                    Reservation {thisEventError && <div className="eventError">{submitError.errorMessage}</div>}
+                </div>
+                <input className="details" defaultValue={thisEvent.event_name} onBlur={(event) => handleNameUpdate(event)} />
 
                 <div className="dateWrapper">
                     <div className="formField" style={{fontSize: "10pt"}}>Date:</div>
@@ -278,7 +352,7 @@ const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions,
 };
 
 // calendar event card
-const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
+const CalendarEvent = ( { eventData, day, position, colors, removeEvent , updateEvents} ) => {
     const [thisEvent, dispatch] = useReducer(eventReducer,eventData);
     const [editEvent, setEdit] = useState(false); // are we editing event details
 
@@ -389,7 +463,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
 
         let minTime = getTimeFromPosition(maxMargin, day);
         let maxTime = getTimeFromPosition(minMargin,day);
-        console.log("what is it",minTime, maxTime);
 
         return [minTime, maxTime];
     }
@@ -404,7 +477,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
 
             // calculate what the max and min are
             let [minTime, maxTime] = getMaxMinHeights();
-            console.log("calcdive",minTime,maxTime);
 
             // check if there are events during this hour already
             if(startTime < minTime) {
@@ -430,8 +502,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
         const resizeableElement = refBox.current;
 
         const position = getPosition(thisEvent.start_time, thisEvent.end_time);
-        console.log("resize", thisEvent.start_time, thisEvent.end_time);
-        console.log("positiongs got", position[0], position[1]);
         resizeableElement.style.marginTop = `${position[0]}px`;
         resizeableElement.style.height = `${position[1]}px`;
 
@@ -464,23 +534,12 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
             let startTime = new Date(thisEvent.start_time.getTime());
             let endTime = new Date(thisEvent.end_time.getTime());
 
-            // maximum and minimum height div can have
-            // maxHeight: height a div can have when resizing the top of the div (top resize). Set it to zero as the default value (top margin in the day)
-            // minHeight: height a div can have when resizing the bottom of the div (bottom resize)
-            // let maxHeight = 0;
-            // let minHeight = 650 - (marginTop); //TODO change 650 to maxSize of day as scaling could change
 
-            //let minTime = new Date(thisEvent.start_time.getTime());
             let minTime = new Date(currTime.getTime());
             let maxTime = new Date(thisEvent.end_time.getTime());
             maxTime.setHours(21);
 
             let listenerEventStartTimer = 0; // capture time between events which we can use to tell between clicks, holds, double clicks etc.
-
-            // set the margin and height to the given pixels from position
-            // this is a simple "fail safe" to make sure the pixels actually match the start and end times
-            //resizeableElement.style.marginTop = `${marginTop}px`;
-            //resizeableElement.style.height = `${height}px`;
 
             let originalStartTime = startTime;
             let originalEndTime = endTime;
@@ -511,11 +570,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
                         startTime = new Date(minTime.getTime());
                     }
 
-                    // update height and marginTop
-                    //marginTop -= (height-originalHeight);
-                    //resizeableElement.style.marginTop = `${marginTop}px`;
-                    //resizeableElement.style.height = `${height}px`;
-
                     //update event time
                     updateEventTime();
                 }
@@ -523,7 +577,6 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
             };
 
             const onMouseUpTopResize = (event) => {
-                console.log("over",thisEvent.start_time, thisEvent.end_time);
                 document.removeEventListener("mousemove", onMouseMoveTopResize);
                 document.removeEventListener("mouseup", onMouseUpTopResize);
             };
@@ -721,7 +774,7 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent } ) => {
 
     return (
         <>
-            {editEvent && <EventEdit marginTop={getPosition(thisEvent.start_time,thisEvent.end_time)[0]} thisEvent={thisEvent} setEdit={setEdit} dispatch={dispatch} checkCollisions={checkCollisions} removeEvent={handleRemove}/>}
+            {editEvent && <EventEdit marginTop={getPosition(thisEvent.start_time,thisEvent.end_time)[0]} thisEvent={thisEvent} setEdit={setEdit} dispatch={dispatch} checkCollisions={checkCollisions} removeEvent={handleRemove} updateEvents={updateEvents}/>}
             <div className={day.getDate() + " eventCard"} ref={refBox} style={{marginTop:position[0], height:position[1], WebkitBackdropFilter:'blur(10px)',  backgroundColor:`rgba(${backgroundColor}, ${opacity})`, borderLeft: `6px solid rgba(${borderColor}, ${opacity})`}}>
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
@@ -772,7 +825,7 @@ const TimeMarker = () => {
     );
 }
 
-const Day = ( {dayIndex, events, addCreatedEvent, removeEvent } ) => {
+const Day = ( {dayIndex, events, addCreatedEvent, removeEvent , updateEvents} ) => {
     const capitalize = (s) => {
         return s[0].toUpperCase() + s.slice(1);
     }
@@ -809,7 +862,7 @@ const Day = ( {dayIndex, events, addCreatedEvent, removeEvent } ) => {
         // we also need data relating to the user as well as start and end time
         // lastly, we keep track of whether the event has just been created (thus not submitted) and whether it is a userEvent (uesr can edit it)
         const newEvent = {
-            id: events.length, // the reservation has not been submitted yet so we simply define the id as the number of events in this day (surely this wont have conflicts)
+            id: Math.round(Math.random()*10000), // the reservation has not been submitted yet so we simply define the id as the number of events in this day (surely this wont have conflicts)
 
             day: weekday,
             room_num: room.room_num,
@@ -838,7 +891,7 @@ const Day = ( {dayIndex, events, addCreatedEvent, removeEvent } ) => {
     }
 
     return(
-        <div className="day">
+        <div className="day" id={day.getDay()}>
             {isToday && <TimeMarker />}
             {events.map((event,index) => (
                 <CalendarEvent
@@ -848,6 +901,7 @@ const Day = ( {dayIndex, events, addCreatedEvent, removeEvent } ) => {
                     position={getPosition(event.start_time, event.end_time)}
                     colors={getColor(index,5)}
                     removeEvent={removeEvent}
+                    updateEvents={updateEvents}
                 />
             ))}
             <div className="dayLabel">{capitalize(weekday)}</div>
@@ -925,6 +979,21 @@ const Calendar = ( {room, week} ) => {
         setEvents(newEvents);
     };
 
+    // takes in an old id and a newId and replaces the old eventId with the newly submitted event id
+    const updateEventsId = (oldId, newId) => {
+        const newEvents = events;
+        for(let i in newEvents){
+            for(let j = 0; j < newEvents[i].length; j++){
+                console.log(newEvents[i][j]);
+                if(newEvents[i][j].id === oldId){
+                    newEvents[i][j].id = newId;
+                    break;
+                }
+            }
+        }
+        setEvents(newEvents); // note that this does not "update" the value of the useState and thus the page is not rendered again
+    };
+
     const removeEvent = (removeEvent) => {
         if(removeEvent.user_event){
             console.log("removing event...", removeEvent);
@@ -955,7 +1024,7 @@ const Calendar = ( {room, week} ) => {
             </div>
 
             {Object.entries(events).map(([dayKey,value]) => (
-                <Day key={dayKey} room={room} dayIndex={dayKey} events={value} addCreatedEvent={addCreatedEvent} removeEvent={removeEvent}  />
+                <Day key={dayKey} room={room} dayIndex={dayKey} events={value} addCreatedEvent={addCreatedEvent} removeEvent={removeEvent} updateEvents={updateEventsId} />
             ))}
         </div>
     );

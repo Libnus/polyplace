@@ -23,9 +23,6 @@ def check_reservation_time(reservations, new_reservation_time):
 		reservation_end = reservation_object.end_time.timetuple()
 
 		## check that reservation times don't overlap ##
-		if (new_reservation_time_start >= reservation_start and new_reservation_time_start < reservation_end) or (new_reservation_time_end > reservation_start and new_reservation_time_end <= reservation_end):
-			print(new_reservation_time_start, reservation_start)
-			print()
-			print(new_reservation_time_end, reservation_end)
+		if(reservation_start > new_reservation_time_end and reservation_end < new_reservation_time_start):
 			return True
 	return False
