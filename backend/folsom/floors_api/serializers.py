@@ -74,6 +74,7 @@ class RoomSerializer(serializers.ModelSerializer):
         elif min_event[0] < current_time:
             state['status'] = "reserved"
             events.remove(min_event)
+
             state['time'] = get_next_free_time(min_event[1],events).astimezone(timezone(timedelta(hours=-4))).strftime(time_format)
 
         elif min_event[0] < current_time+timedelta(minutes=30):
@@ -83,7 +84,10 @@ class RoomSerializer(serializers.ModelSerializer):
 
         else:
             state['status'] = "free"
-            state['time'] = min_event[0].astimezone(timezone(timedelta(hours=-4))).strftime(time_format)
+            if(current_time.day < min_event[0].day):
+                state['time'] += min_event[0].strftime("%B") + ', ' + str(min_event[0].day) + ' @'
+            state['time'] += min_event[0].astimezone(timezone(timedelta(hours=-4))).strftime(time_format)
+
 
         state['event'] = min_event[2]
 

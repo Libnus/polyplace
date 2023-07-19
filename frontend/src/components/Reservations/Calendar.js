@@ -467,9 +467,8 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent , update
         const events = document.getElementsByClassName(day.getDate() + " eventCard");
 
         // also define max and min margins for looping and we will set heights after. This is so there is no confusion between heights and margin calculations during iteration
-        let maxMargin = getPosition(currTime, currTime)[1]+19;
+        let maxMargin = getPosition(currTime, currTime)[0];
         let minMargin = 669;
-
 
         // TODO move to checkCollisions method
         // loop over all events from this day
@@ -611,7 +610,7 @@ const CalendarEvent = ( { eventData, day, position, colors, removeEvent , update
             const onMouseDownTopResize = (event) => {
                 [minTime, maxTime] = getMaxMinHeights();
 
-                console.log("minTime", minTime);
+                console.log("miniest of th emin",minTime);
 
                 y = event.clientY;
                 const styles = window.getComputedStyle(resizeableElement);
@@ -863,7 +862,8 @@ const Day = ( {dayIndex, events, addCreatedEvent, removeEvent , updateEvents} ) 
     const day = new Date();
     day.setDate(dayIndex);
 
-    const isToday = new Date().getDate() === day.getDate();
+    const currTime = new Date()
+    const isToday = currTime.getDate() === day.getDate() && !isTimePast(currTime, 21, 1) && isTimePast(currTime, 7, 59);
     const weekday = day.toLocaleDateString(undefined, options).toLowerCase()
 
     const last = weekday === "saturday";
