@@ -948,11 +948,6 @@ const createWeek = (weekStart) => {
 }
 
 const Calendar = ( { room, week, events, addCreatedEvent, updateEventsId, removeEvent } ) => {
-
-    useEffect(() => {
-        console.log("calendar created with events", events);
-    },[events])
-
     return (
         <div className="calendarContainer">
             <div className="calendarTimes">

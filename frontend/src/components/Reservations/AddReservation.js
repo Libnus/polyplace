@@ -156,7 +156,7 @@ const AddReservation = ({ room, open, children ,onClose}) => {
 
             try{
                 // try upload
-                const response = await fetch("http://127.0.0.1:8000/reservations_api/", {
+                const response = await fetch(process.env.REACT_APP_API_URL + "/reservations_api/", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

@@ -13,7 +13,6 @@ def check_reservation_time(reservations, new_reservation_time):
 	parsed_start_string = new_reservation_time[0][0:16] + new_reservation_time[0][-1]
 	parsed_end_string = new_reservation_time[1][0:16] + new_reservation_time[1][-1]
 
-
 	new_reservation_time_start = parser.parse(parsed_start_string).timetuple()
 	new_reservation_time_end = parser.parse(parsed_end_string).timetuple()
 

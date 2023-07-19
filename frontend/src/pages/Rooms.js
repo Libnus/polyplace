@@ -32,7 +32,7 @@ const Rooms = () => {
 
 
     let getFloors = async () => {
-        const response = await fetch('http://127.0.0.1:8000/floors_api/floors/')
+        const response = await fetch(process.env.REACT_APP_API_URL + '/floors_api/floors/')
         const floors = await response.json()
         
         setFloors(floors)
