@@ -104,5 +104,5 @@ class ReservationViewSet(viewsets.ViewSet):
             return Response({'message': "Reservation doesn't exist!"}, status=status.HTTP_404_NOT_FOUND)
 
         reservation = Reservation.objects.get(pk=pk)
-        reservation.delete();
+        reservation.delete()
         return Response(status=status.HTTP_200_OK)
