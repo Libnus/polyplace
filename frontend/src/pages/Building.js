@@ -2,13 +2,18 @@ import React from 'react';
 import { useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 
+import '../components/Reservations/Building.css';
 import Calendar from '../components/Reservations/Calendar'
+
+const RoomContext = React.createContext();
 
 const Room = ({index, room, floor, building}) => {
 	let [isCalendarOpen, setCalendarOpen] = useState(false);
 
-	const handleClick = () => {
-		setCalendarOpen(true);
+
+	const handleOpen = () => {
+		if(isCalendarOpen === false) setCalendarOpen(true);
+		else setCalendarOpen(false);
 	};
 
 	console.log(room);
@@ -39,23 +44,23 @@ const Room = ({index, room, floor, building}) => {
 	}
 	
 	return (
-		<>
-		{isCalendarOpen && <Calendar room={room} />}
-		<div className={statusClass} onClick={handleClick}>
-			<div className="labels">
-				Room {room.room_num}
+		<RoomContext.Provider value={room}>
+			{isCalendarOpen && <Calendar handleOpen={handleOpen} />}
+				<div className={statusClass} onClick={() => handleOpen()}>
+				<div className="labels">
+					Room {room.room_num}
+				</div>
+				<div className="location">
+					{room.location}
+				</div>
+				<div className="reserveName">
+					<u>Next Event:</u> {room.room_status.event}
+				</div>
+				<div class="time">
+					{statusMessage}
+				</div>
 			</div>
-			<div className="location">
-				Amos Eaton, {floor} Floor
-			</div>
-			<div className="reserveName">
-				<u>{room.room_status.event}</u>
-			</div>
-			<div class="time">
-				{statusMessage}
-			</div>
-		</div>
-		</>
+		</RoomContext.Provider>
 	);
 }
 
@@ -73,7 +78,8 @@ const Floor = ({index, floor, building}) => {
 		getRooms();
 	}, []);
 
-
+    let free_rooms = rooms.filter(room => {return room.room_status.status === "free"})
+    const shadow = `inset 2px 2px 0.5px 0px rgba(0, 0, 0, 0.5), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3), inset ${100*(free_rooms.length/rooms.length)-100}px 2px 0px 0px rgba(0, 0, 0, 0.5), inset 0px 0px 0px 0px rgba(0, 0, 0, 0.3)`
     return (
     	<div className="divFloor">
 			<div className="floorTest" style={{backgroundColor: floor.color}}>
@@ -81,8 +87,8 @@ const Floor = ({index, floor, building}) => {
 			</div>
 			<div className="roomsContent">
 				<div className="roomAvailable">
-					<button className="bookRoom">8/10</button>
-					<button className="myBook" style={{width: '15%'}}>My reservations</button>
+				  <button className="bookRoom" style={{boxShadow: shadow}} >{free_rooms.length}/{rooms.length}</button>
+					<button className="myBook" style={{width: 'fit-content'}}>My reservations</button>
 				</div>
 				<div className="roomsContainer">
 					{rooms.map((room,index) => (
@@ -92,14 +98,11 @@ const Floor = ({index, floor, building}) => {
 		</div>
     );
 }
-
 const Building = () => {
 
 	let [floors, setFloors] = useState([]);
 
 	let building = useParams().building;
-
-	console.log("building", building);
 
 	useEffect(() => {
 
@@ -107,13 +110,11 @@ const Building = () => {
 			const response = await fetch(process.env.REACT_APP_API_URL + `/floors_api/floors/${building}/`);
 			const floors = await response.json();
 
-			console.log('DATA:', floors);
 			setFloors(floors);
 		}
 
         getFloors();
     },[building]);
-
 
 	return(
 		<>
@@ -127,5 +128,7 @@ const Building = () => {
 		</>
 	);
 }
+
+export {RoomContext};
 
 export default Building;

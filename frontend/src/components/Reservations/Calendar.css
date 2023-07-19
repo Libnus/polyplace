@@ -1,0 +1,348 @@
+:root{
+    #--color-background-0: #FFFDD0;
+    --color-background-0: 255,253,208;
+    #--color-border-0: #90EE90;
+    --color-border-0: 144,238,144;
+
+    #--color-background-1: #F7C59F;
+    --color-background-1: 247,197,159;
+    #--color-border-1: #FF6B35;
+    --color-border-1: 255,107,53;
+
+    #--color-background-2: #1A659E;
+    --color-background-2: 26,101,158;
+    #--color-border-2: #004E89;
+    --color-border-2: 0,78,137;
+
+    #--color-background-3: #EFEFD0;
+    --color-background-3: 239,239,208;
+    #--color-border-3: #456972;
+    --color-border-3: 69,105,114;
+
+    #--color-background-4: #D667A5;
+    --color-background-4: 214,103,165;
+    #--color-border-4: #6D5B79;
+    --color-border-4: 109,91,121;
+}
+
+.overlay{
+
+  position: fixed;
+  user-select: none;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0.6);
+  z-index: 1000;
+}
+
+.calendar{
+  user-select: none;
+  background-color: rgba(52,55,60,1.0);
+  color: white;
+  border-radius: 5px;
+  z-index: 1000;
+}
+
+.calendarContainer{
+    height: 1000px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.calendarTimes{
+    height: 100%;
+    width: 3%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.7em;
+    padding-right: 1%;
+}
+
+.calendarTime{
+    height: 5%;
+    text-align:right;
+}
+
+.day{
+    height: 100%;
+    user-select: none;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.timeMarkerWrapper{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    z-index: 3000;
+}
+
+.timeMarkerLine{
+    width: 100%;
+    border: 0;
+    border-top: 2px solid red;
+    border-right-radius: 2px;
+}
+
+.timeMarkerCircle{
+    margin-top: 2%;
+    margin-left: -2.5%;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.dayLabel{
+    text-align: center;
+    font-weight: bold;
+    user-select: none;
+    font-size: 15px;
+}
+
+.hour{
+    box-sizing: border-box;
+    user-select: none;
+    height: 5%;
+    border-right: 1px solid white;
+    border-top: 1px solid white;
+    cursor: copy;
+}
+
+.hourLast{
+    box-sizing: border-box;
+    height: 5%;
+    border-top: 1px solid white;
+    cursor: copy;
+}
+
+.notClickable{
+    cursor: not-allowed;
+}
+
+.message{
+        display: flex;
+        flex-direction: column;
+        width: 200px;
+        height: 100px;
+        margin: 220px;
+        border-radius: 5px;
+        background-color: #ffffff;
+}
+.bar{
+    width: 100%;
+    height: 20%;
+    box-shadow: 0px 1px 2px 0px #888888;
+    background-color: #f1f3f4;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.eventTitle{
+    padding-left: 3%;
+    padding-top: 1.5%;
+    font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.details{
+    padding-left: 5%;
+    padding-top: 3%;
+}
+
+.eventCard{
+    user-select: none;
+    color: black;
+    position: absolute;
+    z-index: 2000;
+    margin-top: 120px;
+    height: 50px;
+    width: 100%;
+    box-sizing: border-box;
+    border-left: 6px solid lightgreen;
+    border-top-right-radius: 0px;
+    white-space: nowrap;
+    transition: ease-out 0.2s;
+    padding: 2%;
+    overflow: hidden;
+
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(10px);
+
+}
+
+.labels{
+  font-size: 11pt;
+  font-weight: bold;
+}
+
+.location{
+  padding-top: 0%;
+  padding-bottom: 2%;
+  font-size: 11pt;
+}
+
+.reserveName{
+  font-size: 11pt;
+  font-weight: 100;
+  padding-bottom: 1%;
+}
+
+.resizeTop{
+  cursor: row-resize;
+  height: 4%;
+  width: 100%;
+  z-index: 1001;
+}
+
+.resizeBottom{
+  position: absolute;
+  cursor: row-resize;
+  height: 4%;
+  bottom: 0;
+  z-index: 1001;
+  width: 100%;
+}
+
+.resizeMiddle{
+  cursor: grab;
+  position: absolute;
+  z-index: 1000;
+  height: 100%;
+  margin-top: 2%;
+  maring-bottom: 2%;
+  width: 100%;
+  top: 50%;
+}
+
+.calendarBar{
+  display: flex;
+  height: 2%;
+  padding-bottom: 3%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.calendarButton{
+  display: inline;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.eventEditor{
+    position: fixed;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    width: 228px;
+    #width: 20%;
+    #height: 26%;
+    height: 200px;
+    margin-left: 160px;
+    border-radius: 5px;
+    background-color: rgba(220,253,243,1.0);
+    color: black;
+    transition: 0.4s ease-in;
+}
+.eventEditor:hover{
+    box-shadow: 5px 5px 0px 0px rgba(30,30,30);
+    transition: 0.2s ease-in;
+}
+
+.success:hover{
+    box-shadow: 0px 0px 0px 3px lightgreen;
+    transition: ease-in 0.3s;
+}
+
+.error:hover{
+    box-shadow: 0px 0px 0px 3px red;
+    transition: ease-in 0.3s;
+}
+
+.bar{
+    width: 100%;
+    height: 15%;
+    padding-top: 1%;
+    box-shadow: 0px 1px 2px 0px #888888;
+    #background-color: #f1f3f4;
+    background-color: rgba(175 ,209,211,0.75);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.eventTitle{
+    padding-left: 3%;
+    font-weight: bold;
+    padding-top: 1.5%;
+    font-size: 11pt;
+    display: flex;
+}
+
+.eventError{
+    padding-left: 4%;
+    color: red;
+}
+
+.details{
+    margin-left: 5%;
+    margin-top: 8%;
+    width: 85%;
+    border-style: none none inset;
+    border-width: 2px;
+    transition: all 0.1s ease-in;
+    height: 14px;
+}
+
+.details:focus{
+    border-style: none inset inset none;
+    border-width: 2px;
+    outline: none;
+    transition: all 0.1s ease-in;
+}
+
+span{
+    font-family: Arial;
+    font-size: 10pt;
+    padding: 5%;
+}
+
+.timeWrapper{
+    margin-left: 5%;
+    #margin-top: 8%;
+}
+
+.formField{
+    margin-top: 5%;
+    margin-left: 5%;
+    #margin-right: %;
+    width: auto;
+    font-size: 8pt;
+    margin-bottom: 2%;
+    border-width: 1px;
+}
+
+.times{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-top: 5%;
+    width: 100%;
+}
+
+.date{
+    margin-left: 2%;
+    border-style: none none inset;
+    padding-top: 4.5%;
+}
+
+.dateWrapper{
+    display: flex;
+    padding-top: 2%;
+    flex-direction: row;
+}

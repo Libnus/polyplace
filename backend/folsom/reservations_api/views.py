@@ -28,18 +28,24 @@ class ReservationViewSet(viewsets.ViewSet):
     @action(detail=True)
     def get_week(self, request, pk=None):
 
-
         # get the week of date
         parsed_date = [int(x) for x in request.query_params.get('date')[:-1].split('-')]
-        print(parsed_date)
-        week = datetime.date(parsed_date[2],parsed_date[0],parsed_date[1]).isocalendar()[1]
+        date = datetime.date(parsed_date[2],parsed_date[0],parsed_date[1])
+        week = date.isocalendar()[1]
+
+        # but wait! python starts the week on monday (:
+        # check if the day inputted is sunday, if so, consider it the next week already
+        if date.weekday() == 6: week+=1
 
         all_reservations = Reservation.objects.filter(room=pk)
 
         reservations = []
         for reservation in all_reservations:
-            print("current week vs week", week, reservation.start_time.isocalendar()[1])
-            if reservation.start_time.isocalendar()[1] == week:
+            reservation_week = reservation.start_time.isocalendar()[1]
+            # maybe there is a better way to solve this problem of the week starting on monday
+            if reservation.start_time.weekday() == 6: reservation_week+=1
+
+            if reservation_week == week:
                 reservations.append(reservation)
 
         return Response(ReservationSerializer(reservations,many=True).data)
@@ -67,4 +73,36 @@ class ReservationViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
+            return Response({'id': serializer.data['id']}, status=status.HTTP_201_CREATED)
+
+    def update(self, request, pk=None):
+        if not Room.objects.filter(room_num=request.data['room']).exists(): # check that the room exists
+            return Response({'message':"Conflict! Room doesn't exist!"},status=status.HTTP_409_CONFLICT)
+
+        room = Room.objects.get(room_num=request.data['room'])
+
+        if check_reservation_time(Reservation.objects.filter(room=room.id), (request.data['start_time'],request.data['end_time'])): # check if room has already been reserved
+            return Response({'message':"Conflict! Room taken at time specified"},status=status.HTTP_409_CONFLICT)
+        #
+        # TODO students can make more than one reservation
+        # if Reservation.objects.filter(rin=request.data['rin']).exists():
+        #     return Response({'message':"Conflict! Student already reserved a room!"},status=status.HTTP_409_CONFLICT)
+
+        else:
+            data = request.data
+            data['room'] = room.id
+
+            reservation = Reservation.objects.get(pk=pk)
+            serializer = ReservationSerializer(reservation, data=data) # create the reservation
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(serializer.data,status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk=None):
+        if not Reservation.objects.filter(pk=pk).exists():
+            return Response({'message': "Reservation doesn't exist!"}, status=status.HTTP_404_NOT_FOUND)
+
+        reservation = Reservation.objects.get(pk=pk)
+        reservation.delete()
+        return Response(status=status.HTTP_200_OK)
