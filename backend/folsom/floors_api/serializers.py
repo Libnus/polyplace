@@ -1,18 +1,22 @@
 from rest_framework import serializers
-from floors.models import Building, Floor, Room
+from floors.models import Building, Floor, Room, Hours
 from datetime import datetime, timezone, timedelta
 from reservations.models import Reservation
 
+class HoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hours
+        fields = "__all__"
 
 class BuildingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Building
-        fields = '__all__'
+        exclude = ('reservations_hidden', 'roles')
 
 class FloorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Floor
-        fields = '__all__'
+        exclude = ('roles',)
 
 # find the next available time a room will be available given a list of events and the last event. 
 # A room is next available if the next booking is not within 30 MINUTES of the last event
@@ -96,4 +100,4 @@ class RoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Room
-        fields = '__all__'
+        exclude = ('roles',)

@@ -12,6 +12,7 @@ from .serializers import ReservationSerializer
 
 import datetime
 
+from users.models import PolyUser
 from .utils import check_reservation_time
 from shibboleth.utils import check_token
 
@@ -61,6 +62,8 @@ class ReservationViewSet(viewsets.ViewSet):
 
     # create method creates a reservation then adds the reservation to the room
     def create(self,request,*args,**kwargs):
+        # TODO check token matches user
+
         if check_token(request) == False:
             raise PermissionDenied()
 
@@ -79,6 +82,12 @@ class ReservationViewSet(viewsets.ViewSet):
         else:
             data = request.data
             data['room'] = room.id
+            data['user'] = PolyUser.objects.get(rcs=data['user']).id
+
+            print(data)
+
+            if room.force_hidden or room.floor.force_hidden or room.floor.building.force_hidden:
+                data['hidden'] = True
 
             serializer = ReservationSerializer(data=data) # create the reservation
             serializer.is_valid(raise_exception=True)
@@ -87,6 +96,8 @@ class ReservationViewSet(viewsets.ViewSet):
             return Response({'id': serializer.data['id']}, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
+        #TODO chekc token
+
         if not Room.objects.filter(room_num=request.data['room']).exists(): # check that the room exists
             return Response({'message':"Conflict! Room doesn't exist!"},status=status.HTTP_409_CONFLICT)
 

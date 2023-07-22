@@ -2,6 +2,8 @@ import jwt
 from decouple import config
 from django.conf import settings
 
+from enum import Enum
+
 secret_key = config('TOKEN_SECRET_KEY')
 
 # check if a user is authenticated

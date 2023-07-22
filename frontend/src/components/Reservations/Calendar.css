@@ -23,6 +23,9 @@
     --color-background-4: 214,103,165;
     #--color-border-4: #6D5B79;
     --color-border-4: 109,91,121;
+
+    --hidden-background: 128, 128, 128;
+    --hidden-border: 0, 0, 0;
 }
 
 .overlay{

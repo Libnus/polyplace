@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect} from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 
 import '../components/Reservations/Building.css';
@@ -10,13 +10,11 @@ const RoomContext = React.createContext();
 const Room = ({index, room, floor, building}) => {
 	let [isCalendarOpen, setCalendarOpen] = useState(false);
 
-
 	const handleOpen = () => {
 		if(isCalendarOpen === false) setCalendarOpen(true);
 		else setCalendarOpen(false);
 	};
 
-	console.log(room);
 
 	// get css class name for room status
 	let statusClass = "";
@@ -100,9 +98,9 @@ const Floor = ({index, floor, building}) => {
 }
 const Building = () => {
 
-	let [floors, setFloors] = useState([]);
+	const [floors, setFloors] = useState([]);
 
-	let building = useParams().building;
+	const building = useParams().building;
 
 	useEffect(() => {
 
@@ -110,11 +108,16 @@ const Building = () => {
 			const response = await fetch(process.env.REACT_APP_API_URL + `/floors_api/floors/${building}/`);
 			const floors = await response.json();
 
-			setFloors(floors);
+			console.log(floors)
+			setFloors([floors]);
 		}
 
         getFloors();
     },[building]);
+
+	useEffect(() => {
+		console.log(floors);
+	},[floors])
 
 	return(
 		<>

@@ -48,6 +48,7 @@ migrations/
 __pycache__/
 *.sqlite3
 local_settings.py
+*.json
 
 ## general
 logs/

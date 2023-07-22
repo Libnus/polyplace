@@ -1,10 +1,13 @@
 import React, { useContext, useState } from 'react';
+import UserSession from '../../UserSession';
 
 const SubmitContext = React.createContext();
 
 const useSubmitContext = () => useContext(SubmitContext);
 
 const SubmitProvider = ({ children }) => {
+    const user = useContext(UserSession);
+
     const [submitError, setError] = useState({
         submitError: null,
         errorMessage: "",
@@ -18,15 +21,15 @@ const SubmitProvider = ({ children }) => {
 
         try{
             const data = {
+                user: user.rcs,
                 room: event.room_num,
                 event_name: event.event_name,
-                first_name: event.first_name,
-                last_name: event.last_name,
-                rin: event.rin,
                 start_time: event.start_time,
-                end_time: event.end_time
+                end_time: event.end_time,
+                hidden: false
             };
 
+            console.log(data);
             // try upload
             const response = await fetch("http://127.0.0.1:8000/reservations_api/", {
                 method: "POST",

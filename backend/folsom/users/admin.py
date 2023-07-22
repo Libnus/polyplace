@@ -6,6 +6,7 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
 from users.models import PolyUser
+from users.models import Role
 
 class UserCreationForm(forms.ModelForm):
 
@@ -53,5 +54,6 @@ class UserAdmin(BaseUserAdmin):
         ordering = ["email"]
         filter_horizontal = []
 
+admin.site.register(Role)
 admin.site.register(PolyUser, UserAdmin)
 admin.site.unregister(Group)
