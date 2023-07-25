@@ -153,12 +153,10 @@ const AddReservation = ({ room, open, children ,onClose}) => {
                 start_time: new Date(),
                 end_time: endTime
             }
-            console.log("date",data.start_time)
-            console.log("date",data.end_time)
 
             try{
                 // try upload
-                const response = await fetch("http://127.0.0.1:8000/reservations_api/", {
+                const response = await fetch(process.env.REACT_APP_API_URL + "/reservations_api/", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -181,8 +179,7 @@ const AddReservation = ({ room, open, children ,onClose}) => {
         }
 
         setSubmitError({submitError: error, errorMessage: message});
-        return;
-    }
+    };
 
     const showEdit = () => {
         setEdit(!edit);
@@ -211,10 +208,9 @@ const AddReservation = ({ room, open, children ,onClose}) => {
     );
 }
 
-export default AddReservation;
 
 export{
     Form,
     Student,
 }
-
+export default AddReservation;

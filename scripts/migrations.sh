@@ -6,5 +6,6 @@ cd ../backend/folsom
 
 python3 manage.py makemigrations floors
 python3 manage.py makemigrations reservations
+python3 manage.py makemigrations users
 
 python3 manage.py migrate
