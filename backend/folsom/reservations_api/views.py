@@ -10,6 +10,8 @@ from reservations.models import Reservation
 from floors.models import Room
 from .serializers import ReservationSerializer
 
+from utils.utils import get_iso_week
+
 import datetime
 
 from users.models import PolyUser
@@ -38,9 +40,7 @@ class ReservationViewSet(viewsets.ViewSet):
             raise PermissionDenied()
 
         # get the week of date
-        parsed_date = [int(x) for x in request.query_params.get('date')[:-1].split('-')]
-        date = datetime.date(parsed_date[2],parsed_date[0],parsed_date[1])
-        week = date.isocalendar()[1]
+        week = get_iso_week(request.query_params.get('date'))
 
         # but wait! python starts the week on monday (:
         # check if the day inputted is sunday, if so, consider it the next week already

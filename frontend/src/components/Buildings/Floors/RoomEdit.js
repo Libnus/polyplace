@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import '../../../assets/styles/main.css';
+import '../../../pages/Buildings.css';
 import AddReservation from'../../Reservations/AddReservation'
 import EditReservation from '../../Reservations/EditReservation'
 
@@ -62,8 +63,8 @@ const RoomEdit = ({selectedRoom, isOccupied}) => {
 
     return(
         <div className="roomEditor">
-            <button onClick={() => addReservation()}>Add Reservation</button>
-            <button onClick={() => editReservation()}>Edit Reservation</button>
+            <button class="myBook" onClick={() => addReservation()}>Add Reservation</button>
+            <button class="myBook" onClick={() => editReservation()}>Edit Reservation</button>
             <ErrorAdd notSelected={errorAdd.notSelected} roomTaken={errorAdd.roomTaken} />
             <AddReservation room={selectedRoom.room_num} open={isAddReserveOpen} onClose={() => setIsAddReserveOpen(false)}/>
             <EditReservation room={selectedRoom} open={isEditReserveOpen} onClose={() => setIsEditReserveOpen(false)} />

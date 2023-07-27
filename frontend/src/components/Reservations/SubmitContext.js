@@ -21,7 +21,7 @@ const SubmitProvider = ({ children }) => {
 
         try{
             const data = {
-                user: user.rcs,
+                user: user.user.rcs,
                 room: event.room_num,
                 event_name: event.event_name,
                 start_time: event.start_time,

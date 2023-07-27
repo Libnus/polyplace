@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Footer from './components/Main/Footer';
 import { Routes, BrowserRouter, Route, Link } from 'react-router-dom';
 import Rooms from './pages/Rooms';
@@ -13,9 +13,18 @@ import Sidebar from './components/Main/Sidebar';
 import Header from './components/Main/Header';
 
 
-function App() {
+const App = () => {
     const [user, setUser] = useState(null);
     const [buildings,setBuildings] = useState([]);
+
+    const checkRoles = (roles) => {
+        for(let i = 0; i < roles.length; i++){
+            for(let j = 0; j < user.roles.length; j++){
+                if(roles[i] === user.roles[j].role) return true;
+            }
+        }
+        return false;
+    }
 
     useEffect(() => {
         getUserSession();
@@ -25,6 +34,7 @@ function App() {
     const getUserSession = async () => {
         const response = await fetch('http://127.0.0.1:8000/users/user/');
         const data = await response.json();
+        console.log('data', data);
         setUser(data);
     }
 
@@ -34,6 +44,11 @@ function App() {
         setBuildings(data);
     };
 
+    const userValue = {
+        user,
+        checkRoles,
+    };
+
     // do not render until the user session is established
     return (
         <>
@@ -41,18 +56,20 @@ function App() {
 
             <div className="page-container">
 
-                <Sidebar />
-                <Header />
+                <UserSession.Provider value={userValue}>
+                    <Sidebar />
+                    <Header />
+                </UserSession.Provider>
 
                 <div className="content-container">
                     <BrowserRouter>
                         {buildings.map(building => (<Link to={'/buildings/' + building.id} />))}
                         <Routes>
-                            <Route path='/rooms' element={<UserSession.Provider value={user}><Rooms /></UserSession.Provider>} />
-                            <Route path='/history' element={<UserSession.Provider value={user}><History /></UserSession.Provider>} />
-                            <Route path='/test' element={<UserSession.Provider value={user}><Test /></UserSession.Provider>} />
-                            <Route path='/buildings' element={<UserSession.Provider value={user}><Buildings buildings={buildings}/></UserSession.Provider>} />
-                            <Route path='/buildings/:building' element={<UserSession.Provider value={user}><Building/></UserSession.Provider>} />
+                            {checkRoles(['admin', 'staff']) && <Route path='/rooms' element={<UserSession.Provider value={userValue}><Rooms /></UserSession.Provider>} />}
+                            <Route path='/history' element={<UserSession.Provider value={userValue}><History /></UserSession.Provider>} />
+                            <Route path='/test' element={<UserSession.Provider value={userValue}><Test /></UserSession.Provider>} />
+                            <Route path='/buildings' element={<UserSession.Provider value={userValue}><Buildings buildings={buildings}/></UserSession.Provider>} />
+                            <Route path='/buildings/:building' element={<UserSession.Provider value={userValue}><Building/></UserSession.Provider>} />
                         </Routes>
                     </BrowserRouter>
                 </div>

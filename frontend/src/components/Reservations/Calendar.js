@@ -3,9 +3,11 @@ import { useState, useEffect, useRef, useReducer, useContext } from 'react';
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from 'react-icons/hi';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 import { AiOutlineCheckCircle } from 'react-icons/ai';
+
 import { SubmitProvider, useSubmitContext } from './SubmitContext';
 import UserSession from '../../UserSession';
-import { RoomContext } from '../../pages/Building';
+import { BuildingContext, RoomContext } from '../../pages/Building';
+
 import './Calendar.css';
 import '../../assets/styles/main.css';
 
@@ -408,8 +410,26 @@ const CalendarEvent = ( { data, colors } ) => {
     const [eventTimes, setTimes] = useState([data.start_time, data.end_time]);
 
     const events = useContext(EventContext);
+    const building = useContext(BuildingContext);
     const room = useContext(RoomContext);
 
+    // opening and closing hours for the building
+    const openingHour = building.building.hours[localEventData.start_time.getDay()][0].split(':');
+    const closingHour = building.building.hours[localEventData.end_time.getDay()][1].split(':');
+
+    // fetch the current time, if the current day is not this calendar events set day then default the current time to 8 am
+    let currTime = new Date();
+    if (currTime.getDate() < data.start_time.getDate()) {
+        currTime.setDate(data.start_time.getDate());
+        currTime.setHours(parseInt(openingHour[0]));
+        currTime.setMinutes(parseInt(openingHour[1]));
+        currTime.setSeconds(0);
+    }
+
+
+    const closingTime = new Date(currTime.getTime());
+    closingTime.setHours(closingHour[0]);
+    closingTime.setMinutes(closingHour[1]);
 
     useEffect(() => {
         if(data.created_event) setEdit(true);
@@ -424,14 +444,6 @@ const CalendarEvent = ( { data, colors } ) => {
 
     const sensitivity = 15;
 
-    // fetch the current time, if the current day is not this calendar events set day then default the current time to 8 am
-    let currTime = new Date();
-    if (currTime.getDate() < data.start_time.getDate()) {
-        currTime.setDate(data.start_time.getDate());
-        currTime.setHours(8);
-        currTime.setMinutes(0);
-        currTime.setSeconds(0);
-    }
 
     const refBox = useRef(null);
     const refTop = useRef(null);
@@ -489,9 +501,11 @@ const CalendarEvent = ( { data, colors } ) => {
 
         const events = document.getElementsByClassName(localEventData.start_time.getDate() + " eventCard");
 
+
         // also define max and min margins for looping and we will set heights after. This is so there is no confusion between heights and margin calculations during iteration
         let maxMargin = getPosition(currTime, currTime)[0];
-        let minMargin = 669;
+        console.log(getPosition(closingTime, closingTime)[0]);
+        let minMargin = getPosition(closingTime, closingTime)[0];
 
         // TODO move to checkCollisions method
         // loop over all events from this day
@@ -578,8 +592,8 @@ const CalendarEvent = ( { data, colors } ) => {
 
 
             let minTime = new Date(currTime.getTime());
-            let maxTime = new Date(localEventData.end_time.getTime());
-            maxTime.setHours(21);
+            //let maxTime = new Date(localEventData.end_time.getTime());
+            let maxTime = new Date(closingTime.getTime());
 
             let listenerEventStartTimer = 0; // capture time between events which we can use to tell between clicks, holds, double clicks etc.
 
@@ -833,10 +847,10 @@ const CalendarEvent = ( { data, colors } ) => {
             <div className="resizeTop" ref={refTop}></div>
             <div className="resizeMiddle" ref={refMiddle}></div>
                 <div className="labels">
-                    Room {room.room_num}
+                    Room {room.room.room_num}
                 </div>
                 <div className="location">
-                    {room.location}
+                    {room.room.location}
                 </div>
                 <div className="reserveName">
                     {`${localEventData.first_name} ${localEventData.last_name}`}
@@ -852,6 +866,8 @@ const CalendarEvent = ( { data, colors } ) => {
 }
 
 const Hour = ({ hour, day, createEvent, last }) => {
+    const building = useContext(BuildingContext);
+
     const handleClick = () => {
         createEvent(hour);
     };
@@ -859,12 +875,30 @@ const Hour = ({ hour, day, createEvent, last }) => {
     // check if the hour has passed
     // TODO more advanced checking. For example, if we are still in the hour allow user to create the event but at the current min
     let passed = false;
+    let closed = false; // is the building closed
+
     day.setHours(hour);
     day.setMinutes(0);
+
+    //inset 0px 25px 0px 0px darkgray
+
+    let hoursShadow = 0;
+    const openingHour = building.building.hours[day.getDay()][0].split(':');
+    const closingHour = building.building.hours[day.getDay()][1].split(':');
+
+    if(day.getDay() === 0) console.log("sunday probably", openingHour, closingHour);
+
+    // TODO stop hard coding values lol
+    // check opening hours
+    if(!isTimePast(day, parseInt(openingHour[0]), parseInt(openingHour[1]))) hoursShadow = 50 - (parseInt(openingHour[1])*0.83333333333); // calculated as 50 (number of pixels in an hour) - the minutes of the opening hour * number of pixels representing a minute (0.83)
+    else if(isTimePast(day, parseInt(closingHour[0]), parseInt(closingHour[1]))) hoursShadow = -50 + (parseInt(closingHour[1])*0.83333333333);
+
+    if(hoursShadow === 50 || hoursShadow === -50) closed = true;
+
     if(new Date() > day) passed = true;
 
     return (
-        <div className={` ${last ? "hourLast" : "hour"} ${passed ? "notClickable" : ""}`} onClick={() => !passed ? handleClick() : undefined}></div>
+        <div className={` ${last ? "hourLast" : "hour"} ${passed || closed ? "notClickable" : ""}`} style={{boxShadow: `inset 0px ${hoursShadow}px 0px 0px rgb(128,128,128, 0.4)`}} onClick={() => !passed && !closed ? handleClick() : undefined}></div>
     );
 }
 
@@ -922,10 +956,10 @@ const Day = ( { day } ) => {
             id: Math.round(Math.random()*10000), // the reservation has not been submitted yet so we simply define the id as the number of events in this day (surely this wont have conflicts)
 
             day: weekday,
-            room_num: room.room_num,
+            room_num: room.room.room_num,
             event_name: "Reservation",
-            first_name: user.first_name,
-            last_name: user.last_name,
+            first_name: user.user.first_name,
+            last_name: user.user.last_name,
             start_time: startTime,
             end_time: endTime,
 
@@ -935,7 +969,6 @@ const Day = ( { day } ) => {
         });
         events.addCreatedEvent(newEvent);
     }
-
 
     return(
         <div className="day" id={day.getDate()}>
@@ -971,9 +1004,6 @@ const Day = ( { day } ) => {
 }
 
 const Calendar = ( { week, weekIndex } ) => {
-    const events = useContext(EventContext); // grab events
-
-
     // gather the days of the week for rendering
     const days = [];
     for(let i = 0; i < 7; i++){
@@ -1087,7 +1117,7 @@ const CalendarView = ( { handleOpen } ) => {
     const getReservations = async (fetchWeek) => {
         const weekString = fetchWeek[0].getMonth()+1 + "-" + fetchWeek[0].getDate() + "-" + fetchWeek[0].getFullYear();
 
-        const response = await fetch(`http://127.0.0.1:8000/reservations_api/${roomContext.id}/get_week/?date=${weekString}/`);
+        const response = await fetch(`http://127.0.0.1:8000/reservations_api/${roomContext.room.id}/get_week/?date=${weekString}/`);
         const data = await response.json();
         return data;
     };
@@ -1114,7 +1144,7 @@ const CalendarView = ( { handleOpen } ) => {
                     data[i].start_time = new Date(data[i].start_time);
                     data[i].end_time = new Date(data[i].end_time);
                     data[i].created_event= false;
-                    data[i].room_num = roomContext.room_num;
+                    data[i].room_num = roomContext.room.room_num;
 
                     thisWeekEvents.push(data[i]);
                 }
@@ -1166,3 +1196,4 @@ const CalendarView = ( { handleOpen } ) => {
 };
 
 export default CalendarView;
+export {getWeek, isTimePast, TimeMarker, isTimeEqual};

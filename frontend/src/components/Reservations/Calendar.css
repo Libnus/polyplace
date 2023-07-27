@@ -37,6 +37,8 @@
   bottom: 0;
   right: 0;
   background-color: rgba(0,0,0,0.6);
+  -webkit-backdrop-filter: blur(2px);
+  filter: blur(1px);
   z-index: 1000;
 }
 
@@ -65,7 +67,7 @@
 }
 
 .calendarTime{
-    height: 5%;
+    height: 50px;
     text-align:right;
 }
 
@@ -112,7 +114,10 @@
 .hour{
     box-sizing: border-box;
     user-select: none;
-    height: 5%;
+    #height: 5%;
+    height: 50px;
+    minHeight: 50px;
+    maxHeight: 50px;
     border-right: 1px solid white;
     border-top: 1px solid white;
     cursor: copy;
@@ -120,13 +125,27 @@
 
 .hourLast{
     box-sizing: border-box;
-    height: 5%;
+    height: 50px;
+    minHeight: 50px;
+    maxHeight: 50px;
     border-top: 1px solid white;
     cursor: copy;
 }
 
+.hourClosed{
+    background-color: darkgray;
+}
+
 .notClickable{
     cursor: not-allowed;
+}
+
+.editHoursOpen{
+    background-color: #5EBC5E;
+}
+
+.editHoursClosed{
+    background-color: #c93135;
 }
 
 .message{

@@ -130,6 +130,7 @@ body {
   background: rgba(54, 57, 62, 1);
   height: 5%;
   display: flex;
+  padding: 10px;
   flex-direction: row;
 }
 
@@ -149,6 +150,8 @@ body {
 }
 
 .divFloor {
+  padding-top: 2%;
+  padding-right: 2%;
   margin-bottom: 40px;
   transition: ease-out 1s;
   #border-radius: 7px;
