@@ -57,6 +57,10 @@ body {
   .history {
     display: none !important;
   }
+
+  .logout{
+    display: none !important;
+  }
 }
 
 .nav-elements li a {

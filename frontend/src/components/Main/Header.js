@@ -1,6 +1,6 @@
 import React from "react";
 import "../../assets/styles/main.css";
-import { FaHome, FaCalendarAlt, FaUsers, FaHistory } from "react-icons/fa";
+import { FaHome, FaCalendarAlt, FaUsers, FaHistory, FaSignOutAlt } from "react-icons/fa";
 
 const Header = () => {
   return (
@@ -84,6 +84,21 @@ const Header = () => {
                     <FaHistory />
                   </div>
                   History
+                </a>
+              </li>
+
+              <li style = {{right: "20px", position: "absolute"}}>
+                <a className="logout" href="/">
+                  <div
+                    style={{
+                      verticalAlign: "middle",
+                      display: "inline-flex",
+                      paddingRight: "4px",
+                    }}
+                  >
+                    <FaSignOutAlt />
+                  </div>
+                  Logout
                 </a>
               </li>
             </ul>
