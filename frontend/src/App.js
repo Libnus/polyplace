@@ -11,6 +11,7 @@ import UserSession from './UserSession';
 import './assets/styles/main.css';
 import Sidebar from './components/Main/Sidebar';
 import Header from './components/Main/Header';
+
 function App() {
     const [user, setUser] = useState(null);
     const [buildings,setBuildings] = useState([]);
@@ -37,13 +38,13 @@ function App() {
         <>
             { user !== null ? (
             <div className="page-container">
-                <div className="header">
-                    <h1 style={{left: "20%", color: "white"}}>PolyPlace</h1>
-                </div>
+
+                <Sidebar/>
+                <Header/>
+
                 <div className="content-container">
                     <BrowserRouter>
                         {buildings.map(building => (<Link to={'/buildings/' + building.id} />))}
-                        <Navbar />
                         <Routes>
                             <Route path='/rooms' element={<UserSession.Provider value={user}><Rooms /></UserSession.Provider>} />
                             <Route path='/history' element={<UserSession.Provider value={user}><History /></UserSession.Provider>} />

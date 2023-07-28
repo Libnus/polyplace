@@ -61,8 +61,11 @@ const History = () => {
                 data[i]['date'] = data[i]['end_time'].toDateString();
             }
 
+            //filter out the ones that are in the past
             let now = new Date();
             data = data.filter(res => res['end_time'].getTime() < now.getTime());
+
+
 
             setData(data)
         }
@@ -74,7 +77,7 @@ const History = () => {
 
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'Building', width: 120, align: 'center',headerAlign: 'center', sortable: true, valueGetter: ({value}) => getBuilding(value)},
-        { field: 'room', headerName: 'Room', width: 70, sortable: true, valueGetter: ({value}) => getRoom(value)},
+        { field: 'room', headerName: 'Room', width: 70, align: 'center', headerAlign: 'center', sortable: true, valueGetter: ({value}) => getRoom(value)},
         { field: 'first_name', headerName: 'First name', maxWidth: 200, align: 'center',headerAlign: 'center', sortable: true, valueGetter: ({value}) => getField(value)},
         { field: 'last_name', headerName: 'Last name', maxWidth: 300, align: 'center', headerAlign: 'center', sortable: true, valueGetter: ({value}) => getField(value)},
         { field: 'start_time', headerName: 'Start Time', maxWidth: 100, align: 'center',headerAlign: 'center',sortable: true, valueGetter: ({value}) => getTime(value)},

@@ -1,5 +1,6 @@
 import React from 'react';
+import {createContext} from 'react';
 
-const UserSession = React.createContext();
+const UserSession = createContext();
 
 export default UserSession;
