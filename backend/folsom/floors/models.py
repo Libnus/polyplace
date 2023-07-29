@@ -41,6 +41,8 @@ class TimeRange(models.Model):
 class Hours(models.Model):
     template_name = models.CharField(default="", blank=True, max_length=20)
 
+    is_active = models.BooleanField(default=False)
+
     iso_week = models.IntegerField(null=True, blank=True) # if the week_start is null then its a template
     building = models.ForeignKey('Building', on_delete=models.CASCADE, blank=True, null=True)
 

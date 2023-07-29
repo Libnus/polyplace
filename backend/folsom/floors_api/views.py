@@ -35,6 +35,15 @@ def save_hours(instance, hours):
     for day in hours:
         getattr(instance, day).add(*hours[day])
 
+def create_hours(instance, iso_week):
+    hours_copy = copy.copy(instance)
+
+    hours_m2m = {str(field.name):list(getattr(instance,field.name).all()) for field in instance._meta.get_fields() if isinstance(field, models.ManyToManyField)}
+    hours_copy.pk = None
+    hours_copy.iso_week = iso_week
+    hours_copy.save()
+    save_hours(hours_copy, hours_m2m)
+
 class BuildingViewSet(viewsets.ViewSet):
     """
     A viewset for Building model
@@ -112,17 +121,12 @@ class BuildingViewSet(viewsets.ViewSet):
         data = request.data
 
         data['building'] = pk
-        iso_week = get_iso_week(request.query_params.get('date'))
-        print(iso_week, request.query_params.get('date'))
+        iso_week = get_iso_week(request.query_params.get('date').strip('/'))
         data['iso_week'] = iso_week
 
         # delete existing week as we are overwriting it
         if Hours.objects.filter(building=pk, iso_week=iso_week).exists():
-            Hours.objects.get(building=pk, iso_week=iso_week).destroy;
-            # hours_m2m = {str(field.name):list(getattr(existing_hours,field.name).all()) for field in existing_hours._meta.get_fields() if isinstance(field, models.ManyToManyField)}
-            # for hour in hours_m2m:
-            #     for time_range in hours_m2m[hour]: time_range.delete()
-            # Hours.objects.get(building=pk, iso_week=iso_week).delete()
+            Hours.objects.get(building=pk, iso_week=iso_week).delete();
 
         # serialize time range data
         deserialized_hours = {}
@@ -136,72 +140,80 @@ class BuildingViewSet(viewsets.ViewSet):
         hours.is_valid(raise_exception=True)
         hours = hours.save()
 
-        # for day in deserialized_hours:
-        #     getattr(hours, day).add(*deserialized_hours[day])
         save_hours(hours, deserialized_hours)
 
         # if we are creating a new template
         if request.query_params.get('create_template') or Hours.objects.filter(iso_week=None, building=pk).all().length == 0:
-            if request.query_params.get('overwrite_templates'):
-                Hours.objects.filter(Q(building=pk) & ~Q(iso_week=iso_week)).delete() # delete all weeks using previous templates
+            if request.query_params.get('overwrite_templates') and Hours.objects.filter(Q(building=pk) & ~Q(iso_week=None) & ~Q(template_name=data['template_name'])).exists():
+                for hour in Hours.objects.filter(Q(building=pk) & ~Q(iso_week=None) & ~Q(template_name=data['template_name'])): hour.destroy() # delete all weeks using previous templates
 
             # remove old template as current template
-            if Hours.objects.filter(iso_week=None, building=pk).exists():
-                Hours.objects.get(iso_week=None, building=pk).building = None # don't delete but make it point to null
+            if Hours.objects.filter(iso_week=None, building=pk, is_active=True).exists():
+                hours = Hours.objects.get(iso_week=None, building=pk, is_active=True) # don't delete but make it inactive
+                hours.is_active = False
+                hours.save()
+
 
             # create new template and make it point to building pk
-            hours_copy = Hours.objects.get(iso_week=iso_week, building=pk)
+            print(data['template_name'], iso_week, pk)
+            hours_copy = Hours.objects.get(iso_week=iso_week, building=pk, template_name=data['template_name'])
 
             hours_copy.pk = None
             hours_copy.iso_week = None
+            hours_copy.is_active = True
             hours_copy.save()
             save_hours(hours_copy, deserialized_hours)
             print(hours_copy.id, hours_copy.sunday_hours.all())
 
         return Response(status=status.HTTP_201_CREATED)
 
-
     @action(detail=True)
     def get_hours(self, request, pk=None):
         if check_token(request) == False:
             raise PermissionDenied()
 
-        parsed_date = [int(x) for x in request.query_params.get('date')[:-1].split('-')]
         template_name = request.query_params.get('template')
-        if template_name != None: template_name = template_name[:-1]
-        print(template_name)
+        if template_name != None: template_name = template_name.strip('/')
 
+        parsed_date = [int(x) for x in request.query_params.get('date').strip('/').split('-')]
         date = datetime.date(parsed_date[2],parsed_date[0],parsed_date[1])
         iso_week = date.isocalendar()[1]
         if(date.weekday() == 6): iso_week+=1
-        print(iso_week)
 
-        if template_name != None:
-            if Hours.objects.filter(template_name=template_name).exists():
-                if Hours.objects.filter(iso_week=iso_week,building=pk).exists():
-                    Hours.objects.get(iso_week=iso_week,building=pk).destroy()
+        if template_name != None and not Hours.objects.filter(building=pk, iso_week=None, template_name=template_name).exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-        # check if hours exist for week
-        if not Hours.objects.filter(iso_week=iso_week, building=pk).exists() or template_name != None:
-            # if not then create the week based on building template
-            if Hours.objects.filter(iso_week=None, building=pk).exists():
-                hours = Hours.objects.get(iso_week=None, building=pk)
-                hours_copy = Hours.objects.get(iso_week=None, building=pk)
+        # overwrite all weeks of a different template
+        if request.query_params.get('overwrite'):
+            print("overwrite true")
+            # change the active template
+            old_active = Hours.objects.get(building=pk, iso_week=None, is_active=True)
+            old_active.is_active = False
+            old_active.save()
 
-                hours_copy.pk = None
-                if template_name != None: hours_copy.template_name = template_name
-                hours_copy.iso_week = iso_week
-                hours_copy.save()
+            new_active = Hours.objects.get(building=pk, iso_week=None, template_name=template_name)
+            new_active.is_active = True
+            new_active.save()
 
-                # copy all the m2m fields
-                hours_m2m = {str(field.name):list(getattr(hours,field.name).all()) for field in hours._meta.get_fields() if isinstance(field, models.ManyToManyField)}
-                save_hours(hours_copy, hours_m2m)
+            for hour in Hours.objects.filter(Q(building=pk) & ~Q(iso_week=None) & ~Q(template_name=template_name)):
+                hour.delete()
 
-                return Response(HoursSerializer(hours_copy, many=False).data)
+        # only if a template exists
+        if Hours.objects.filter(building=pk, iso_week=None, is_active=True).exists():
+            # if this week doesn't exist yet just make it from active template
+            if template_name == None and not Hours.objects.filter(building=pk, iso_week=iso_week).exists():
+                create_hours(Hours.objects.get(building=pk, iso_week=None, is_active=True), iso_week)
 
-            else: return Response('') # building doesn't have an hours template yet
-        return Response(HoursSerializer(Hours.objects.get(iso_week=iso_week, building=pk),many=False).data)
+            # otherwise if template_name was specified make a new week using the template
+            elif template_name != None and not Hours.objects.filter(building=pk, iso_week=iso_week, template_name=template_name).exists():
+                # delete old week
+                if Hours.objects.filter(building=pk, iso_week=iso_week):
+                    Hours.objects.get(building=pk, iso_week=iso_week).delete()
+                create_hours(Hours.objects.get(building=pk, iso_week=None, template_name=template_name), iso_week)
 
+            return Response(HoursSerializer(Hours.objects.get(building=pk, iso_week=iso_week), many=False).data)
+
+        else: return Response("")
 
 class FloorViewSet(viewsets.ViewSet):
     """
