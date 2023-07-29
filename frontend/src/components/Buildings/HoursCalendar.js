@@ -87,7 +87,7 @@ const Day = ({day}) => {
 
 const HoursCalendar = ( {week, weekIndex} ) => {
 
-    const hours = useContext(HoursContext);
+    const hoursContext = useContext(HoursContext);
 
     // gather the days of the week for rendering
     const days = [];
@@ -107,29 +107,27 @@ const HoursCalendar = ( {week, weekIndex} ) => {
 
             if(target.classList.contains('hour') || target.classList.contains('hourLast')){
                 if(!currentDay.has(target.getAttribute('id'))) currentDay.add(event.target.getAttribute('id'));
-                console.log(currentDay);
+
 
                 if(openSelected){
                     if(target.classList.contains('editHoursClosed')) {
                         target.classList.remove('editHoursClosed');
                     }
                     target.classList.add('editHoursOpen');
-                    // update hours context
                 }
                 else{
                     if(target.classList.contains('editHoursOpen')){
                         target.classList.remove('editHoursOpen');
                     }
                     target.classList.add('editHoursClosed');
-                    // update hours context
                 }
             }
         };
 
 
         const onMouseDownEvent = (event) => {
-            if(event.target.classList.contains('editHoursClosed')) openSelected = false
-            else openSelected = true;
+            // if the mouse down event didn't happen inside the calendar
+            if(!event.target.classList.contains('hour') && !event.target.classList.contains('hourLast')) return;
 
             onMouseOverEvent(event);
 
@@ -139,6 +137,9 @@ const HoursCalendar = ( {week, weekIndex} ) => {
         };
 
         const onMouseUpEvent = (event) => {
+            hoursContext.setCreatorState();
+            hoursContext.handleEditTemplate();
+
             for (let i = 0; i < hours.length; i++){
                 hours[i].removeEventListener("mouseover", onMouseOverEvent);
             }
@@ -157,14 +158,22 @@ const HoursCalendar = ( {week, weekIndex} ) => {
             currentDay = new Set();
         };
 
+        const onKeyDownEvent = (event) => {
+            if(event.key === 'x'){
+                openSelected = !openSelected;
+            }
+        };
+
         document.addEventListener("mousedown", onMouseDownEvent)
+        document.addEventListener("keydown", onKeyDownEvent);
         document.addEventListener("mouseup", onMouseUpEvent);
 
         return () => {
             document.removeEventListener("mousedown", onMouseDownEvent);
+            document.removeEventListener("keydown", onKeyDownEvent);
             document.removeEventListener("mouseup", onMouseUpEvent);
         }
-    },[])
+    },[hoursContext.currentTemplate])
 
 // var reBoxShadow = /(?:rgb\((\d+), ?(\d+), ?(\d+)\)([^,]*))+/g;
 
@@ -194,23 +203,33 @@ const HoursCalendar = ( {week, weekIndex} ) => {
 
 const HoursCalendarView = ( { handleClose } ) => {
     const [currentTemplate, setCurrentTemplate] = useState('');
+    const [templateSaved, setSave] = useState(true);
+    const [updateTemplate, setUpdateTemplate] = useState(false);
+
+    const [weeks, setWeeks] = useState([]);
     const [calendarIndex, setCalendarIndex] = useState(0);
-    const [week, setWeek]  = useState(getWeek(0));
-    const [weekString, setWeekString] = useState();
+    //const [week, setWeek]  = useState(getWeek(0));
+    //const [weekString, setWeekString] = useState();
+    const templates = {}; // a dictionary of templates where the key is the template name and the value is the schedule
 
     const [creatorOpen, setCreatorOpen] = useState(false);
-    const [hours, setHours] = useState([]);
 
     const building = useContext(BuildingContext);
 
-    console.log(building);
+    const setCreatorState = () => {
+        console.log(calendarIndex, weeks.length)
+        if (weeks.length === 0) setCreatorOpen(true);
+    };
 
     const handleSubmit = async () => {
-        let data = { template_name: hours[calendarIndex].template_name,
+        let data = { template_name: weeks[calendarIndex].template_name,
                        hours:  {}}
+
+        const week = weeks[calendarIndex].week;
 
         // go through every hour and check if its open or closed, update min max
         for(let i = 0; i < 7; i++){
+
             const day = new Date(week[0].getTime());
             day.setDate(week[0].getDate()+i);
 
@@ -225,16 +244,10 @@ const HoursCalendarView = ( { handleClose } ) => {
             let index = 8; // keep track of hour we are on
             for(let hour of currentDayHours){
                 if(hour.classList.contains('hour') || hour.classList.contains('hourLast')){
-                    if(day.getDay() === 3){
-                        console.log(hour);
-                    }
                     if(startHour === -1 && hour.classList.contains('editHoursOpen')){
                         startHour = index; // new min
                     }
                     else if(startHour !== -1 && hour.classList.contains('editHoursClosed') || (startHour !== -1 && index === 20)){
-                        if(day.getDay() === 3){
-                            console.log('pushed', hour, startHour, index, currentDayHours.length+3);
-                        }
                         data['hours'][weekday + '_hours'].push({
                             start_time: startHour + ':00',
                             end_time: index + ':00',
@@ -245,7 +258,6 @@ const HoursCalendarView = ( { handleClose } ) => {
                 }
             }
         }
-        console.log(data);
 
         const postWeekString = week[0].getMonth()+1 + "-" + week[0].getDate() + "-" + week[0].getFullYear();
         const response = await fetch(process.env.REACT_APP_API_URL + `/floors_api/buildings/${building.building.id}/create_hours/?date=${postWeekString}&create_template=true&overwrite_templates=true/`,{
@@ -255,42 +267,51 @@ const HoursCalendarView = ( { handleClose } ) => {
             },
             body: JSON.stringify(data),
         });
-        if(response.status === 201){
-            let newHours = [...hours];
-            for(let i in data['hours']) newHours[calendarIndex][i] = [...data['hours'][i]];
-            setHours(newHours);
 
-            if(!building.building.hours_templates.includes(data.template_name)){
-                const newBuilding = {...building.building};
-                newBuilding.hours_templates.push(data.template_name);
-                console.log(newBuilding);
-                building.setBuilding(newBuilding);
+        if(response.status === 201){
+            // add the new template unless it already exists
+            const templateExists = building.building.hours_templates.includes(data.template_name);
+
+            let newWeeks = [...weeks];
+            newWeeks[calendarIndex] = [...newWeeks[calendarIndex]];
+            newWeeks[calendarIndex].template = data.template_name;
+
+            if(!templateExists){
+                building.buildingAddHoursTemplate(data.template_name);
             }
+
+            // add to the template list or overwrite data if it exists
+            templates[data.template_name] = {...data};
+
+            // update use states
+            setWeeks(newWeeks);
+            setSave(true);
+            setCreatorOpen(false);
         }
 
     };
 
     const handleNameUpdate = (event) => {
-        const newHours = [...hours];
-
-        newHours[calendarIndex].template_name = event.target.value;
-        setHours(newHours);
+        const newWeeks = [...weeks];
+        newWeeks[calendarIndex] = {...newWeeks[calendarIndex], template: event.target.value};
+        setCurrentTemplate(event.target.value);
+        setWeeks(newWeeks);
     };
 
     // controls what week is selected by user
     const setCalendarLeftArrow = () => {
         if(calendarIndex > 0){
+            setUpdateTemplate(false);
             setCalendarIndex(calendarIndex-1);
         }
     };
 
     const setCalendarRightArrow = () => {
-        if(calendarIndex < 1){
-            setCalendarIndex(calendarIndex+1);
-        }
+        setUpdateTemplate(false);
+        setCalendarIndex(calendarIndex+1);
     };
 
-    const getHours = async (getTemplate=false) => {
+    const getWeekHours = async (week, getTemplate=false) => {
         const postWeekString = week[0].getMonth()+1 + "-" + week[0].getDate() + "-" + week[0].getFullYear();
         let fetchUrl = process.env.REACT_APP_API_URL + `/floors_api/buildings/${building.building.id}/get_hours/?date=${postWeekString}`;
 
@@ -298,68 +319,131 @@ const HoursCalendarView = ( { handleClose } ) => {
             fetchUrl += `&template=${currentTemplate}`
         }
 
+        let newWeeks = [...weeks];
+        if(getTemplate){
+            if(templateSaved && window.confirm("Would you like to set all other weeks to this template")){
+                fetchUrl += '&overwrite=true';
+
+                for(let week in newWeeks){
+                    if (week != calendarIndex){
+                        newWeeks[week].template = currentTemplate;
+                    }
+                }
+            }
+
+            else if(templateSaved){
+                newWeeks[calendarIndex].template = currentTemplate;
+            }
+        }
+
+        setWeeks(newWeeks);
+
         const response = await fetch(`${fetchUrl}/`);
         const data = await response.json();
         return data;
     };
 
-    const handleTemplateSelect = (event) => {
-        if(event.target.value === 'Create template...'){
-            setCreatorOpen(true);
-            const newHours = [...hours];
-            newHours[calendarIndex] = {};
-            setHours(newHours);
+    const handleTemplateSelect = (template) => {
+
+        if(template === 'create'){
+            setCreatorState();
+            const newWeeks = [...weeks];
+
+            newWeeks[calendarIndex] = {};
+
+            setWeeks(newWeeks);
+
+            setCurrentTemplate(name);
+            setSave(false);
+        }
+        else if(template === 'edit'){
+            const newWeeks = [...weeks];
+            newWeeks[calendarIndex].template = {...newWeeks[calendarIndex], template: '-- Copy -- ${currentTemplate}'};
+
+            setWeeks(newWeeks);
+            setSave(false);
         }
 
-        else{
-            setCurrentTemplate(event.target.value);
-            setCalendarIndex();
+        // we are not creating but switching
+        else if(template !== currentTemplate){
+            // check if the current template has been saved
+            if(!templateSaved) {
+                if(window.confirm('This template hasn\'t been saved yet! Are you sure you want to continue?')) {
+                    building.buildingRemoveHoursTemplate(currentTemplate);
+                }
+                else {
+                    document.querySelector('#templateSelect').value = currentTemplate;
+                    return false;
+                }
+            }
+            setUpdateTemplate(true);
+            setCurrentTemplate(template);
         }
+        return true;
     };
 
-    const parse = (data) => {
-        const newHours = [...hours];
-        newHours[calendarIndex] = data != "" ? data : {};
-        setHours(newHours);
+    const handleEditTemplate = () => {
+        const copyTemplate = `-- Copy -- ${currentTemplate}`;
+        building.buildingAddHoursTemplate(copyTemplate);
+        handleTemplateSelect('create', copyTemplate);
+
+        document.querySelector('#templateSelect').value = copyTemplate;
+    };
+
+    const parse = (data, newWeek) => {
+        const newWeeks = [...weeks];
+        const newWeekString = newWeek[0].getMonth()+1 + '/' + newWeek[0].getDate() + ' - ' + (newWeek[1].getMonth()+1) + '/' + newWeek[1].getDate();
+
+        newWeeks[calendarIndex] = data != "" ? data : { week: newWeek, weekString: newWeekString, weekTemplate: data.template_name };
+        setWeeks(newWeeks);
+
+        // check if the template exists inside the templates dict
+        if(templates[data.template_name] === undefined){
+            templates[data.template_name] = data;
+        }
+
         return data;
     };
 
     useEffect(() => {
-        const newWeek = getWeek(calendarIndex);
-        setWeek(newWeek);
-        const newWeekString = newWeek[0].getMonth()+1 + '/' + newWeek[0].getDate() + ' - ' + (newWeek[1].getMonth()+1) + '/' + newWeek[1].getDate();
-        setWeekString(newWeekString);
-
-        if(hours.length <= calendarIndex){
+        if(weeks.length <= calendarIndex){
+            const newWeek = getWeek(calendarIndex);
             fetch();
+
             async function fetch() {
-                let data = await getHours();
-                data = parse(data);
-                console.log(data);
-                setCurrentTemplate(data.template_name);
+                let data = await getWeekHours(newWeek);
+                data = parse(data, newWeek);
+                if(data != "") {
+                    setCurrentTemplate(data.template_name);
+                    document.querySelector('#templateSelect').value = data.template_name;
+                }
             }
         }
-
+        else {
+            setCurrentTemplate(hours[calendarIndex].template_name);
+            document.querySelector('#templateSelect').value = hours[calendarIndex].template_name;
+        }
     }, [calendarIndex]);
 
+    // this useEffect only runs if it's not the first render and it's not the first api call made
     useEffect(() => {
-        if(currentTemplate != ''){
+        if(updateTemplate){ // don't make the same call twice (if not first render)
             fetch();
-
             async function fetch(){
-                const data = await getHours(true)
+                const data = await getWeekHours(week, true)
                 parse(data);
+                document.querySelector('#templateSelect').value = data.template_name;
             }
+            setUpdateTemplate(false);
         }
     }, [currentTemplate]);
 
-    useEffect(() => {
-        console.log(hours);
-    },[hours]);
-
     const hoursContextValue = {
-        hours,
+        weeks,
         calendarIndex,
+        handleEditTemplate,
+        currentTemplate,
+        setCreatorState,
     };
 
     return (
@@ -387,20 +471,20 @@ const HoursCalendarView = ( { handleClose } ) => {
                                 <input type="checkbox" id="overwrite" style={{marginRight: '10px'}}/>
                                 Overwrite templates
                             </label>
-                            <button className='myBook' style={{borderRadius: '5px', width: '50px', height: '20px', padding: '1px', color: 'white', backgroundColor: '#5fb760'}}>Save</button>
+                            <button className='myBook' style={{borderRadius: '5px', width: '50px', height: '20px', padding: '1px', color: 'white', backgroundColor: '#5fb760'}} onClick={(event) => handleSubmit(event)}>Save</button>
                         </div>
                     </div>}
 
                     <div style={{width: '35%', display: 'flex', flexDirection: 'row'}}>
                         <b style={{marginRight: '1%'}}>Select Template:</b>
                         {hours.length > calendarIndex &&
-                            <select style={{width: '50%'}} onChange={(event) => handleTemplateSelect(event)}>
+                            <select id="templateSelect" style={{width: '50%'}} onChange={(event) => handleTemplateSelect(event.target.selectedOptions[0].value)}>
                                 {!hours[calendarIndex].template_name && <option selected>--------</option>}
                                 {building.building.hours_templates.map((template) => {
-                                    if(template === hours[calendarIndex].template_name) return <option selected>(Active) {template}</option>
-                                    else return <option>{template}</option>
+                                    if(template === hours[calendarIndex].template_name) return <option value={template}>(Active) {template}</option>
+                                    else return <option value={template}>{template}</option>
                                 })}
-                                <option>Create template...</option>
+                                <option id="create">Create template...</option>
                             </select>}
                         <button className='myBook' style={{borderRadius: '5px', width: '50px', height: '20px', marginLeft: '2%', padding: '1px', color: 'white', backgroundColor: '#5fb760'}}>Edit</button>
                         <button className='myBook' style={{borderRadius: '5px', width: '50px', height: '20px', padding: '1px', color: 'white', backgroundColor: '#c93135'}}>Delete</button>

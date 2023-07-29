@@ -33,7 +33,7 @@ const getWeek = (weekOffset) => {
 
     start.setDate(start.getDate()-start.getDay())
 
-    const end = new Date();
+    const end = new Date(start.getTime());
     end.setDate(start.getDate()+6);
 
     return [start, end];

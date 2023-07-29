@@ -270,10 +270,6 @@ const Building = () => {
 	const [floors, setFloors] = useState([]);
 	const [editHours, setEditHours] = useState(false);
 
-	const buildingContextData ={
-		building,
-		setBuilding,
-	};
 
 	const buildingId = useParams().building;
 
@@ -334,9 +330,33 @@ const Building = () => {
         getFloors();
     },[]);
 
+	const buildingAddHoursTemplate = (newTemplate) => {
+		const newBuilding = {...building};
+		let newHoursTemplate = [...newBuilding.hours_templates];
+		newHoursTemplate.push(newTemplate);
+		newBuilding.hours_templates = newHoursTemplate;
+
+		console.log(newBuilding);
+		setBuilding(newBuilding);
+	};
+
+	const buildingRemoveHoursTemplate = (removeTemplate) => {
+		const newBuilding = {...building};
+		let newHoursTemplate = [...newBuilding.hours_templates];
+		newBuilding.hours_templates = newHoursTemplate.filter(template => template != removeTemplate);
+		console.log(newBuilding);
+		setBuilding(newBuilding);
+	};
+
+	const buildingContextData ={
+		building,
+		buildingAddHoursTemplate,
+		buildingRemoveHoursTemplate,
+	};
+
 	return(
 		<BuildingContext.Provider value={buildingContextData}>
-		{editHours && <HoursCalendar building={building} handleClose={handleEditHours} />}
+		{editHours && <HoursCalendar handleClose={handleEditHours} />}
 		<div className="main">
 			<div className="title" style={{display:'flex', flexDirection: 'column', justifyContent: 'start'}}>
 				Reservations
