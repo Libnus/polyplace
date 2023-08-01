@@ -1,7 +1,10 @@
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
 from datetime import datetime
 from floors.models import Room
-
+from reservations.tasks import add
 
 class Reservation(models.Model):
     #room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -18,6 +21,12 @@ class Reservation(models.Model):
         current = datetime.now()
         diff = self.end_time.replace(tzinfo=None) - current
         return diff
+
+@receiver(post_save, sender=Reservation)
+def post(sender, instance, *args, **kawrgs):
+    # add a celery task to move this reservation to history
+    print("ran post save")
+    add.apply_async(args=[11,25], eta=instance.end_time)
 
 # model that holds reservations for a week
 class WeekContainer(models.Model):

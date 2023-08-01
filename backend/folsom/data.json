@@ -1,0 +1,30 @@
+[
+    {
+        "model": "floors.building",
+        "pk": 1,
+        "fields":{
+            "building_name": "Folsom",
+            "num_floors": 1
+        }
+    },
+    {
+        "model": "floors.floor",
+        "pk": 1,
+        "fields":{
+            "floor_num": "3rd",
+            "num_rooms": 1,
+            "color": "#FF8C00",
+            "building": 1,
+            "reservations_hidden": false,
+            "force_hidden": false
+        }
+    },
+    {
+        "model": "floors.room",
+        "pk": 1,
+        "fields":{
+            "floor": 1,
+            "room_num": "353-A"
+        }
+    }
+]
