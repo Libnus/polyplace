@@ -44,7 +44,6 @@ class ReservationViewSet(viewsets.ViewSet):
 
         # but wait! python starts the week on monday (:
         # check if the day inputted is sunday, if so, consider it the next week already
-        if date.weekday() == 6: week+=1
 
         all_reservations = Reservation.objects.filter(room=pk)
 

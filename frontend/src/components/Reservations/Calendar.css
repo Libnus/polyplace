@@ -28,6 +28,12 @@
     --hidden-border: 0, 0, 0;
 }
 
+.error{
+  display: block;
+  color: red;
+  margin: 5px 0 0 0;
+}
+
 .overlay{
 
   position: fixed;
@@ -141,11 +147,11 @@
 }
 
 .editHoursOpen{
-    background-color: #5EBC5E;
+    background-color: #00864E;
 }
 
 .editHoursClosed{
-    background-color: #c93135;
+    background-color: #c93235;
 }
 
 .message{

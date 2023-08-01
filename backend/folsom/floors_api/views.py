@@ -144,23 +144,26 @@ class BuildingViewSet(viewsets.ViewSet):
 
         # if we are creating a new template
         if request.query_params.get('create_template') or Hours.objects.filter(iso_week=None, building=pk).all().length == 0:
+            hours_copy = Hours.objects.get(iso_week=iso_week, building=pk, template_name=data['template_name'])
+            hours_copy.pk = None
+            hours_copy.iso_week = None
+            hours_copy.is_active = False
+
             if request.query_params.get('overwrite_templates') and Hours.objects.filter(Q(building=pk) & ~Q(iso_week=None) & ~Q(template_name=data['template_name'])).exists():
                 for hour in Hours.objects.filter(Q(building=pk) & ~Q(iso_week=None) & ~Q(template_name=data['template_name'])): hour.destroy() # delete all weeks using previous templates
 
-            # remove old template as current template
-            if Hours.objects.filter(iso_week=None, building=pk, is_active=True).exists():
-                hours = Hours.objects.get(iso_week=None, building=pk, is_active=True) # don't delete but make it inactive
-                hours.is_active = False
-                hours.save()
+                # remove old template as current template
+                if Hours.objects.filter(iso_week=None, building=pk, is_active=True).exists():
+                    hours = Hours.objects.get(iso_week=None, building=pk, is_active=True) # don't delete but make it inactive
+                    hours.is_active = False
+                    hours.save()
 
+            print("oh here",len(Hours.objects.all()))
+            if request.query_params.get('overwrite_templates') or len(Hours.objects.all()) == 1: hours_copy.is_active = True
 
             # create new template and make it point to building pk
             print(data['template_name'], iso_week, pk)
-            hours_copy = Hours.objects.get(iso_week=iso_week, building=pk, template_name=data['template_name'])
 
-            hours_copy.pk = None
-            hours_copy.iso_week = None
-            hours_copy.is_active = True
             hours_copy.save()
             save_hours(hours_copy, deserialized_hours)
             print(hours_copy.id, hours_copy.sunday_hours.all())

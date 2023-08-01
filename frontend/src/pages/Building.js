@@ -336,15 +336,24 @@ const Building = () => {
 		newHoursTemplate.push(newTemplate);
 		newBuilding.hours_templates = newHoursTemplate;
 
-		console.log(newBuilding);
 		setBuilding(newBuilding);
 	};
+
 
 	const buildingRemoveHoursTemplate = (removeTemplate) => {
 		const newBuilding = {...building};
 		let newHoursTemplate = [...newBuilding.hours_templates];
 		newBuilding.hours_templates = newHoursTemplate.filter(template => template != removeTemplate);
-		console.log(newBuilding);
+
+		setBuilding(newBuilding);
+	};
+
+	const buildingUpdateHoursTemplate = (oldName, newName) => {
+		const newBuilding = {...building};
+		let newHoursTemplate = [...newBuilding.hours_templates];
+		newBuilding.hours_templates = newHoursTemplate.filter(template => template != oldName);
+		newBuilding.hours_templates.push(newName);
+
 		setBuilding(newBuilding);
 	};
 
@@ -352,6 +361,7 @@ const Building = () => {
 		building,
 		buildingAddHoursTemplate,
 		buildingRemoveHoursTemplate,
+		buildingUpdateHoursTemplate,
 	};
 
 	return(
