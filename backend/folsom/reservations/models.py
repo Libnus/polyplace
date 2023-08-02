@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 
 from datetime import datetime
 from floors.models import Room
-from reservations.tasks import add
+from reservations.tasks import expired
 
 class Reservation(models.Model):
     #room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -25,8 +25,7 @@ class Reservation(models.Model):
 @receiver(post_save, sender=Reservation)
 def post(sender, instance, *args, **kawrgs):
     # add a celery task to move this reservation to history
-    print("ran post save")
-    add.apply_async(args=[11,25], eta=instance.end_time)
+    expired.apply_async(args=[instance.id], eta=instance.end_time)
 
 # model that holds reservations for a week
 class WeekContainer(models.Model):
