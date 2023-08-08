@@ -34,7 +34,7 @@ const Rooms = () => {
     let getFloors = async () => {
         const response = await fetch(process.env.REACT_APP_API_URL + '/floors_api/floors/')
         const floors = await response.json()
-        
+
         setFloors(floors)
 
     }

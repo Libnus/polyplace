@@ -9,8 +9,10 @@ class Reservation(models.Model):
     last_name = models.CharField(max_length=20)
     rin = models.CharField(max_length=9,default="")
     email = models.CharField(max_length=20,default="----@rpi.edu")
+
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     event_name = models.CharField(max_length=20, default="")
 

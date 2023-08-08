@@ -377,7 +377,7 @@ const EventEdit = ( { marginTop , thisEvent, setEdit, dispatch, checkCollisions,
         </div>
     );
 };
-
+}
 // calendar event card
 const CalendarEvent = ( { eventData, day, position, colors, removeEvent , updateEvents} ) => {
     const [thisEvent, dispatch] = useReducer(eventReducer,eventData);
