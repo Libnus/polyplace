@@ -1,6 +1,5 @@
 def stringify(reservation):
     time_format = "%m-%d-%Y @ %H:%M"
-    print(reservation)
     dic = {
         "first_name": reservation.first_name,
         "last_name": reservation.last_name,
